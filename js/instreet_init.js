@@ -1,11 +1,14 @@
 ﻿var instreet_config;
 (function(){
-  var widgetSid="6ed7yugOfTf7BQKm8ShWw0",
-	  actionUrl="http://localhost/action.php",
-	  ifengUrl="js/instreet_ifeng.js";  
+  var scripts=document.getElementsByTagName("script"),len=scripts.length,src=scripts[len-1].src,reg=/pd=([^?|&]*)/,widgetSid,
+  	  actionUrl="http://localhost/action.php",defaultUrl="instreet_default.js",ifengUrl="js/instreet_ifeng.js";  
+   if(src.match(reg)){
+     widgetSid=src.match(reg)[1];
+   }
+   else 
+	return false;
 	  
-	  
-  var ranN=Math.round(Math.random()*1000000),funcName="callback_"+ranN;
+  var funcName="injsop";
   actionUrl+="?pd="+widgetSid+"&pu="+encodeURIComponent(encodeURIComponent(location.href))+"&callback="+funcName; 
   
   window[funcName]=function(data){
@@ -13,7 +16,11 @@
 
 			data["widgetSid"]=widgetSid; 
 			instreet_config=data;
-			document.write('<script src="'+ifengUrl+'" charset="utf-8" type="text/javascript"><'+'/script>');
+			if(data.style=="")
+				document.write('<script src="'+defaultUrl+'" charset="utf-8" type="text/javascript"><'+'/script>');
+			else if(data.style=="blue")
+				document.write('<script src="'+ifengUrl+'" charset="utf-8" type="text/javascript"><'+'/script>');
+			
 	  }
   
   }

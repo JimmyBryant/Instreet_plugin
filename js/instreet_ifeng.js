@@ -943,7 +943,7 @@
 
 		/********Mix config*************/
 		var mixConfig=function(c){
-		   if(c){
+		   if(c&&typeof c=="object"){
 		   
 		     for(var i in c){
 			    config[i]=c[i];
