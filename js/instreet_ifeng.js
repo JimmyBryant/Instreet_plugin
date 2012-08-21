@@ -953,7 +953,7 @@
 		     return;		   
 		   }
 		
-		}
+		};
 		mixConfig(instreet_config);
 		
 		
