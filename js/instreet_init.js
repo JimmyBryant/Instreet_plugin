@@ -3,14 +3,14 @@
 var instreet_config;
 (function(){
   var scripts=document.getElementsByTagName("script"),len=scripts.length,src=scripts[len-1].src,reg=/pd=([^?|&]*)/,widgetSid,
-  	  actionUrl="http://localhost/action.php",defaultUrl="http://static.instreet.cn/widgets/push/js/default.min.js",ifengUrl="http://static.instreet.cn/widgets/push/js/ifeng.min.js";  
+  	  actionUrl="http://ts.instreet.cn:90/statCheck.action",defaultUrl="js/instreet_default.js",ifengUrl="js/instreet_ifeng.js";  
    if(src.match(reg)){
      widgetSid=src.match(reg)[1];
    }
    else 
 	return false;
 	  
-  var funcName="injsop";
+  var funcName="injsonp";
   actionUrl+="?pd="+widgetSid+"&pu="+encodeURIComponent(encodeURIComponent(location.href))+"&callback="+funcName; 
   
   window[funcName]=function(data){

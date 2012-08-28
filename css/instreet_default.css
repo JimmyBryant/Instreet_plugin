@@ -1,0 +1,356 @@
+#INSTREET_CONTAINER{
+   font: 12px/1.5 serif,arial,yahei; 
+   text-align:left;
+}
+#INSTREET_CONTAINER div,#INSTREET_CONTAINER dd,#INSTREET_CONTAINER p,#INSTREET_CONTAINER dl,#INSTREET_CONTAINER dt,#INSTREET_CONTAINER li{
+   margin:0;
+}
+#INSTREET_CONTAINER .clear{
+   clear:both;
+}
+#INSTREET_CONTAINER a img{
+   border:none;
+}
+#INSTREET_CONTAINER .instreet_icons_holder{
+   position:absolute;z-index:99999;
+   
+}
+#INSTREET_CONTAINER .instreet_icons_holder a{
+   display:block;width:28px;height:28px;
+   background:url(../images/wdbg.png) no-repeat;
+   outline:none;
+}
+#INSTREET_CONTAINER .tool_bar a{
+   margin-top:3px;
+}
+#INSTREET_CONTAINER .instreet_icons_holder .icon_logo{
+   background-position:-10px -10px;
+}
+#INSTREET_CONTAINER .instreet_icons_holder .icon_logo_hover{
+   background-position:-48px -10px;
+}
+#INSTREET_CONTAINER .instreet_icons_holder .icon_share{
+   background-position: -10px -86px;
+}
+#INSTREET_CONTAINER .instreet_icons_holder .icon_share:hover,#INSTREET_CONTAINER .instreet_icons_holder .hover{
+   background-position:-48px -86px;
+}
+#INSTREET_CONTAINER .instreet_icons_holder .icon_setting{
+   background-position: -10px -48px;
+}
+#INSTREET_CONTAINER .instreet_icons_holder .tool_bar{
+	left: 0;
+    position: absolute;
+    top: -65px;
+	display:none;
+}
+#INSTREET_CONTAINER .tool_bar ,#INSTREET_CONTAINER .tool_bar dd{
+  margin:0;
+}
+#INSTREET_CONTAINER .instreet_share_icons{
+	background: url("../images/wdbg.png") no-repeat scroll -255px -132px transparent;
+    height: 28px;
+    padding: 0 0 0 2px;
+    position: absolute;
+    top: 35px;
+    width: 80px;
+	display:none;
+}
+#INSTREET_CONTAINER .instreet_icons_holder .left{
+    left:28px;
+}
+#INSTREET_CONTAINER .instreet_icons_holder .right{
+    right:28px;
+}
+#INSTREET_CONTAINER .instreet_share_icons a{
+   display:inline-block;width:16px;height:16px;
+   margin:5px;
+}
+#INSTREET_CONTAINER .instreet_share_icons a.instreet_sina{
+   background-position: -10px -335px;	
+}
+#INSTREET_CONTAINER .instreet_share_icons a.instreet_renren{
+   background-position:-36px -335px;
+}
+#INSTREET_CONTAINER .instreet_share_icons a.instreet_tx{
+   background-position:-62px -335px;
+}
+
+/*******spot******/
+.instreet_spot_ads, .instreet_spot_weibo, .instreet_spot_wiki{
+    border: 1px solid #FFFFFF;
+    cursor: pointer;
+    display: block;
+    height: 23px;
+	width:23px;
+    position: absolute;
+    z-index: 999;
+	background:url("../images/wdbg.png") no-repeat;
+	outline:none;
+	display:none;
+}
+.instreet_spot_ads{
+	background-position:-11px -161px;
+}
+.instreet_spot_ads:hover{
+    background-position:-44px -161px;
+}
+.instreet_spot_weibo{
+	background-position:-11px -197px;
+}
+.instreet_spot_weibo:hover{
+    background-position:-44px -197px;
+}
+.instreet_spot_wiki{
+	background-position:-11px -125px;
+}
+.instreet_spot_wiki:hover{
+    background-position:-44px -125px;
+}
+
+/*********holder*********/
+#INSTREET_CONTAINER .ads_holder,#INSTREET_CONTAINER .weibo_holder,#INSTREET_CONTAINER .wiki_holder{
+    position:absolute;z-index: 999999;
+	width:300px;
+
+}
+#INSTREET_CONTAINER .ads_holder .instreet_slider_left,#INSTREET_CONTAINER .ads_holder .instreet_slider_right{
+	background: url("../images/wdbg.png") repeat scroll -47px -394px transparent;
+    height:60px;
+    position: absolute;
+    top: 66px;
+    width: 20px;
+    z-index: 99;
+	outline:none;
+}
+#INSTREET_CONTAINER .ads_holder .instreet_slider_left{
+    left:2px;
+}
+#INSTREET_CONTAINER .ads_holder .instreet_slider_left:hover{
+   background-position:-112px -394px;
+}
+#INSTREET_CONTAINER .ads_holder .instreet_slider_right{
+   right:2px;
+   background-position:-12px -394px;
+}
+#INSTREET_CONTAINER .ads_holder .instreet_slider_right:hover{
+   background-position:-82px -394px;
+}
+#INSTREET_CONTAINER .cont_head{
+   background:url("../images/wdbg.png") no-repeat -152px -361px;
+   height:21px;
+   width:100%;
+   overflow:hidden;
+   margin: 0;
+}
+#INSTREET_CONTAINER .cont_head .button_close_holder{
+	float: right;
+    height: 15px;
+    position: relative;
+    right: 6px;
+    top: 3px;
+    width: 15px;
+	outline:none;
+	background:url("../images/wdbg.png") no-repeat -135px -361px transparent;
+	_background:#000;
+	_filter:alpha(opacity=0);
+}
+#INSTREET_CONTAINER .cont_head .button_close_holder:hover{
+    background-position:-431px -394px;
+}
+#INSTREET_CONTAINER .cont_body {
+	background: url("../images/wdbg.png") no-repeat scroll -107px -43px transparent;
+    left: 0;
+    position: absolute;
+    top: 21px;
+    width: 100%;
+	z-index:10;
+	display:none;
+}
+#INSTREET_CONTAINER .weibo_holder .cont_body,#INSTREET_CONTAINER .wiki_holder .cont_body{
+    display:block;
+}
+
+#INSTREET_CONTAINER #instreet_ads_focus{
+    display:block;
+	z-index:20;
+}
+#INSTREET_CONTAINER .cont_body .left{
+  float:left;
+  width:145px;
+}
+#INSTREET_CONTAINER .cont_body .right{
+  float:left;
+  width: 155px;
+  padding: 10px 0 0;
+}
+#INSTREET_CONTAINER .weibo_holder .cont_body .left{
+  width:70px;
+}
+#INSTREET_CONTAINER .weibo_holder .cont_body .right{
+  width:230px;
+}
+#INSTREET_CONTAINER .wiki_holder .cont_body .left{
+  width:80px;
+}
+#INSTREET_CONTAINER .wiki_holder .cont_body .right{
+  width:220px;
+}
+#INSTREET_CONTAINER .cont_body  .thumb{
+	
+    display: inline-block;
+    margin: 10px 0 0 22px;
+}
+#INSTREET_CONTAINER .cont_body .thumb img{
+   background: url("../images/default_loading.gif") no-repeat scroll center center #FFFFFF;
+   width:100px;
+   height:100px;
+   vertical-align:top;
+}
+#INSTREET_CONTAINER .weibo_holder .cont_body .thumb{
+   width:50px;
+   height:50px;
+   margin:10px;
+}
+#INSTREET_CONTAINER .wiki_holder .cont_body .thumb{
+  width:60px;
+  height:60px;
+  vertical-align:middle;
+  margin:10px 0 0 10px;
+
+}
+#INSTREET_CONTAINER .weibo_holder .cont_body .thumb img{
+   width:50px;
+   height:50px;
+}
+#INSTREET_CONTAINER .wiki_holder .cont_body .thumb img{
+   width:auto;
+   height:auto;
+   vertical-align:middle;
+}
+#INSTREET_CONTAINER .cont_body *{
+  margin:0;color:#FFF;
+}
+#INSTREET_CONTAINER .cont_body .p_desc{
+  margin:0;
+  height:34px;
+  overflow:hidden;
+  padding-right:5px;
+}
+#INSTREET_CONTAINER .cont_body .p_desc a{
+  color:#FFF;
+  text-decoration:none;
+}
+#INSTREET_CONTAINER .cont_body .p_desc a:hover{
+  text-decoration:underline;
+  color:#F71B1B;
+}
+#INSTREET_CONTAINER .cont_body .p_money,#INSTREET_CONTAINER .cont_body .p_nowmoney{
+  color:#F71B1B;
+}
+#INSTREET_CONTAINER .cont_body .p_money strong{
+  font-weight:bold;
+  text-decoration:line-through;
+  color:#FFF;
+  font-size:16px;
+}
+#INSTREET_CONTAINER .cont_body .p_nowmoney strong{
+  font-weight:bold;
+  color:#FFF;
+  font-size:16px;
+}
+#INSTREET_CONTAINER .cont_body .p_buyit .button_buy{
+	display: inline-block;
+	height: 25px;
+	margin: 5px 0 10px;
+	width: 53px;
+	background:url("../images/wdbg.png") no-repeat -10px -232px;
+}
+#INSTREET_CONTAINER .cont_body .p_buyit .button_buy:hover{
+  background-position:-73px -232px;
+}
+#INSTREET_CONTAINER .weibo_holder .nickname,#INSTREET_CONTAINER .wiki_holder .nickname{
+   color:#FFD34E;
+   text-decoration:none;
+}
+#INSTREET_CONTAINER .weibo_holder .nickname:hover,#INSTREET_CONTAINER .wiki_holder .nickname:hover{
+   text-decoration:underline;
+}
+#INSTREET_CONTAINER .weibo_holder .icon,#INSTREET_CONTAINER .wiki_holder .icon{
+    padding:5px 10px;
+    text-align: right;
+}
+#INSTREET_CONTAINER .wiki_holder .summary{
+    padding-right:10px;
+}
+/********foot ad**********/
+ #INSTREET_CONTAINER .foot_holder{
+    position:absolute;
+	width:300px;
+    height:100px;
+    overflow:hidden;	
+	z-index:9999;
+
+ }
+  #INSTREET_CONTAINER .foot_holder ¡iimg{
+    width:300px;
+	height:100px;
+  }
+  #INSTREET_CONTAINER .foot_holder .foot_cont{
+    position:relative;
+	background:#FFF;
+  }
+  #INSTREET_CONTAINER .foot_holder .foot_cont .black_bg{
+    background: url("../images/bg.png") repeat-x scroll 0 0 transparent;
+    border-top: 1px solid #999999;
+    display: block;
+    height: 34px;
+	text-align:center;
+	text-decoration:none;
+  }
+  #INSTREET_CONTAINER .foot_holder .sprite1,#INSTREET_CONTAINER .foot_holder .slogan{
+	display:inline-block;
+	vertical-align:top;
+  }
+  #INSTREET_CONTAINER .foot_holder .sprite1{position:relative;top:-16px;left:20px;}
+  #INSTREET_CONTAINER .foot_holder .slogan{
+    margin-left: 18px;
+    padding: 0 18px;
+  }
+ #INSTREET_CONTAINER .foot_holder .slogan p{
+    font:12px/1.25 arial;
+	color:#FFF;
+	margin:0;
+	padding:0;
+	text-align:left;
+  }
+  #INSTREET_CONTAINER .foot_holder .slogan .light{
+    font-size:13px;
+	font-weight: bold;
+    -moz-text-shadow: 0 2px 0 #000000;
+    -webkit-text-shadow: 0 2px 0 #000000;
+    -o-text-shadow: 0 2px 0 #000000;
+    text-shadow: 0 2px 0 #000000;
+  }
+  #INSTREET_CONTAINER .foot_holder .button_close_foot{
+    background: url("../images/close.png") no-repeat scroll 0 0 transparent;
+    color: #000000;
+    cursor: pointer;
+    display: block;
+    height: 20px;
+    line-height: 18px;
+    outline: medium none;
+    position: absolute;
+    right: 5px;
+    text-align: center;
+    text-decoration: none;
+    top: 5px;
+    width: 22px;
+  }
+  #INSTREET_CONTAINER .foot_holder .button_close_foot:hover{
+    color:#F71B1B;text-decoration:none;
+  }
+
+
+
+
