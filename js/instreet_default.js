@@ -29,12 +29,11 @@
 						imih	:	200,
 						imiw	:	200,
 						timer   :   1000,
-						openFootAd: false,
 						triggerFootAd: "scroll",        //mouse为鼠标移动到图片显示、scroll为页面滚动的时候显示
-						showAd  :   true,
-						showFootAd: true,
-				        showWeibo:  true,
-						showWiki:   true,
+						//showAd  :   true,
+						//showFootAd: true,
+				        //showWeibo:  true,
+						//showWiki:   true,
 						position:   'right'
 		    },			
 			ev = {                  
@@ -240,148 +239,7 @@
 			  parent.removeChild(this.container);
 			}
 		};
-		var imgReady = (function () {
 
-			var list = [], intervalId = null,
-
-		 
-
-			// 用来执行队列
-
-			tick = function () {
-
-				var i = 0;
-
-				for (; i < list.length; i++) {
-
-					list[i].end ? list.splice(i--, 1) : list[i]();
-
-				};
-
-				!list.length && stop();
-
-			},
-
-		 
-
-			// 停止所有定时器队列
-
-			stop = function () {
-
-				clearInterval(intervalId);
-
-				intervalId = null;
-
-			};
-
-		 
-
-			return function (img, ready, load, error) {
-
-				var onready, width, height, newWidth, newHeight;
-
-		
-				// 如果图片被缓存，则直接返回缓存数据
-
-				if (img.complete) {
-
-					ready.call(img);
-
-					load && load.call(img);
-
-					return;
-
-				};
-
-		 
-
-				width = img.width;
-
-				height = img.height;
-
-		 
-
-				// 加载错误后的事件
-
-				img.onerror = function () {
-
-					error && error.call(img);
-
-					onready.end = true;
-
-					img = img.onload = img.onerror = null;
-
-				};
-
-		 
-
-				// 图片尺寸就绪
-
-				onready = function () {
-
-					newWidth = img.width;
-
-					newHeight = img.height;
-
-					if (newWidth !== width || newHeight !== height ||
-
-						// 如果图片已经在其他地方加载可使用面积检测
-
-						newWidth * newHeight > 1024
-
-					) {
-
-						ready.call(img);
-
-						onready.end = true;
-
-					};
-
-				};
-
-				onready();
-
-		 
-
-				// 完全加载完毕的事件
-
-				img.onload = function () {
-
-					// onload在定时器时间差范围内可能比onready快
-
-					// 这里进行检查并保证onready优先执行
-
-					!onready.end && onready();
-
-		 
-
-					load && load.call(img);
-
-		 
-
-					// IE gif动画会循环执行onload，置空onload即可
-
-					img = img.onload = img.onerror = null;
-
-				};
-
-		 
-
-				// 加入队列中定期执行
-
-				if (!onready.end) {
-
-					list.push(onready);
-
-					// 无论何时只允许出现一个定时器，减少浏览器性能损耗
-
-					if (intervalId === null) intervalId = setInterval(tick, 40);
-
-				};
-
-			};
-
-		})();
 		var slideDown=function(ele,speed){
 		
 		    var slider=function(ele, speed){
@@ -426,25 +284,27 @@
 
 			   for(var i=0,len=imgs.length;i<len;i++){
 			    
-			     var index=i,img=new Image();
+			     var img=new Image(),index=i;
                  img.src=imgs[index].src;				 
 				 img.setAttribute('instreet_img_id',index);
-				 imgReady(img,this.ready,this.loadData);
+				 if(img.complete){
+				    cache.loadData(img);
+				 }else{
+					 img.onload=function(){					   
+					   var obj=this;
+					   obj.onload=null;      
+					   cache.loadData(obj);  
+					 }				 
+			     }
                 
 				}
 
 		    },
-			ready     :function(){
-			    if(this.width<config.imiw||this.height<config.imih){
-				
-				    this.onload=this.onerror=null;
-				}
-			},
-			loadData     :function(){
+			loadData     :function(img){
 			   
-			   var index=this.getAttribute('instreet_img_id'),clientImg=imgs[index];
+			   var index=img.getAttribute('instreet_img_id'),clientImg=imgs[index];
                if(clientImg){			   
-				   if(clientImg.width>=config.imiw&&clientImg.height>=config.imih){				   
+				   if(img.width>=config.imiw&&img.height>=config.imih&&clientImg.clientWidth>=config.imiw&&clientImg.clientHeight>=config.imih){				   
 					   cache.createJsonp(index);
 					   instreet.recordImage(clientImg);
 				   }
@@ -516,7 +376,7 @@
 					    }
 					    instreet.hideAll(index);
 					};
-					setTimeout(instreet.lazyTrigger,100);
+					instreet.lazyTrigger();
 				 }
 			},
 			getImgs:function(){		
@@ -780,9 +640,10 @@
 						 str+=fra.slice(0,-2)+'></iframe>';
 					  }
 					  str+="</div>";
-					  if(!config.openFootAd){
+					  
+					  //if(!config.openFootAd){
 					    foot.style.display="none";
-					  }
+					  //}
 					  foot.innerHTML=str;
 					  return foot;
 				   
@@ -1030,9 +891,13 @@
 			
 			},
 			lazyTrigger:function(){                                 //延迟显示底部广告
+			
+			   if(config.triggerFootAd!=="scroll"){
+			      return;
+			   }
 			   var images=cache.avaImages,
 				  scrollTop=window.scrollY,
-				  height=window.screen.height;
+				  height=window.innerHeight;
 				for(var i=0,len=images.length;i<len;i++){
 				   var img=images[i], pos=ev.getXY(img),index=img.getAttribute('instreet_img_id'),
 				       foot=instreet.findFootByImg(index);
@@ -1040,8 +905,8 @@
 					if(!foot||foot.style.display!="none"){
 						continue;
 					}else if(scrollTop+height>pos.y&&scrollTop<=pos.y+img.height){
-				   		ev.show(foot);
-					    slideDown(foot.firstChild).animate();
+					
+					   ev.show(foot);slideDown(foot.firstChild).animate();
 				    				   
 				    }
 				}
@@ -1150,7 +1015,7 @@
 			    ev.bind(document.body,'mouseover',instreet.eventDelegate);
 				ev.bind(document.body,'mouseout',instreet.eventDelegate);
 				ev.bind(document.body,'click',instreet.eventDelegate);
-				if(config.triggerFootAd=="scroll"){ev.bind(window,'scroll',function(){setTimeout(instreet.lazyTrigger,100);});				}
+				if(config.triggerFootAd=="scroll"){ev.bind(window,'scroll',instreet.lazyTrigger);}
 				ev.bind(window,'load',function(){instreet.checkPosition();ev.bind(window,'resize',instreet.checkPosition);
 				});
 				c.onmouseover=function(event){
