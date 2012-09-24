@@ -1,10 +1,15 @@
-﻿(function(window,undefined){
+﻿/*************************************
+*尚街广告插件 2.1.0
+*1.新增对幻灯图片的支持
+*2.复杂页面dom ready前就能出现首个广告
+*************************************/
+(function(window,undefined){
         
-		if (window.InstreetWidget!=undefined||window.InstreetWidget != null){
+		if (window.InstreetWidget != null||typeof window.InstreetWidget!="undefined"){
 			return null;
 		} else {
 			window.InstreetWidget = new Object();
-			window.InstreetWidget.version = "2.0.1";
+			window.InstreetWidget.version = "2.1.1";
 			window.InstreetWidget.name = "InstreetWidget";
 		}
 
@@ -17,13 +22,15 @@
 		   leftPad=-331,
 		   rightPad=28,
 		   firstData=true;
+
+		 var isIE6= !!window.ActiveXObject&&!window.XMLHttpRequest;   
+		 var isIE7= /msie 7/i.test(navigator.userAgent); 
         
-		/**********插件相关配置************/
+		/********************************
+		*Config对象
+		*********************************/
 		var config = {
 						redurl	:	"http://www.instreet.cn/click.action",
-					//widgetSid	:	"79cjp47BnLo3NdNaLeICIw",
-					//widgetSid   :   "5D6FZL6a13wcmpgBnoVWsU",
-					//widgetSid  :"6ed7yugOfTf7BQKm8ShWw0",
 						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet_ifeng.css",
 					callbackurl	:	"http://ts.instreet.cn:90/push.action",
 						murl	:	"http://ts.instreet.cn:90/tracker.action",
@@ -31,31 +38,22 @@
 						ourl	:	"http://ts.instreet.cn:90/loadImage.action",
 						imih	:	200,
 						imiw	:	200,
-						timer   :   1000
-					/*	autoShow:   true,
-						showAd  :   true,           //是否显示广告
-						showFootAd: true,           //是否显示底部广告
-						showShare:  true,          //是否显示分享
-						showMD  :   true,          //是否显示美叮
-				        showWeibo:  true,          //是否显示微博信息
-						showWiki:   true,          //是否显示互动百科
-						showNews:   false,         //是否显示新闻
-						showWeather:true          //是否显示天气
-					*/	
+						timer   :   1000,
+						widgetSid:"79cjp47BnLo3NdNaLeICIw",
+						showAd:true,
+						showFootAd:true,
+						showWeibo:true,
+						showWiki:true,
+						showShare:true,
+						showWeather:true,
+						showNews:true,
+						showMD  :true,
+						openFootAd:true
 						
 		};
 
 		var tool={
-		   getImgs  :function(){
-		      var images=document.getElementsByTagName('img'),img;
-			  for(var i=0,len=images.length;i<len;i++){
-			    img=images[i];
-			    //if(img.style.display!='none'&&img.style.visibility!='hidden'){
- 					  img.setAttribute('instreet_img_id',i.toString());
-					  imgs[i]=img;
-				//}
-			  }
-		   },
+
 		   recordImage:function(img){
 		       var iu=encodeURIComponent(encodeURIComponent(img.src)),
 			       pd=config.widgetSid,
@@ -108,17 +106,12 @@
 					ev.importFile('js',ul);
 				
 				}
-		   },
-		   isLeft:function(img){
-		   		var pos=ev.getXY(img),
-				   left=pos.x+img.width+360>document.body.clientWidth?true:false;
-				
-				return left;		   
-		   
 		   }
 		  
 		};
-
+        /****************************
+        *常用方法对象
+        ****************************/
 		var ev = {                  
 			bind : function(element,type,handler){
 				if(element.addEventListener){
@@ -187,7 +180,7 @@
 				   return array;
 				   function sortNum(a,b){return a-b;}
 		    },
-		   getElementsByClassName:  function(parentNode,tagName,className){  		   
+		    $:  function(parentNode,tagName,className){  		   
 				   var parent=parentNode||document;
 				   if(document.getElementsByClassName) return parent.getElementsByClassName(className);
 				   var arr=[];
@@ -220,7 +213,12 @@
 	        }
 		};
         
-        
+        var $=function(id){return document.getElementById(id);},
+            hide=function(elem){elem.style.display="none"},
+            show=function(elem){elem.style.display="block"} ;
+        /*********************************
+        *为document扩展DomReady方法
+        **********************************/
         var readylist=[];
 		var run = function () {   
 				for (var i = 0; i < readylist.length; i++) readylist[i]&&readylist[i]();   
@@ -235,7 +233,7 @@
 			  }  
 			  run();  
 	    };	
-		document.ready = function (fn){  
+		document.DomReady = function (fn){  
                 var isIE = !!window.ActiveXObject;
                 if(document.readyState==="complete") {readylist.push(fn);run();return;}				
 				if (readylist.push(fn) > 1) return; 	
@@ -249,10 +247,13 @@
 
 		}; 
 			
-
+        /*********************************
+        *cache对象，加载并缓存广告数据
+        **********************************/
 		var cache={
 		    dataArray  :[],
 			avaImages  :[],
+			adsArray   :[],
 	        initData   :function(){
 
 			   for(var i=0,len=imgs.length;i<len;i++){
@@ -298,34 +299,49 @@
 				  cache.dataArray[id]=data;
 				  img.setAttribute('instreet_data_ready',true);
 				  cache.avaImages.push(obj);
-				  ifeng.startShowAd(id);
+				  cache.adsArray[data.index]=new InstreetAd(data);
+				  //instreet.startShowAd(id);
 				  firstData=false;
 				}
 				
 		};
 		
 		
-
+        /*****************************
+        *instreet对象
+        *****************************/
 		
-		var ifeng={
+		var instreet={
 		    container   :   null,
 			spotBox     :   null,
-		    init        :  function(){
+		    init        :  function(data){
+
+		   	   var images=document.getElementsByTagName('img'),img;
+			   for(var i=0,len=images.length;i<len;i++){
+				    img=images[i];
+				    //if(img.style.display!='none'&&img.style.visibility!='hidden'){
+	 					  img.setAttribute('instreet_img_id',i.toString());
+						  imgs[i]=img;
+					//}
+			   }
 			   var cssUrl=config.cssurl;
 			   //var cssUrl="css/instreet_ifeng.css";
 			   ev.importFile('css',cssUrl);
-			   var container=document.createElement('div'),
-			       spotBox=document.createElement('div');
-			   container.id="INSTREET_CONTAINER";
-			   spotBox.id="INSTREET_SPOTBOX";
-			   this.container=container;
-			   this.spotBox=spotBox;
-			   document.body.appendChild(container);
-			   container.appendChild(spotBox);
+		       instreet.createContainer();
 			   this.bindBodyEvent();
 
 			},
-			bindBodyEvent  :function(){                      //所有绑定在body上的事件
+			createContainer: function(){						//创建广告容器
+		       var container=document.createElement('div'),           
+			       spotBox=document.createElement('div');
+			   container.id="INSTREET_CONTAINER";
+			   spotBox.id="INSTREET_SPOTBOX";
+			   instreet.container=container;
+			   instreet.spotBox=spotBox;
+			   container.appendChild(spotBox);
+			   document.body.insertBefore(container,document.body.firstChild);				
+			},
+			bindBodyEvent  :function(){                      //创建事件委托
 			
 			    var eventDelegate=function(eve){
 			      var event=ev.getEvent(eve),
@@ -333,14 +349,16 @@
 					  type=event.type;
                   switch(type){
 				    
-					case "mouseover":if(target.tagName=='A'&&target.className=='instreet_other_close'){
-					   var parent=target.parentNode;if(parent.className==='instreet_other_title'){
-					     parent.id="instreet_other_close";
+					case "mouseover":
+					if(target.tagName=='A'&&target.className=='instreet_other_close'){
+					   var parent=target.parentNode;
+					   if(parent.className==='instreet_other_title'){
+					     	parent.id="instreet_other_close";
 					   }
 					}else if(target.tagName=='A'&&target.className=='instreet_share_button'){
 					    var next,
 						    parent;
-						   ifeng.closeActiveAd();						   
+						   instreet.closeActiveAd();						   
 
 						   parent=target.parentNode;
 						   next=target.nextSibling;
@@ -358,19 +376,20 @@
                               parent.id='';
 							  this.style.display="none";
 							  target.style.display="block";
+
 						  };
 					}else if(target.tagName=='IMG'&&target.getAttribute('instreet_data_ready')){
 						  clearTimeout(outFlag);
 						  var img_id=target.getAttribute('instreet_img_id'),
-						      other=ifeng.find_instreet_other(img_id),
-							  active=document.getElementById('INSTREET_AD_ACTIVE');
+						      other=instreet.find_instreet_other(img_id),
+							  active=$('INSTREET_AD_ACTIVE');
 						
 						  if(!other)
 						     return;
 						  if(active&&active.parentNode==other)
 						     return;
 						  
-						  ifeng.closeActiveAd();
+						  instreet.closeActiveAd();
 						  var li=other.firstChild;
 						  if(li){
 							li.id="INSTREET_AD_ACTIVE";
@@ -385,36 +404,37 @@
 					
 					break;
 					
-					case "mouseout":if(target.tagName=='A'&&target.className=='instreet_other_close'){
+					case "mouseout":
+					if(target.tagName=='A'&&target.className=='instreet_other_close'){
 					   var parent=target.parentNode;if(parent.className==='instreet_other_title'){
 					     parent.id="";
 					   }
 					}else if(target.tagName=='IMG'&&target.getAttribute('instreet_data_ready')){
-					   outFlag=setTimeout(ifeng.closeActiveAd,config.timer);
+					   outFlag=setTimeout(instreet.closeActiveAd,config.timer);
 					}
 					break;
 					
 					case "click":if(target.tagName=='A'&&target.className=='instreet_other_close'){
 					     var parent=target.parentNode;if(parent.className==='instreet_other_title'){
-					     var adbox=parent.parentNode;
-						 adbox.style.display='none';
-						 adbox.parentNode.id='';
+						     var adbox=parent.parentNode;
+							 adbox.style.display='none';
+							 adbox.parentNode.id='';
 					   }
 					}else if(target.className=='instreet_sina'||target.className=='instreet_renren'||target.className=='instreet_tx'){
 					   var other=target.parentNode.parentNode.parentNode;
 					   var index=other.getAttribute('instreet_img_id');
 					   var picUrl=imgs[index].src;
 					   switch(target.className){
-					    case "instreet_sina": 
-						window.open('http://v.t.sina.com.cn/share/share.php?title='+encodeURIComponent(document.title)+'&url='+encodeURIComponent(document.URL)+'&pic='+encodeURIComponent(picUrl),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=580, height=500");
-                        break;
-                        case "instreet_renren":
-						window.open('http://share.renren.com/share/buttonshare.do?link='+encodeURIComponent(document.URL),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=570, height=326");
-						break;
-                        case "instreet_tx"   :
-						window.open('http://share.v.t.qq.com/index.php?c=share&a=index&title='+encodeURI(document.title+'\n\n')+'&url='+encodeURI(document.URL)+'&pic='+encodeURIComponent(picUrl),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=580, height=500");
-						break;						
-					 }
+						    case "instreet_sina": 
+							window.open('http://v.t.sina.com.cn/share/share.php?title='+encodeURIComponent(document.title)+'&url='+encodeURIComponent(document.URL)+'&pic='+encodeURIComponent(picUrl),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=580, height=500");
+	                        break;
+	                        case "instreet_renren":
+							window.open('http://share.renren.com/share/buttonshare.do?link='+encodeURIComponent(document.URL),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=570, height=326");
+							break;
+	                        case "instreet_tx"   :
+							window.open('http://share.v.t.qq.com/index.php?c=share&a=index&title='+encodeURI(document.title+'\n\n')+'&url='+encodeURI(document.URL)+'&pic='+encodeURIComponent(picUrl),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=580, height=500");
+							break;						
+					    }
 					}
 					break;
 				  
@@ -427,184 +447,24 @@
 			   ev.bind(document.body,'click',eventDelegate);
 			
 			},
-			startShowAd:function(index){
-				this.createAllBox(index);
-				this.checkPosition();
-			},
-			createAllBox  :function(index){
-		   	   var data=cache.dataArray[index],
-			       img=imgs[index],
-			       pos=ev.getXY(img),
-				   str='';
-			   var instreet_other=document.createElement('ul');
-			   instreet_other.setAttribute('instreet_img_id',index);
-			   instreet_other.className="instreet_other";
-			   instreet_other.style.cssText="top:"+pos.y+"px;left:"+(pos.x+img.width)+"px;margin-top:10px;";
-			   this.container.appendChild(instreet_other);
-			  
-			   for(i in modual){
-			      str+=modual[i]?modual[i](data,img):'';
 
-			   }
 
-			   instreet_other.innerHTML+=str;
-			   this.addMouseEvent(instreet_other);
-			},
-
-			createSpot:function(data,img){
-			   var index=img.getAttribute('instreet_img_id'),
-			       w=data.width,
-			       metrix=data.metrix,
-				   ox=metrix%3000,
-				   oy=Math.round(metrix/3000),
-				   zoomNum=img.width/w,
-				   x=ox*zoomNum,
-				   y=oy*zoomNum,
-				   pos=ev.getXY(img),
-				   r=17;
-
-			   var spot=document.createElement('a');
-			   if(data.adsType)
-			      spot.className="instreet_ad_spot";
-			   else if(data.type.toString()=="1"||data.type.toString()=="2")  
-			      spot.className="instreet_weibo_spot";
-			   else if(data.type.toString()=="4")
-  			      spot.className="instreet_wiki_spot";
-			   spot.href="javascript:;";
-			   spot.setAttribute('metrix',metrix);
-			   spot.setAttribute('instreet_img_id',index);
-			   spot.style.cssText="top:"+(y+pos.y-r)+"px;left:"+(x+pos.x-r)+"px;";
-			   this.spotBox.appendChild(spot);
-			   this.addSpotEvent(spot);
-			},
-			addSpotEvent  :function(spot){
-			
-			   
-				
-					spot.onmouseover=function(){
-						ifeng.closeActiveAd();
-					    var imgId=this.getAttribute('instreet_img_id'),
-					       metrix=this.getAttribute('metrix'),
-					       other=ifeng.find_instreet_other(imgId),
-						   box,
-						   items;
-						   
-                        if(spot.className=='instreet_ad_spot'){ 
-							box=ev.getElementsByClassName(other,null,'instreet_aditem');
-						   for(var i=0,len=box.length;i<len;i++){
-
-						      if(box[i].getAttribute('metrix')==metrix.toString()){
-							    clearTimeout(outFlag);
-							    box[i].id="INSTREET_AD_ACTIVE";
-								box[i].lastChild.style.display="block";
-							  }
-						   }
-						 }
-						 else{
-						 
-							if(spot.className=='instreet_weibo_spot')	
-								box=ev.getElementsByClassName(other,null,'instreet_weibo')[0];
-							else if(spot.className=='instreet_wiki_spot')	
-								box=ev.getElementsByClassName(other,null,'instreet_wiki')[0];
-							items=ev.getElementsByClassName(other,null,'other_weibo_box');	
-							for(var i=0,len=items.length;i<len;i++){
-							   var item=items[i];
-							   if(item.getAttribute('metrix')==metrix){
-								 item.id="instreet_box_focus";
-							   }else{
-							     
-								 item.id="";
-							   }
-							}
-							clearTimeout(outFlag);	
-							box.id="INSTREET_AD_ACTIVE";	
-                            box.lastChild.style.display="block";							
-						 
-						 }
-					     
-					};
-					spot.onmouseout=function(){
-							var imgId=this.getAttribute('instreet_img_id'),
-							   metrix=this.getAttribute('metrix'),
-							   other=ifeng.find_instreet_other(imgId),
-							   item;
-							item=document.getElementById('instreet_box_focus');
-							if(item){
-								item.id='';	
-							}										
-					
-					};
-										
-			},
-			addMouseEvent :function(target){	                    //绑定tip上的鼠标事件
-                			
-			     var tips=ev.getElementsByClassName(target,null,'instreet_tip');
-                 for(var i=tips.length;i--;){
-
-                    var tip=tips[i],adItem=tip.nextSibling;
-                    tip.onmouseover=function(e){
-                       var parent=this.parentNode,adItem=this.nextSibling,imgId=parent.parentNode.getAttribute('instreet_img_id');
-					   clearTimeout(outFlag);
-					   ifeng.closeActiveAd();
-					   parent.id='INSTREET_AD_ACTIVE';
-					   adItem.style.display="block";
-
-					};
-					
-					tip.onmouseout=function(){
-					  outFlag=setTimeout(ifeng.closeActiveAd,config.timer);					   
-					};
-					
-					adItem.onmouseover=function(){
-					   clearTimeout(outFlag);
-					   this.parentNode.id="INSTREET_AD_ACTIVE";
-					   this.style.display="block";
-					};	
-					
-					adItem.onmouseout=function(){
-					   outFlag=setTimeout(ifeng.closeActiveAd,config.timer);	
-					};
-					var children=adItem.childNodes;
-                    
-					for(var j=children.length;j--;){
-					    if(j==0) break;
-						children[j].onmouseover=function(e){
-						   var event=ev.getEvent(e),
-							   rela=ev.getRelatedTarget(event);
-						   if(this.contains(rela)){
-							  return;
-						   }
-						   else{				 
-							  tool.recordAction(this);		
-						   }
-									
-						}
-					}
-					
-				 }			 
-
-			},
 			closeActiveAd :	function (){			
-					var cont=this.container;
-					 var active_box=document.getElementById('INSTREET_AD_ACTIVE');
-					 if(active_box){
-						 active_box.id="";
-						 
-						 if(active_box.firstChild.className=='instreet_share_button'){
-							active_box.firstChild.style.display="block";
-						 }
-						 if(active_box.lastChild){
-						    active_box.lastChild.style.display="none";
-						 }
-					 }
+
+				 var active_box=$('INSTREET_AD_ACTIVE');
+				 if(active_box){
+					 active_box.id="";					 
+					 active_box.firstChild.className=='instreet_share_button'&&show(active_box.firstChild)						 
+					 active_box.lastChild&& hide(active_box.lastChild);					    					 
+				 }
 			},
 			checkPosition  :function(){
 
 			   var img,
 				   data_ready,
 				   instreet_others,
-				   cont=ifeng.container;
-			       instreet_others=ev.getElementsByClassName(cont,'ul','instreet_other');
+				   cont=instreet.container;
+			       instreet_others=ev.$(cont,'ul','instreet_other');
 
 			   for(var i=0,len=imgs.length;i<len;i++){
 			      img=imgs[i];
@@ -622,7 +482,7 @@
 							if(top!=pos.y||left!=(pos.x+w)){
 							   other.style.cssText="top:"+pos.y+"px;left:"+(pos.x+w)+'px;margin-top:10px;';
 							   if(pos.x+w+360>document.body.clientWidth){
-							     var boxes=ev.getElementsByClassName(other,null,'instreet_other_box'),box;
+							     var boxes=ev.$(other,null,'instreet_other_box'),box;
 								 for(var k=0;k<boxes.length;k++){
 								   box=boxes[k];
 							       box.style.left="-331px";
@@ -639,7 +499,7 @@
 			},
 			checkSpot:function(){
 			  var img,
-			  	  spots=ifeng.spotBox.getElementsByTagName('a');
+			  	  spots=instreet.spotBox.getElementsByTagName('a');
 
 			  for(var i=0,len=imgs.length;i<len;i++){
 			      img=imgs[i];
@@ -680,7 +540,7 @@
 			
 			},
 			find_instreet_other:function(imgId){
-			  var instreet_others=ev.getElementsByClassName(ifeng.container,'ul','instreet_other');
+			  var instreet_others=ev.$(instreet.container,'ul','instreet_other');
 			  for(var i=instreet_others.length;i--;){
 				  if(instreet_others[i].getAttribute('instreet_img_id')==imgId.toString()){
 				    return instreet_others[i];
@@ -693,17 +553,205 @@
 		};
         
 
-		/******插件功能模块****/
-		var modual={
-			createAdBox :function(data,img){
+
+
+        /********************************
+        *InstreetAd 类
+        ********************************/
+        var InstreetAd=function(data){
+
+             this.dataPackage=data;
+             this.img=imgs[data.index];
+             this.spotsArray=[];
+             this.init();
+        };
+
+        InstreetAd.prototype={
+
+        	constructor:InstreetAd,
+            init  :function(){
+
+		   	   var _this=this,
+		   	   	   data=_this.dataPackage,
+		   	   	   index=data.index,
+		   	   	   img=_this.img,
+			       pos=ev.getXY(img),
+				   str='';
+			   var side=document.createElement('ul');
+			   side.setAttribute('instreet_img_id',index);
+			   side.className="instreet_other";
+			   side.style.cssText="top:"+pos.y+"px;left:"+(pos.x+img.width)+"px;margin-top:10px;";
+			   this.sideWrapper=side;
+			   this.isLeft=pos.x+img.width+360>document.body.clientWidth?true:false;    //设置isLeft属性的值
+			  
+			   for(i in InstreetAd.modual){
+
+			     var lis=InstreetAd.modual[i](data,_this);
+			     
+			     for(var len=lis.length,i=0;i<len;i++){
+			     	side.appendChild(lis[i]);
+			     }
+			    			     	
+			   }
+
+			   this.addMouseEvent(side);
+			   instreet.container.appendChild(side);
+			},
+			createSpot:function(spotData){
+			   var _this=this, 
+			       index=_this.dataPackage.index,
+			       img=_this.img,
+			       w=spotData.width,
+			       metrix=spotData.metrix,
+				   ox=metrix%3000,
+				   oy=Math.round(metrix/3000),
+				   zoomNum=img.width/w,
+				   x=ox*zoomNum,
+				   y=oy*zoomNum,
+				   pos=ev.getXY(img),
+				   r=17;
+
+			   var spot=document.createElement('a');
+			   if(spotData.adsType)
+			      spot.className="instreet_ad_spot";
+			   else if(spotData.type.toString()=="1"||spotData.type.toString()=="2")  
+			      spot.className="instreet_weibo_spot";
+			   else if(spotData.type.toString()=="4")
+  			      spot.className="instreet_wiki_spot";
+			   spot.href="javascript:;";
+			   spot.setAttribute('metrix',metrix);
+			   spot.metrix=metrix;
+			   spot.setAttribute('instreet_img_id',index);
+			   spot.style.cssText="top:"+(y+pos.y-r)+"px;left:"+(x+pos.x-r)+"px;";
+			   instreet.spotBox.appendChild(spot);
+			   this.addSpotEvent(spot);
+			   this.spotsArray.push(spot);
+			},
+			addSpotEvent  :function(spot){
+				var _this=this,
+					imgId=_this.dataPackage.index,
+					side=_this.sideWrapper;		   				
+				spot.onmouseover=function(){
+						instreet.closeActiveAd();
+					    
+						var boxes,box,
+							metrix=this.metrix,
+						    items;
+						   
+                        if(spot.className=='instreet_ad_spot'){ 
+							boxes=ev.$(side,null,'instreet_aditem');
+						   for(var i=0,len=boxes.length;i<len;i++){
+
+						      if(boxes[i].getAttribute('metrix')==metrix){
+							    clearTimeout(outFlag);
+							    boxes[i].id="INSTREET_AD_ACTIVE";
+								show(boxes[i].lastChild);
+							  }
+						   }
+						 }
+						 else{
+						 
+							if(spot.className=='instreet_weibo_spot'){
+								box=ev.$(side,null,'instreet_weibo')[0];
+								items=ev.$(box,null,'other_weibo_box');
+							}									
+							else if(spot.className=='instreet_wiki_spot'){	
+								box=ev.$(side,null,'instreet_wiki')[0];
+								items=ev.$(box,null,'other_wiki_box');
+							}
+								
+							for(var i=0,len=items.length;i<len;i++){
+							   var item=items[i];
+							   if(item.getAttribute('metrix')==metrix){
+								 item.id="instreet_box_focus";
+							   }else{							     
+								 item.id="";
+							   }
+							}
+							clearTimeout(outFlag);	
+							box.id="INSTREET_AD_ACTIVE";	
+                            show(box.lastChild);							
+						 
+						 }
+					     
+				};
+				spot.onmouseout=function(){
+
+					var	item=$('instreet_box_focus');
+					if(item){
+							item.id='';	
+					}										
+				
+				};
+										
+			},
+			addMouseEvent :function(target){	                    //为tip绑定鼠标事件
+                			
+			     var tips=ev.$(target,null,'instreet_tip');
+                 for(var i=tips.length;i--;){
+
+                    var tip=tips[i],adItem=tip.nextSibling;
+                    tip.onmouseover=function(e){
+                       var parent=this.parentNode,adItem=this.nextSibling,imgId=parent.parentNode.getAttribute('instreet_img_id');
+					   clearTimeout(outFlag);
+					   instreet.closeActiveAd();
+					   parent.id='INSTREET_AD_ACTIVE';
+					   adItem.style.display="block";
+
+					};
+					
+					tip.onmouseout=function(){
+					  outFlag=setTimeout(instreet.closeActiveAd,config.timer);					   
+					};
+					
+					adItem.onmouseover=function(){
+					   clearTimeout(outFlag);
+					   this.parentNode.id="INSTREET_AD_ACTIVE";
+					   this.style.display="block";
+					};	
+					
+					adItem.onmouseout=function(){
+					   outFlag=setTimeout(instreet.closeActiveAd,config.timer);	
+					};
+					var children=adItem.childNodes;
+                    
+					for(var j=children.length;j--;){
+					    if(j==0) break;
+						children[j].onmouseover=function(e){
+						   var event=ev.getEvent(e),
+							   rela=ev.getRelatedTarget(event);
+						   if(this.contains(rela)){
+							  return;
+						   }
+						   else{				 
+							  tool.recordAction(this);		
+						   }
+									
+						}
+					}
+					
+				 }			 
+
+			}
+
+
+        };
+
+		/*****************************
+		*插件功能模块
+		*****************************/
+		InstreetAd.modual={
+			createAdBox :function(data,obj){
 			   var str='',
 				   arr=[],
+				   liArray=[],
 				   aMetrix=[],
+				   img=obj.img,
 				   len=data.adsSpot.length,
-				   footAd=data.badsSpot[0],
-				   left=tool.isLeft(img),id='',dis='',
+				   footData=data.badsSpot[0],
+				   left=obj.isLeft,id='',dis='',
                    open=firstData&&config.autoShow?true:false,
-				   createAd=function(data,metrix,img){
+				   createAd=function(data,metrix){                    //创建metrix值相同的精准匹配广告节点
 						var str='',
 					        len=data.adsSpot.length,
 					        ad,
@@ -714,63 +762,71 @@
 							if(data.adsSpot[j].metrix===metrix){
 							  ad=data.adsSpot[j];
 							  redUrl=config.redurl+"?tty=0&mid="+ad.imageNumId+"&muh="+data.imageUrlHash+"&pd="+ad.widgetSid+"&ift=&tg=&at="+ad.adsType+"&ad="+ad.adsId+"&rurl="+encodeURIComponent(encodeURIComponent(ad.adsLinkUrl));
-							  if(j==len-1)
-							     str+="<div adsid='"+ad.adsId+"' class='other_ad_box no_border'><table><tbody><tr><td class='td1'><a class='imgbox' href='"+redUrl+"'><img src='"+ad.adsPicUrl+"' alt='' /></a></td>";
-							  else
-                                 str+="<div adsid='"+ad.adsId+"' class='other_ad_box'><table><tbody><tr><td  class='td1'><a href='"+redUrl+"'><img src='"+ad.adsPicUrl+"' alt='' /></a></td>";							  
+							  var className=j==len-1?"other_ad_box no_border":"other_ad_box";
+							  str+="<div adsid='"+ad.adsId+"' class='"+className+"'>";
+					          str+="<table><tbody><tr><td class='td1'><a class='imgbox' href='"+redUrl+"'><img src='"+ad.adsPicUrl+"' alt='' /></a></td>";                                							  
 							  str+="<td class='td2'><p class='other_ad_title'><a href='"+redUrl+"' title='' target='_blank'>"+ad.adsTitle+"</a></p>";
 							  str+="<p class='other_ad_new'><b>宝贝价：<span class='other_ad_price'>"+(ad.adsDiscount||ad.adsPrice)+"</span>元</b></p><p class='other_ad_buy'><a target='_blank' href='"+redUrl+"'></a></p></td></tr></tbody></table></div>";
 							  if(!adData){
 								adData=ad;
 							  }
+							
 							}
 						}
-						ifeng.createSpot(adData,img);
-						return str;				  
+						obj.createSpot(adData);	
+						return str;		  
 					},
-					createFootAd=function(data){		
+					createFootAd=function(footData){	                 //创建底部广告节点	
 
-					   var footAd=data.badsSpot[0],
-						   str='';
-					   if(!footAd||!footAd.description){     
+					   var 	str='';
+					   if(!footData){     
 						  return str;
 					   }else{
-						  str+="<div class='other_foot_ad'>";
-						  if(footAd.adsPicUrl){
-						      var redUrl=config.redurl+"?tty=0&mid="+data.imageNumId+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(footAd.adsType||'')+"&ad="+(footAd.adsId||'')+"&tg=&rurl="+encodeURIComponent(encodeURIComponent(footAd.adsLinkUrl));
-							  str=str+"<a href='"+redUrl+"'><img src='"+footAd.adsPicUrl+"' alt=''/></a>";
-						  }else if(!footAd.adsLinkUrl&&footAd.description){
-							 var fra=footAd.description;
+						  str="<div class='other_foot_ad'>";
+						  if(footData.adsType==3){
+						      var redUrl=config.redurl+"?tty=0&mid="+data.imageNumId+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(footData.adsType||'')+"&ad="+(footData.adsId||'')+"&tg=&rurl="+encodeURIComponent(encodeURIComponent(footData.adsLinkUrl));
+							  str+="<a href='"+redUrl+"'><img src='"+footData.adsPicUrl+"' alt=''/></a>";
+						  }else if(!footData.adsLinkUrl&&footData.description){
+							 var fra=footData.description;
 							 str+=fra.slice(0,-2)+'></iframe>';
 						  }
 						  str+="</div>";
+						  return str;
 					   }
-					   return str;
 					   					
 					};
 
+                 var footAd=createFootAd(footData);
                			    
 				if(open){
 				   id="INSTREET_AD_ACTIVE";
 				   dis="display:block;";
 				}	
 			
-               if(!config.showAd&&!config.showFootAd){
+                if(!config.showAd&&!config.showFootAd){
 			      return str;
-			   }
+			    }
 
-			   if(len<=0||!config.showAd){
-			      if(footAd&&config.showFootAd){
-				    if(left)
-					 str="<li id='"+id+"' class='instreet_aditem' instreet_ad_id='0'><div class='instreet_tip'><span class='tip_top'></span><p>热门信息</p><span class='tip_bottom'></span></div><div class='instreet_other_box' style='left:"+leftPad+"px;"+dis+"'><div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>热门信息</div>";
-					else 
-					 str="<li id='"+id+"' class='instreet_aditem' instreet_ad_id='0'><div class='instreet_tip'><span class='tip_top'></span><p>热门信息</p><span class='tip_bottom'></span></div><div class='instreet_other_box' style='left:"+rightPad+"px;"+dis+"'><div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>热门信息</div>";
-					str+=createFootAd(data);
-					str+="</li>";
-					return str;
+                var createLI=function(index){       //创建LI
+
+	   		      	var li=document.createElement("li");
+			      	li.setAttribute("instreet_ad_id",index);
+			      	li.className="instreet_aditem";
+			      	li.id=id;
+			      	return li;
+				};
+
+			   if(len<=0||!config.showAd){                   //只有底部广告
+			      if(footData&&config.showFootAd){
+	   		      	var li=createLI(0);
+		      		var style=left?"left:"+leftPad+"px;"+dis:"left:"+rightPad+"px;"+dis;
+			      	var str="<div class='instreet_tip'><span class='tip_top'></span><p>热门信息</p><span class='tip_bottom'></span></div>";
+					str+="<div class='instreet_other_box' style='"+style+"'><div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>热门信息</div>";
+					li.innerHTML=str+footAd;
+					liArray.push(li);
 				 }
 			   }
-			   else if(config.showAd&&len>0){
+			   else if(config.showAd&&len>0){              //存在图片匹配广告
 			   
 				   while(len--){
 					arr.push(data.adsSpot[len].metrix);
@@ -788,46 +844,40 @@
 					 case 4:tipId="五";break;
 					 case 5:tipId="六";break;
 				   }
-                  if(i!=0){
-				    if(id!==''){
-					  id='';
-					}
-					if(dis!==''){
-					  dis='';
-					}
+                  if(i!=0){				    
+					  id="";										
+					  dis="";					
 				  }
-				  str=str+"<li id='"+id+"' instreet_ad_id='"+i+"' metrix='"+aMetrix[i]+"' class='instreet_aditem'><div class='instreet_tip'><span class='tip_top'></span><p>相似商品"+tipId+"</p><span class='tip_bottom'></span></div>";
-				  
-				  if(left){
-				    str+="<div class='instreet_other_box' style='left:"+leftPad+"px;"+dis+"'>";
-				 				     
-				  }else{
-				    str+="<div class='instreet_other_box' style='left:"+rightPad+"px;"+dis+"'>";
+				  var li=createLI(i);
+				  li.setAttribute("metrix",aMetrix[i]);
+				  var style=left?"left:"+leftPad+"px;"+dis:"left:"+rightPad+"px;"+dis;
+				  str="<div class='instreet_tip'><span class='tip_top'></span><p>相似商品"+tipId+"</p><span class='tip_bottom'></span></div>";
+				  str+="<div class='instreet_other_box' style='"+style+"'><div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相似商品</div>";
+				  str+=createAd(data,aMetrix[i]);	 //广告html	  
+				  if(config.showFootAd){
+                      str+=footAd;                   //底部广告html                 
 				  }
-				  str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相似商品</div>";
-				  str+=createAd(data,aMetrix[i],img);		          
-				  if(config.showFootAd)
-				     str+=createFootAd(data);
-				  
-				  str+="</div></li>";
+			      li.innerHTML=str+"</div>";    
+			      liArray.push(li);      
 			   }
 			  }
-			   return str;
+			   return liArray;
 
 			},
-			createWeibo: function(data,img){
+
+			createWeibo: function(data,obj){
 			   var str="",
-				   left=tool.isLeft(img);
+				   left=obj.isLeft,
+				   liArray=[],
+				   img=obj.img;
 
 			   if(data.weiboSpot.length>0&&config.showWeibo){
+			   	   var li=document.createElement("li"),
+			   	   	   style=left?"left:"+leftPad+"px;":"left:"+rightPad+"px;";
+			   	   	li.className="instreet_weibo";   
 			   
-			       str="<li class='instreet_weibo'><a href='javascript:;' class='instreet_tip instreet_weibo_button'></a>";
-				  if(left){
-				     str+="<div class='instreet_weibo_box' style='left:"+leftPad+"px;'>";
-				  }else{
-				    str+="<div class='instreet_weibo_box' style='left:"+rightPad+"px;'>";
-				  }
-				  str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关微博</div>";
+			       str="<a href='javascript:;' class='instreet_tip instreet_weibo_button'></a><div class='instreet_weibo_box' style='"+style+"'>";		
+				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关微博</div>";
 				   for(var len=data.weiboSpot.length,i=0;i<len;i++){
 				      var weibo=data.weiboSpot[i],
 					      nickName=weibo.nickName,
@@ -844,28 +894,31 @@
 						    s="<div class='other_weibo_box' metrix='"+metrix+"'>";
 						s+="<table><tr><td class='td1'><a href='"+userUrl+"' target='_blank'><img src='"+avatar+"'/></a></td><td class='td2'><p><a target='_blank' class='name' href='"+userUrl+"'>"+nickName+"</a></p><p class='cont'>"+latestStatus+"</p><p class='icon'><a href='"+userUrl+"' title='微博'><img src='"+icon+"'/></a></p></td></tr></table></div>";  
 				        str+=s;
-						ifeng.createSpot(weibo,img);
+						obj.createSpot(weibo);
 				   }
-				   str+="</div></li>";
+				   str+="</div>";
+				   li.innerHTML=str;
+				   liArray.push(li);
 			   
 			   }
-			    return str;
+			    return liArray;
 
 			
 			},			
-			createWiki:function(data,img){
+			createWiki:function(data,obj){
 			   var str="",
-			   	   left=tool.isLeft(img);
+			   	   left=obj.isLeft,
+			   	   img=obj.img
+			   	   liArray=[];
 			   if(data.wikiSpot.length>0&&config.showWiki){
 
-			       str="<li class='instreet_wiki'><a href='javascript:;' class='instreet_tip instreet_wiki_button'></a>";
-				  if(left){
-				     str+="<div class='instreet_wiki_box' style='left:"+leftPad+"px;'>";
-				  }else{
-				     str+="<div class='instreet_wiki_box' style='left:"+rightPad+"px;'>";
-				  }
-				  str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关互动百科</div>";
-				  for(var len=data.wikiSpot.length,i=0;i<len;i++){
+   			   	    var li=document.createElement("li"),
+			   	   	   style=left?"left:"+leftPad+"px;":"left:"+rightPad+"px;";
+			   	   	li.className="instreet_wiki";   
+
+			       str="<a href='javascript:;' class='instreet_tip instreet_wiki_button'></a><div class='instreet_wiki_box' style='"+style+"'>";
+				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关互动百科</div>";
+				   for(var len=data.wikiSpot.length,i=0;i<len;i++){
 				      var wiki=data.wikiSpot[i],
 					      title=wiki.title,
 						  firstimg=wiki.firstimg,
@@ -880,68 +933,83 @@
 						    s="<div class='other_wiki_box' metrix='"+metrix+"'>";
 						s+="<table><tr><td class='td1'><a href='"+url+"' target='_blank'><img src='"+firstimg+"'/></a></td><td class='td2'><p><a target='_blank' class='name' href='"+url+"'>"+title+"</a></p><p class='cont'>"+summary+"</p><p class='icon'><a href='"+url+"' title='互动百科'><img src='http://static.instreet.cn/widgets/push/images/icon_baike.png'/></a></p></td></tr></table></div>";  
 				        str+=s;
-						ifeng.createSpot(wiki,img);
-				   }
-				   str+="</div></li>";			   
+						obj.createSpot(wiki);
+				    }
+				    str+="</div>";	
+				    li.innerHTML=str;
+				    liArray.push(li);		   
 			   }
-			   return str;
+			   return liArray;
 			   			
 			},
-			createNews  :function(data,img){		  
+			createNews  :function(data,obj){		  
 			  data={widgetSid:"79cjp47BnLo3NdNaLeICIw",imageNumId:3210181,imageUrlHash:"-5247197737280147510",newsSpot:[{type:5,content:"6月30日晚，<font color='#CC0033'></font> 次出征选择黑色波点古董裙，黑发红唇，气势依旧。", title:"<font color='#CC0033'>范冰冰</font>为扮美不惜争分夺秒在车里也敷面膜(图)", url:"http%3A%2F%2Fwww.chinanews.com%2Fyl%2F2012%2F07-03%2F4003609.shtml",publisher:"中国新闻网",titleNoFormatting:"范冰冰为扮美不惜争分夺秒在车里也敷面膜(图)",unescapedUrl:"http://www.chinanews.com/yl/2012/07-03/4003609.shtml"}]};
 
 			   var str="",
-			   	  left=tool.isLeft(img);
+			   	  left=obj.isLeft,
+			   	  liArray=[];
 			   if(config.showNews){
 
-			       str="<li class='instreet_news'><a href='javascript:;' class='instreet_tip instreet_news_button'></a>";
-				  if(left){
-				     str+="<div class='instreet_news_box' style='left:"+leftPad+"px;'>";
-				  }else{
-				     str+="<div class='instreet_news_box' style='left:"+rightPad+"px;'>";
-				  }
-				  str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关新闻讯息</div>";
-				
-				  str+='<div class="other_news_box no_border"><iframe frameborder="0" width="300" height="250" marginwidth="0" marginheight="0" src="http://www.google.com/uds/modules/elements/newsshow/iframe.html?topic=h&rsz=small&format=300x250"></iframe></div></div></li>';			   
+   			   	    var li=document.createElement("li"),
+			   	   	   style=left?"left:"+leftPad+"px;":"left:"+rightPad+"px;";
+			   	   	li.className="instreet_news";  
+			       str="<a href='javascript:;' class='instreet_tip instreet_news_button'></a><div class='instreet_news_box' style='"+style+"'>";
+				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关新闻讯息</div>";				
+				   str+='<div class="other_news_box no_border"><iframe frameborder="0" width="300" height="250" marginwidth="0" marginheight="0" src="http://www.google.com/uds/modules/elements/newsshow/iframe.html?topic=h&rsz=small&format=300x250"></iframe></div></div>';			   
+			   	   li.innerHTML=str;
+				   liArray.push(li);
 			   }
-			   return str;
+			   return liArray;
 			},
-			createWheather:function(data,img){
+			createWheather:function(data,obj){
 			    
-			    var str="",
-					left=tool.isLeft(img),
-					index=img.getAttribute('instreet_img_id'),
-					url="http://www.instreet.cn/weather?location=&callback=showWeather_"+index;
+			    var str="",liArray=[]
+					left=obj.isLeft,
+					url="http://www.instreet.cn/weather?location=&callback=showWeather_"+data.index;
 				if(config.showWeather){
-				  str="<li class='instreet_weather'><a href='javascript:;' class='instreet_tip instreet_weather_button'></a>";
-				  if(left){
-				     str+="<div class='instreet_weather_box' style='left:"+leftPad+"px;'>";
-				  }else{
-				     str+="<div class='instreet_weather_box' style='left:"+rightPad+"px;'>";
-				  }
+		   	      var li=document.createElement("li"),
+			   	   	   style=left?"left:"+leftPad+"px;":"left:"+rightPad+"px;";
+			   	  li.className="instreet_weather"; 
+				  str="<a href='javascript:;' class='instreet_tip instreet_weather_button'></a><div class='instreet_weather_box' style='"+style+"'>";
 				  str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关天气讯息</div>";
-				  str+="<div class='other_weather_box no_border'><iframe name='weather_inc' src='http://tianqi.xixik.com/cframe/2' width='290' height='70' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'></iframe></div></div></li>";
-				
+				  str+="<div class='other_weather_box no_border'><iframe name='weather_inc' src='http://tianqi.xixik.com/cframe/2' width='290' height='70' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'></iframe></div></div>";
+			   	  li.innerHTML=str;
+				  liArray.push(li);
 				}
-				return str;
+				return liArray;
 			
 			},
 			createShare :function(){
-			   var str='';
-			   if(config.showShare)
-			   str+="<li class='instreet_share'><a class='instreet_share_button' title='分享图片'></a><div class='instreet_share_icons'><a class='instreet_sina'  title='新浪微博'></a><a class='instreet_renren' title='人人网' ></a><a class='instreet_tx' title='腾讯微博'></a></div></li>";
-			   return str;
+			   var str='',liArray=[];
+			   if(config.showShare){
+		   	      var li=document.createElement("li");
+			   	  li.className="instreet_share"; 
+			   	  str="<a class='instreet_share_button' title='分享图片'></a><div class='instreet_share_icons'><a class='instreet_sina'  title='新浪微博'></a><a class='instreet_renren' title='人人网' ></a><a class='instreet_tx' title='腾讯微博'></a></div>";
+  			   	  li.innerHTML=str;
+				  liArray.push(li);
+			   }
+			   
+			   return liArray;
 			},
 			createMD   :function(){
-			   var str='';
-			   if(config.showMD)
-               str+="<li class='instreet_imeiding'><a class='share_button' href='http://www.imeiding.com' target='_blank' title='每叮网'></a></li>";
-			   return str;
+			   var str='',liArray=[];
+			   if(config.showMD){
+			   	  var li=document.createElement("li");
+			   	  li.className="instreet_imeiding"; 
+				  str="<a class='share_button' href='http://www.imeiding.com' target='_blank' title='每叮网'></a>";
+			   	  li.innerHTML=str;
+				  liArray.push(li);
+			   }             
+			   return liArray;
 			}
-		 
+	 
 		};
 
-		/********Mix config*************/
+
+
+		/*****************************
+		*Mix config
+		*****************************/
 		var mixConfig=function(c){
 		   if(c&&typeof c=="object"){
 		   
@@ -954,15 +1022,23 @@
 		   }
 		
 		};
-		mixConfig(instreet_config);
-		
-		
-		
-        document.ready(function(){
-		     tool.getImgs();
+		//mixConfig(instreet_config);
+
+		/************************* 
+		*init function
+		*************************/
+		function init(){
+
+		     instreet.init();
 			 cache.initData();
-			 ifeng.init();
-			 ev.bind(window,'load',function(){ifeng.checkPosition();ifeng.checkSpot();ev.bind(window,'resize',function(){ifeng.checkPosition();ifeng.checkSpot();});	});	 
+			 ev.bind(window,'load',function(){instreet.checkPosition();instreet.checkSpot();ev.bind(window,'resize',function(){instreet.checkPosition();instreet.checkSpot();});	});	 
+
+		};
+		
+		
+		
+        document.DomReady(function(){
+             init();
 		});
         
 		
