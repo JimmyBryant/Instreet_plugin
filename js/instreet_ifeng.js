@@ -39,7 +39,7 @@
 						imih	:	200,
 						imiw	:	200,
 						timer   :   1000,
-						widgetSid:"79cjp47BnLo3NdNaLeICIw",
+						widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
 						showAd:true,
 						showFootAd:true,
 						showWeibo:true,
@@ -54,59 +54,7 @@
 
 		var tool={
 
-		   recordImage:function(img){
-		       var iu=encodeURIComponent(encodeURIComponent(img.src)),
-			       pd=config.widgetSid,
-				   pu=encodeURIComponent(encodeURIComponent(location.href)),
-				   t=encodeURIComponent(encodeURIComponent(document.title)),
-				   ul=config.ourl;
 
-				  ul+="?iu="+iu+"&pd="+pd+"&pu="+pu+"&t="+t;
-				  ev.importFile('js',ul);
-			   
-		   },
-		   recordImgAction:function(index){                           //鼠标移动到图片上的时候发送行为记录
-		       var data=cache.dataArray[index],img=imgs[index],
-				   ul=config.iurl,pd=data.widgetSid,muh=data.imageUrlHash,
-				   iu=encodeURIComponent(encodeURIComponent(img.src));
-				   
-				ul+="?pd="+pd+"&muh="+muh+"&iu="+iu;
-				ev.importFile('js',ul);
-		   
-		   },
-		   recordAction:function(tar){                    //鼠标移动到广告或者微博、百科上发送行为记录
-		       
-			   var index=tar.parentNode.parentNode.parentNode.getAttribute('instreet_img_id');
-
-			   if(index!=undefined){
-			      var  data=cache.dataArray[index],m,spots,img=imgs[index],
-					   iu=encodeURIComponent(encodeURIComponent(img.src)),
-					   pd=data.widgetSid,
-					   ul=config.murl,
-					   mid=data.imageNumId||'',
-					   muh=data.imageUrlHash,
-					   adData,
-					   ad='',
-					   at='',
-					   ift=0,
-					   tty=1,adReg=/other_ad_box/,weiboReg=/other_weibo_box/,wikiReg=/other_wiki_box/,footReg=/other_foot_ad/;
-                    if(adReg.test(tar.className)){
-					   ad=tar.getAttribute('adsid');
-					   at=1;
-					}else if(weiboReg.test(tar.className)){
-					   ift=2;
-					}else if(wikiReg.test(tar.className)){
-					   ift=4;
-					}else if(footReg.test(tar.className)){
-					   ad=data.badsSpot[0].adsId;
-					   at=data.badsSpot[0].adsType;
-					}
-													
-					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg=";				
-					ev.importFile('js',ul);
-				
-				}
-		   }
 		  
 		};
         /****************************
@@ -260,7 +208,7 @@
 			    
 			     var img=new Image(),index=i;
                  img.src=imgs[index].src;				 
-				 img.setAttribute('instreet_img_id',index);
+				 img.imgId=index;
 				 if(img.complete){
 				    cache.loadData(img);
 				 }else{
@@ -274,14 +222,14 @@
 
 		    },
 			loadData     :function(img){
-			   var index=img.getAttribute('instreet_img_id'),clientImg;
+			   var index=img.imgId,clientImg;
                for(var i=imgs.length;i--;){
-			      if(imgs[i].getAttribute('instreet_img_id')==index.toString()){
+			      if(imgs[i].imgId==index.toString()){
 				    clientImg=imgs[i];break;
 				  }
 			   }			   
 			   if(img.width>=config.imiw&&img.height>=config.imih&&clientImg.clientWidth>=config.imiw&&clientImg.clientHeight>=config.imiw){		
-				   tool.recordImage(img);			   
+				   InstreetAd.recordImage(img);			   
 				   cache.createJsonp(index);
                    
 			   }
@@ -320,7 +268,8 @@
 			   for(var i=0,len=images.length;i<len;i++){
 				    img=images[i];
 				    //if(img.style.display!='none'&&img.style.visibility!='hidden'){
-	 					  img.setAttribute('instreet_img_id',i.toString());
+	 					  //img.setAttribute('instreet_img_id',i.toString());	 					 
+	 					  img.imgId=i;
 						  imgs[i]=img;
 					//}
 			   }
@@ -362,26 +311,26 @@
 
 						   parent=target.parentNode;
 						   next=target.nextSibling;
-						   target.style.display="none";
+						   hide(target);
 						   parent.id="INSTREET_AD_ACTIVE";
-						   next.style.display="block";
+						   show(next);
 						   next.onmouseover=null;
 						   next.onmouseout=null;
 						   next.onmouseover=function(){
 						      parent.id="INSTREET_AD_ACTIVE";
-                              this.style.display="block";
-							  target.style.display="none";
+                              show(this);
+							  hide(target);
 						  };
 						  next.onmouseout=function(){
                               parent.id='';
-							  this.style.display="none";
-							  target.style.display="block";
+							  hide(this);
+							  show(target);
 
 						  };
 					}else if(target.tagName=='IMG'&&target.getAttribute('instreet_data_ready')){
 						  clearTimeout(outFlag);
-						  var img_id=target.getAttribute('instreet_img_id'),
-						      other=instreet.find_instreet_other(img_id),
+						  var index=target.imgId,
+						      other=cache.adsArray[index].sideWrapper,
 							  active=$('INSTREET_AD_ACTIVE');
 						
 						  if(!other)
@@ -394,11 +343,11 @@
 						  if(li){
 							li.id="INSTREET_AD_ACTIVE";
 							if(li.firstChild&&li.firstChild.className=='instreet_share_button'){
-								li.firstChild.style.display="none";
+								hide(li);
 							}
-							li.lastChild.style.display="block";
+							show(li.lastChild);
 						  }
-						  tool.recordImgAction(img_id);
+						  InstreetAd.recordImgAction(index);
 					
 					}
 					
@@ -455,101 +404,63 @@
 				 if(active_box){
 					 active_box.id="";					 
 					 active_box.firstChild.className=='instreet_share_button'&&show(active_box.firstChild)						 
-					 active_box.lastChild&& hide(active_box.lastChild);					    					 
+					 active_box.children.length>1&& hide(active_box.lastChild);					    					 
 				 }
 			},
-			checkPosition  :function(){
+			reLocateAd  :function(){                   //重新定位广告
 
-			   var img,
-				   data_ready,
-				   instreet_others,
-				   cont=instreet.container;
-			       instreet_others=ev.$(cont,'ul','instreet_other');
+               var adsArray=cache.adsArray;
+               for(i in adsArray){
+                  var adObj=adsArray[i],
+                      sideWrapper=adObj.sideWrapper,
+                      img=adObj.img,
+                      pos=ev.getXY(img);
 
-			   for(var i=0,len=imgs.length;i<len;i++){
-			      img=imgs[i];
-			      data_ready=img.getAttribute('instreet_data_ready');
-			      if(data_ready) {
+                   sideWrapper.style.cssText="top:"+pos.y+"px;left:"+(pos.x+img.width)+"px;margin-top:5px;";
+                   lis=sideWrapper.children;
+                   for(var j=lis.length;j--;){
+                   		var box=lis[j].lastChild,
+                   		    style=adObj.chooseLeft?leftPad+"px;":rightPad+"px;"
+                   		 box.style.left=style;
+                   }
+                   
 
-				       var img_id=img.getAttribute('instreet_img_id'),
-						   pos=ev.getXY(img),
-					       w=img.width;
-					   for(var j=0,l=instreet_others.length;j<l;j++){
-					     var other=instreet_others[j];
-					     if(img_id==other.getAttribute('instreet_img_id')){
-						    var top=parseInt(other.style.top.replace('px','')),
-							    left=parseInt(other.style.left.replace('px',''));
-							if(top!=pos.y||left!=(pos.x+w)){
-							   other.style.cssText="top:"+pos.y+"px;left:"+(pos.x+w)+'px;margin-top:10px;';
-							   if(pos.x+w+360>document.body.clientWidth){
-							     var boxes=ev.$(other,null,'instreet_other_box'),box;
-								 for(var k=0;k<boxes.length;k++){
-								   box=boxes[k];
-							       box.style.left="-331px";
-								 }
-							   }
-							}
-						 }
-					   }
+               }
 
-					
-				  }
-			   } 
 			 
 			},
-			checkSpot:function(){
-			  var img,
-			  	  spots=instreet.spotBox.getElementsByTagName('a');
+			reLocateSpot:function(){                  //重新定位spot
 
-			  for(var i=0,len=imgs.length;i<len;i++){
-			      img=imgs[i];
-			      data_ready=img.getAttribute('instreet_data_ready');
-			      if(data_ready) {
-				       var img_id=img.getAttribute('instreet_img_id'),
-						   pos=ev.getXY(img),
-						   spot,
-						   data,						   						   
-						   r=17;
- 
-					   for(var j=0,l=spots.length;j<l;j++){
-					     spot=spots[j];
+               var adsArray=cache.adsArray;
+               for(i in adsArray){
+                  var adObj=adsArray[i],
+                      spotsArray=adObj.spotsArray;
+                  if(spotsArray.length>0){
+                      img=adObj.img,
+                      pos=ev.getXY(img),
+                      w=spotsArray[0].imgWidth,
+                      zoomNum=img.width/w,
+					  r=17;
+                      
+	                  for(var j=spotsArray.length;j--;){
+	                  	   var  spot=spotsArray[j];				      
+					       metrix=spot.metrix,
+						   ox=metrix%3000,
+						   oy=Math.round(metrix/3000),					  
+						   x=ox*zoomNum,
+						   y=oy*zoomNum;
+	 					  spot.style.cssText="top:"+(y+pos.y-r)+"px;left:"+(x+pos.x-r)+"px;"
 
-						 if(spot.getAttribute('instreet_img_id')==img_id){
-							 switch(spot.className){
-								case "instreet_ad_spot":data=cache.dataArray[img_id].adsSpot[0]; break;
-								case "instreet_weibo_spot":data=cache.dataArray[img_id].weiboSpot[0]; break;
-								case "instreet_wiki_spot":data=cache.dataArray[img_id].wikiSpot[0]; break;
-						    }
+	                   }
 
-							var	w=data.width,
-								metrix=parseInt(spot.getAttribute('metrix')),
-								zoomNum=img.width/w,
-								ox=metrix%3000,
-								oy=Math.round(metrix/3000),
-								x=ox*zoomNum,
-								y=oy*zoomNum;
+                  }                   
 
-							spot.style.cssText="top:"+(y+pos.y-r)+"px;left:"+(x+pos.x-r)+"px;";
-							 
-						 }
-					   
-					   }
-				  
-				  }
-			    }
+               }
 			
-			},
-			find_instreet_other:function(imgId){
-			  var instreet_others=ev.$(instreet.container,'ul','instreet_other');
-			  for(var i=instreet_others.length;i--;){
-				  if(instreet_others[i].getAttribute('instreet_img_id')==imgId.toString()){
-				    return instreet_others[i];
-				  }
-			  }
-			  return null;
 			}
             
-		
+
+
 		};
         
 
@@ -580,9 +491,9 @@
 			   var side=document.createElement('ul');
 			   side.setAttribute('instreet_img_id',index);
 			   side.className="instreet_other";
-			   side.style.cssText="top:"+pos.y+"px;left:"+(pos.x+img.width)+"px;margin-top:10px;";
+			   side.style.cssText="top:"+pos.y+"px;left:"+(pos.x+img.width)+"px;margin-top:5px;";
 			   this.sideWrapper=side;
-			   this.isLeft=pos.x+img.width+360>document.body.clientWidth?true:false;    //设置isLeft属性的值
+			   this.chooseLeft();                           //判断广告放置在图片左侧或者右侧
 			  
 			   for(i in InstreetAd.modual){
 
@@ -594,8 +505,12 @@
 			    			     	
 			   }
 
-			   this.addMouseEvent(side);
+			   this.addTipEvent(side);
 			   instreet.container.appendChild(side);
+			},
+			chooseLeft    :function(){						//判断广告放置在图片左侧或者右侧
+				var img=this.img,pos=ev.getXY(img);
+				return this.isLeft=pos.x+img.width+360>document.body.clientWidth?true:false;    
 			},
 			createSpot:function(spotData){
 			   var _this=this, 
@@ -621,6 +536,7 @@
 			   spot.href="javascript:;";
 			   spot.setAttribute('metrix',metrix);
 			   spot.metrix=metrix;
+			   spot.imgWidth=w;
 			   spot.setAttribute('instreet_img_id',index);
 			   spot.style.cssText="top:"+(y+pos.y-r)+"px;left:"+(x+pos.x-r)+"px;";
 			   instreet.spotBox.appendChild(spot);
@@ -685,18 +601,21 @@
 				};
 										
 			},
-			addMouseEvent :function(target){	                    //为tip绑定鼠标事件
+			addTipEvent :function(){	                    //为tip绑定鼠标事件
                 			
-			     var tips=ev.$(target,null,'instreet_tip');
-                 for(var i=tips.length;i--;){
+			     var _this=this, 
+			     	lis=_this.sideWrapper.children;
+  
+                 for(var i=lis.length;i--;){
 
-                    var tip=tips[i],adItem=tip.nextSibling;
+                    var tip=lis[i].firstChild,
+                    	adItem=lis[i].lastChild;
                     tip.onmouseover=function(e){
-                       var parent=this.parentNode,adItem=this.nextSibling,imgId=parent.parentNode.getAttribute('instreet_img_id');
+                       var parent=this.parentNode,adItem=this.nextSibling;
 					   clearTimeout(outFlag);
 					   instreet.closeActiveAd();
 					   parent.id='INSTREET_AD_ACTIVE';
-					   adItem.style.display="block";
+					   show(adItem);
 
 					};
 					
@@ -704,38 +623,98 @@
 					  outFlag=setTimeout(instreet.closeActiveAd,config.timer);					   
 					};
 					
-					adItem.onmouseover=function(){
+					adItem.onmouseover=function(e){
+
 					   clearTimeout(outFlag);
 					   this.parentNode.id="INSTREET_AD_ACTIVE";
-					   this.style.display="block";
+					   show(this);
+
 					};	
 					
 					adItem.onmouseout=function(){
 					   outFlag=setTimeout(instreet.closeActiveAd,config.timer);	
 					};
-					var children=adItem.childNodes;
-                    
-					for(var j=children.length;j--;){
-					    if(j==0) break;
-						children[j].onmouseover=function(e){
-						   var event=ev.getEvent(e),
-							   rela=ev.getRelatedTarget(event);
-						   if(this.contains(rela)){
-							  return;
-						   }
-						   else{				 
-							  tool.recordAction(this);		
-						   }
-									
-						}
-					}
-					
-				 }			 
 
+					var children=adItem.children;
+
+					for(var j=1,len=children.length;j<len;j++){                //记录鼠标行为
+						children[j].onmouseover=function(e){
+					      var event=ev.getEvent(e),
+					  		 rela=ev.getRelatedTarget(event);
+	                       if(!this.contains(rela)){
+	                       	 _this.recordAction(this);	
+	                       }
+						}
+					 }								 		 
+
+		  		}
+		  },
+
+	       //鼠标移动到广告或者微博、百科上发送行为记录
+ 	      recordAction:function(tar){   		       
+
+			      var  _this=this,data=_this.dataPackage,
+			      	   img=_this.img,
+					   iu=encodeURIComponent(encodeURIComponent(img.src)),
+					   pd=data.widgetSid,
+					   ul=config.murl,
+					   mid=data.imageNumId||'',
+					   muh=data.imageUrlHash,
+					   adData,
+					   ad='',
+					   at='',
+					   ift=0,
+					   tty=1,adReg=/other_ad_box/,weiboReg=/other_weibo_box/,wikiReg=/other_wiki_box/,footReg=/other_foot_ad/;
+                    if(adReg.test(tar.className)){
+					   ad=tar.getAttribute('adsid');
+					   at=1;
+					}else if(weiboReg.test(tar.className)){
+					   ift=2;
+					}else if(wikiReg.test(tar.className)){
+					   ift=4;
+					}else if(footReg.test(tar.className)){
+					   ad=data.badsSpot[0].adsId;
+					   at=data.badsSpot[0].adsType;
+					}
+													
+					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg=";				
+					ev.importFile('js',ul);
+				
 			}
+			
 
 
         };
+
+        /****************************************
+        *页面加载时向服务器返回符合要求的图片信息
+        ****************************************/
+        InstreetAd.recordImage=function(img){
+
+	       var iu=encodeURIComponent(encodeURIComponent(img.src)),
+		       pd=config.widgetSid,
+			   pu=encodeURIComponent(encodeURIComponent(location.href)),
+			   t=encodeURIComponent(encodeURIComponent(document.title)),
+			   ul=config.ourl;
+
+			  ul+="?iu="+iu+"&pd="+pd+"&pu="+pu+"&t="+t;
+			  ev.importFile('js',ul);
+		   
+	    };
+	    /**************************************
+	    *鼠标移动到图片上的时候发送行为记录
+	    **************************************/
+	    InstreetAd.recordImgAction=function(index){                           
+		       var data=cache.dataArray[index],img=imgs[index],
+				   ul=config.iurl,pd=data.widgetSid,muh=data.imageUrlHash,
+				   iu=encodeURIComponent(encodeURIComponent(img.src));
+				   
+				ul+="?pd="+pd+"&muh="+muh+"&iu="+iu;
+				ev.importFile('js',ul);
+		   
+		};
+
+
 
 		/*****************************
 		*插件功能模块
@@ -762,7 +741,7 @@
 							if(data.adsSpot[j].metrix===metrix){
 							  ad=data.adsSpot[j];
 							  redUrl=config.redurl+"?tty=0&mid="+ad.imageNumId+"&muh="+data.imageUrlHash+"&pd="+ad.widgetSid+"&ift=&tg=&at="+ad.adsType+"&ad="+ad.adsId+"&rurl="+encodeURIComponent(encodeURIComponent(ad.adsLinkUrl));
-							  var className=j==len-1?"other_ad_box no_border":"other_ad_box";
+							  var className="other_ad_box no_border";
 							  str+="<div adsid='"+ad.adsId+"' class='"+className+"'>";
 					          str+="<table><tbody><tr><td class='td1'><a class='imgbox' href='"+redUrl+"'><img src='"+ad.adsPicUrl+"' alt='' /></a></td>";                                							  
 							  str+="<td class='td2'><p class='other_ad_title'><a href='"+redUrl+"' title='' target='_blank'>"+ad.adsTitle+"</a></p>";
@@ -1031,15 +1010,14 @@
 
 		     instreet.init();
 			 cache.initData();
-			 ev.bind(window,'load',function(){instreet.checkPosition();instreet.checkSpot();ev.bind(window,'resize',function(){instreet.checkPosition();instreet.checkSpot();});	});	 
+			 ev.bind(window,'load',function(){instreet.reLocateAd();instreet.reLocateSpot();ev.bind(window,'resize',function(){instreet.reLocateAd();instreet.reLocateSpot();});	});	 
 
 		};
 		
 		
 		
-        document.DomReady(function(){
+        //document.DomReady(function(){
              init();
-		});
+		//});
         
-		
     })(window);
