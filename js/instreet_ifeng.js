@@ -1,7 +1,8 @@
 ﻿/*************************************
 *尚街广告插件 2.1.0
-*1.新增对幻灯图片的支持
-*2.复杂页面dom ready前就能出现首个广告
+*1.支持代码移前，加速广告展现
+*2.新增对幻灯形式图库页面的支持
+*
 *************************************/
 (function(window,undefined){
         
@@ -9,7 +10,7 @@
 			return null;
 		} else {
 			window.InstreetWidget = new Object();
-			window.InstreetWidget.version = "2.1.1";
+			window.InstreetWidget.version = "2.1.0";
 			window.InstreetWidget.name = "InstreetWidget";
 		}
 
@@ -21,10 +22,7 @@
            readylist=[],
 		   leftPad=-331,
 		   rightPad=28,
-		   firstData=true;
-
-		 var isIE6= !!window.ActiveXObject&&!window.XMLHttpRequest;   
-		 var isIE7= /msie 7/i.test(navigator.userAgent); 
+		   isFirst=true;
         
 		/********************************
 		*Config对象
@@ -36,10 +34,14 @@
 						murl	:	"http://ts.instreet.cn:90/tracker.action",
 						iurl    :	"http://ts.instreet.cn:90/tracker8.action",
 						ourl	:	"http://ts.instreet.cn:90/loadImage.action",
-						imih	:	200,
-						imiw	:	200,
+					// callbackurl	:	"http://test.instreet.cn/push.action",
+					// 	murl	:	"http://test.instreet.cn/tracker.action",
+					// 	iurl    :	"http://test.instreet.cn/tracker8.action",
+					// 	ourl	:	"http://test.instreet.cn/loadImage.action",
+						imih	:	300,
+						imiw	:	300,
 						timer   :   1000,
-						widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
+						widgetSid:"79cjp47BnLo3NdNaLeICIw",
 						showAd:true,
 						showFootAd:true,
 						showWeibo:true,
@@ -48,15 +50,11 @@
 						showWeather:true,
 						showNews:true,
 						showMD  :true,
-						openFootAd:true
+						openFootAd:true,
+						autoShow:  true
 						
 		};
 
-		var tool={
-
-
-		  
-		};
         /****************************
         *常用方法对象
         ****************************/
@@ -196,60 +194,62 @@
 		}; 
 			
         /*********************************
-        *cache对象，加载并缓存广告数据
+        *cache对象，加载广告数据
         **********************************/
 		var cache={
-		    dataArray  :[],
+		    //dataArray  :[],
 			avaImages  :[],
 			adsArray   :[],
 	        initData   :function(){
 
 			   for(var i=0,len=imgs.length;i<len;i++){
-			    
-			     var img=new Image(),index=i;
-                 img.src=imgs[index].src;				 
-				 img.imgId=index;
+			   	  var img=imgs[i];
+			   	  img.insId=i;img.setAttribute("instreet_img_id",i);
+			   	  cache.onImgLoad(img);
+			   }
+
+
+		    },
+		    onImgLoad  :function(image){
+				 var img=new Image();
+				 img.src=image.src,
+				 img.insId=image.insId;
 				 if(img.complete){
-				    cache.loadData(img);
+				    cache.loadData(image);
 				 }else{
 					 img.onload=function(){					   
 					   var obj=this;
 					   obj.onload=null;
-					   cache.loadData(obj);  
+					   cache.loadData(image);  
 					 }				 
 			     }
-			   }
-
 		    },
 			loadData     :function(img){
-			   var index=img.imgId,clientImg;
-               for(var i=imgs.length;i--;){
-			      if(imgs[i].imgId==index.toString()){
-				    clientImg=imgs[i];break;
-				  }
-			   }			   
-			   if(img.width>=config.imiw&&img.height>=config.imih&&clientImg.clientWidth>=config.imiw&&clientImg.clientHeight>=config.imiw){		
+			   var index=img.insId;		   
+			   if(img.width>=config.imiw&&img.height>=config.imih){
+			   	 if(img.clientWidth>=config.imiw&&img.clientHeight>=config.imiw){		
 				   InstreetAd.recordImage(img);			   
-				   cache.createJsonp(index);
-                   
+				   cache.createJsonp(img);
+			   	  }
 			   }
 			},
-			createJsonp  :function(index){
-			   var iu=encodeURIComponent(encodeURIComponent(imgs[index].src)),url=config.callbackurl+"?index="+index+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp";
+			createJsonp  :function(img){
+			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp";
 			   ev.importFile('js',url);
 			}
 		
 		};
 
         window['insjsonp']=function(data){
+
 			    if(data){
-				  var id=data.index,img=imgs[id],obj={img:img,imgId:id};
-				  cache.dataArray[id]=data;
+				  var index=data.index,img=imgs[index];
 				  img.setAttribute('instreet_data_ready',true);
-				  cache.avaImages.push(obj);
-				  cache.adsArray[data.index]=new InstreetAd(data);
-				  //instreet.startShowAd(id);
-				  firstData=false;
+				  instreet.reLocateAd();        //重新定位已经显示的广告
+				  var ad=new InstreetAd(data);
+				  cache.adsArray[index]=ad;
+				  instreet.autoShow(ad);
+				  isFirst=false;
 				}
 				
 		};
@@ -269,7 +269,7 @@
 				    img=images[i];
 				    //if(img.style.display!='none'&&img.style.visibility!='hidden'){
 	 					  //img.setAttribute('instreet_img_id',i.toString());	 					 
-	 					  img.imgId=i;
+	 					  img.insId=i;
 						  imgs[i]=img;
 					//}
 			   }
@@ -294,86 +294,71 @@
 			
 			    var eventDelegate=function(eve){
 			      var event=ev.getEvent(eve),
-					  target=ev.getTarget(event),
+					  tar=ev.getTarget(event),
 					  type=event.type;
                   switch(type){
 				    
 					case "mouseover":
-					if(target.tagName=='A'&&target.className=='instreet_other_close'){
-					   var parent=target.parentNode;
+					/*
+					if(tar.tagName=='A'&&tar.className=='instreet_other_close'){
+					   var parent=tar.parentNode;
 					   if(parent.className==='instreet_other_title'){
 					     	parent.id="instreet_other_close";
 					   }
-					}else if(target.tagName=='A'&&target.className=='instreet_share_button'){
+					}else
+					*/
+					//鼠标over到分享按钮
+					if(tar.tagName=='A'&&tar.className=='instreet_share_button'){
 					    var next,
 						    parent;
 						   instreet.closeActiveAd();						   
 
-						   parent=target.parentNode;
-						   next=target.nextSibling;
-						   hide(target);
+						   parent=tar.parentNode;
+						   next=tar.nextSibling;
+						   hide(tar);
 						   parent.id="INSTREET_AD_ACTIVE";
 						   show(next);
 						   next.onmouseover=null;
 						   next.onmouseout=null;
 						   next.onmouseover=function(){
+						   	  clearTimeout(outFlag);
 						      parent.id="INSTREET_AD_ACTIVE";
                               show(this);
-							  hide(target);
+							  hide(tar);
 						  };
 						  next.onmouseout=function(){
                               parent.id='';
 							  hide(this);
-							  show(target);
+							  show(tar);
 
 						  };
-					}else if(target.tagName=='IMG'&&target.getAttribute('instreet_data_ready')){
-						  clearTimeout(outFlag);
-						  var index=target.imgId,
-						      other=cache.adsArray[index].sideWrapper,
-							  active=$('INSTREET_AD_ACTIVE');
-						
-						  if(!other)
-						     return;
-						  if(active&&active.parentNode==other)
-						     return;
-						  
-						  instreet.closeActiveAd();
-						  var li=other.firstChild;
-						  if(li){
-							li.id="INSTREET_AD_ACTIVE";
-							if(li.firstChild&&li.firstChild.className=='instreet_share_button'){
-								hide(li);
-							}
-							show(li.lastChild);
-						  }
-						  InstreetAd.recordImgAction(index);
-					
 					}
 					
 					break;
-					
+					/*
 					case "mouseout":
-					if(target.tagName=='A'&&target.className=='instreet_other_close'){
-					   var parent=target.parentNode;if(parent.className==='instreet_other_title'){
+					if(tar.tagName=='A'&&tar.className=='instreet_other_close'){              
+					   var parent=tar.parentNode;if(parent.className==='instreet_other_title'){
 					     parent.id="";
 					   }
-					}else if(target.tagName=='IMG'&&target.getAttribute('instreet_data_ready')){
-					   outFlag=setTimeout(instreet.closeActiveAd,config.timer);
 					}
 					break;
-					
-					case "click":if(target.tagName=='A'&&target.className=='instreet_other_close'){
-					     var parent=target.parentNode;if(parent.className==='instreet_other_title'){
+					*/
+					//关闭按钮点击事件
+					case "click":
+					if(tar.tagName=='A'&&tar.className=='instreet_other_close'){
+					     var parent=tar.parentNode;if(parent.className==='instreet_other_title'){
 						     var adbox=parent.parentNode;
-							 adbox.style.display='none';
+							 hide(adbox);
 							 adbox.parentNode.id='';
 					   }
-					}else if(target.className=='instreet_sina'||target.className=='instreet_renren'||target.className=='instreet_tx'){
-					   var other=target.parentNode.parentNode.parentNode;
+					}
+					//分享按钮点击事件
+					else if(tar.className=='instreet_sina'||tar.className=='instreet_renren'||tar.className=='instreet_tx'){
+					   var other=tar.parentNode.parentNode.parentNode;
 					   var index=other.getAttribute('instreet_img_id');
 					   var picUrl=imgs[index].src;
-					   switch(target.className){
+					   switch(tar.className){
 						    case "instreet_sina": 
 							window.open('http://v.t.sina.com.cn/share/share.php?title='+encodeURIComponent(document.title)+'&url='+encodeURIComponent(document.URL)+'&pic='+encodeURIComponent(picUrl),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=580, height=500");
 	                        break;
@@ -392,13 +377,13 @@
 			   };
 
 			   ev.bind(document.body,'mouseover',eventDelegate);
-			   ev.bind(document.body,'mouseout',eventDelegate);
+			  // ev.bind(document.body,'mouseout',eventDelegate);
 			   ev.bind(document.body,'click',eventDelegate);
 			
 			},
 
 
-			closeActiveAd :	function (){			
+			closeActiveAd :	function (){	             //关闭当前显示的广告		
 
 				 var active_box=$('INSTREET_AD_ACTIVE');
 				 if(active_box){
@@ -410,60 +395,64 @@
 			reLocateAd  :function(){                   //重新定位广告
 
                var adsArray=cache.adsArray;
+               
                for(i in adsArray){
-                  var adObj=adsArray[i],
-                      sideWrapper=adObj.sideWrapper,
-                      img=adObj.img,
-                      pos=ev.getXY(img);
 
-                   sideWrapper.style.cssText="top:"+pos.y+"px;left:"+(pos.x+img.width)+"px;margin-top:5px;";
-                   lis=sideWrapper.children;
-                   for(var j=lis.length;j--;){
-                   		var box=lis[j].lastChild,
-                   		    style=adObj.chooseLeft?leftPad+"px;":rightPad+"px;"
-                   		 box.style.left=style;
-                   }
-                   
-
-               }
-
+                  var adObj=adsArray[i];
+                  adObj.locateAd();
 			 
+			    }
 			},
-			reLocateSpot:function(){                  //重新定位spot
+			autoShow  :function(ad){                  //自动展示第一个加载成功的广告
 
-               var adsArray=cache.adsArray;
-               for(i in adsArray){
-                  var adObj=adsArray[i],
-                      spotsArray=adObj.spotsArray;
-                  if(spotsArray.length>0){
-                      img=adObj.img,
-                      pos=ev.getXY(img),
-                      w=spotsArray[0].imgWidth,
-                      zoomNum=img.width/w,
-					  r=17;
-                      
-	                  for(var j=spotsArray.length;j--;){
-	                  	   var  spot=spotsArray[j];				      
-					       metrix=spot.metrix,
-						   ox=metrix%3000,
-						   oy=Math.round(metrix/3000),					  
-						   x=ox*zoomNum,
-						   y=oy*zoomNum;
-	 					  spot.style.cssText="top:"+(y+pos.y-r)+"px;left:"+(x+pos.x-r)+"px;"
+				if(isFirst){
 
-	                   }
+					var side=ad.sideWrapper,li=side.firstChild;
+					if(li&&li.children.length>1){
+						li.id="INSTREET_AD_ACTIVE";
+						show(li.lastChild);
+					}
 
-                  }                   
+				}
 
-               }
-			
+			},
+			search   :function(){                     //搜索未被发现的图片
+
+				var images=document.getElementsByTagName("img");
+				
+				for(var i=0;i<images.length;i++){
+					var img=images[i],len=imgs.length;
+					if(img.insId==undefined){
+						imgs[len]=img;
+						img.insId=len;
+						img.setAttribute("instreet_img_id",len);
+						cache.onImgLoad(img);
+					}
+				}
+
 			}
-            
-
 
 		};
         
+         var TimerId=null;         //全局时间函数计时器
 
+         /**********************************
+         *TimerTick 类
+         ***********************************/
+         var TimerTick=function(arr){
+            this.queue=arr;
+            this.go=function(){
+                 var arr=this.queue;
+                 TimerId=setInterval(function(){
+		         	 for(var i=0;i<arr.length;i++){
+						arr[i]&&arr[i].detect();
+		         	 }
+                 },1000);
+
+
+         	}
+
+         };
 
 
         /********************************
@@ -471,8 +460,10 @@
         ********************************/
         var InstreetAd=function(data){
 
-             this.dataPackage=data;
-             this.img=imgs[data.index];
+             var img=imgs[data.index];
+             this.dataPackage=data;           
+             this.img=img;
+             this.originInfo={width:img.clientWidth,height:img.clientHeight,src:img.src};
              this.spotsArray=[];
              this.init();
         };
@@ -489,9 +480,8 @@
 			       pos=ev.getXY(img),
 				   str='';
 			   var side=document.createElement('ul');
-			   side.setAttribute('instreet_img_id',index);
 			   side.className="instreet_other";
-			   side.style.cssText="top:"+pos.y+"px;left:"+(pos.x+img.width)+"px;margin-top:5px;";
+			   side.setAttribute("instreet_img_id",index);
 			   this.sideWrapper=side;
 			   this.chooseLeft();                           //判断广告放置在图片左侧或者右侧
 			  
@@ -505,26 +495,22 @@
 			    			     	
 			   }
 
-			   this.addTipEvent(side);
+			   this.addTipEvent();
+			   this.addImgEvent();
+			   this.locateAd();
 			   instreet.container.appendChild(side);
+
 			},
 			chooseLeft    :function(){						//判断广告放置在图片左侧或者右侧
 				var img=this.img,pos=ev.getXY(img);
-				return this.isLeft=pos.x+img.width+360>document.body.clientWidth?true:false;    
+				this.isLeft=pos.x+img.offsetWidth+360>document.body.clientWidth?true:false
+				return this.isLeft;    
 			},
 			createSpot:function(spotData){
 			   var _this=this, 
-			       index=_this.dataPackage.index,
 			       img=_this.img,
 			       w=spotData.width,
-			       metrix=spotData.metrix,
-				   ox=metrix%3000,
-				   oy=Math.round(metrix/3000),
-				   zoomNum=img.width/w,
-				   x=ox*zoomNum,
-				   y=oy*zoomNum,
-				   pos=ev.getXY(img),
-				   r=17;
+			       metrix=spotData.metrix;
 
 			   var spot=document.createElement('a');
 			   if(spotData.adsType)
@@ -534,18 +520,15 @@
 			   else if(spotData.type.toString()=="4")
   			      spot.className="instreet_wiki_spot";
 			   spot.href="javascript:;";
-			   spot.setAttribute('metrix',metrix);
 			   spot.metrix=metrix;
 			   spot.imgWidth=w;
-			   spot.setAttribute('instreet_img_id',index);
-			   spot.style.cssText="top:"+(y+pos.y-r)+"px;left:"+(x+pos.x-r)+"px;";
 			   instreet.spotBox.appendChild(spot);
 			   this.addSpotEvent(spot);
 			   this.spotsArray.push(spot);
 			},
 			addSpotEvent  :function(spot){
 				var _this=this,
-					imgId=_this.dataPackage.index,
+					insId=_this.dataPackage.index,
 					side=_this.sideWrapper;		   				
 				spot.onmouseover=function(){
 						instreet.closeActiveAd();
@@ -649,7 +632,29 @@
 
 		  		}
 		  },
+		  addImgEvent  :function(){
+		  	   var _this=this,img=this.img,side=_this.sideWrapper;
+		  	   ev.bind(img,'mouseover',function(){
+		  	   	    clearTimeout(outFlag);
+		  	   	    var active=$("INSTREET_AD_ACTIVE");
+		  	   	    if(side.contains(active)){
+		  	   	    	return;
+		  	   	    }else{
+		  	   	    	var li=side.firstChild,children=li.children;
+		  	   	    	if(children&&children.length>1){
+		  	   			   instreet.closeActiveAd();
+		  	   			   li.id="INSTREET_AD_ACTIVE";
+		  	   			   show(li.lastChild);
+		  	   			   InstreetAd.recordImgAction(img.insId);
+		  	   			}
+		  	   		}
 
+               });
+   		  	   ev.bind(img,'mouseout',function(){
+					outFlag=setTimeout(instreet.closeActiveAd,config.timer);
+               });
+
+		  },
 	       //鼠标移动到广告或者微博、百科上发送行为记录
  	      recordAction:function(tar){   		       
 
@@ -680,6 +685,65 @@
 					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg=";				
 					ev.importFile('js',ul);
 				
+			},
+			locateAd :function(){                    //定位广告
+
+                  var _this=this,
+                      side=_this.sideWrapper,
+                      spotsArray=_this.spotsArray,
+                      img=_this.img,
+                      dis=img.clientWidth>=config.imiw&&img.clientWidth>=config.imih?"block":"none",
+                      pos=ev.getXY(img);
+
+                   side.style.cssText="top:"+pos.y+"px;left:"+(pos.x+img.offsetWidth)+"px;margin-top:5px;display:"+dis+";";
+                   lis=side.children;
+                   for(var j=lis.length;j--;){
+                   	   if(lis[j].children.length>1){
+                   		var box=lis[j].lastChild;
+                   		if(box.className!="instreet_share_icons"){
+                   		    dir=_this.chooseLeft()?leftPad+"px":rightPad+"px" 
+	                   		box.style.left=dir;
+                   		 }
+                   	   } 
+                   }
+
+                   if(spotsArray.length>0){              //如果存在spot，同时也对其重定位
+
+
+                     var w=spotsArray[0].imgWidth,
+                     	 zoomNum=img.width/w,
+					 	 r=17;
+                      
+	                  for(var j=spotsArray.length;j--;){
+	                  	   var  spot=spotsArray[j];				      
+					       metrix=spot.metrix,
+						   ox=metrix%3000,
+						   oy=Math.round(metrix/3000),					  
+						   x=ox*zoomNum,
+						   y=oy*zoomNum;
+	 					  spot.style.cssText="top:"+(y+pos.y-r)+"px;left:"+(x+pos.x-r)+"px;"
+
+	                   }
+
+                    }  
+			},
+			detect   :function(){                     //每隔一段时间开始检测图片对象是否change
+
+                var _this=this,img=_this.img,origin=_this.originInfo,
+                	side=_this.sideWrapper;
+
+                if(img.src&&img.src!=origin.src){
+                    var parent=side.parentNode||document.body;
+                    parent.removeChild(side);
+                    cache.onImgLoad(img);
+                    origin.src=img.src;
+                }
+                else if(img.clientWidth!=origin.width||img.clientHeight!=origin.height){
+
+                		_this.locateAd();
+                }
+                
+
 			}
 			
 
@@ -705,7 +769,7 @@
 	    *鼠标移动到图片上的时候发送行为记录
 	    **************************************/
 	    InstreetAd.recordImgAction=function(index){                           
-		       var data=cache.dataArray[index],img=imgs[index],
+		       var ad=cache.adsArray[index],img=ad.img,data=ad.dataPackage,
 				   ul=config.iurl,pd=data.widgetSid,muh=data.imageUrlHash,
 				   iu=encodeURIComponent(encodeURIComponent(img.src));
 				   
@@ -717,7 +781,7 @@
 
 
 		/*****************************
-		*插件功能模块
+		*插件应用模块
 		*****************************/
 		InstreetAd.modual={
 			createAdBox :function(data,obj){
@@ -729,7 +793,6 @@
 				   len=data.adsSpot.length,
 				   footData=data.badsSpot[0],
 				   left=obj.isLeft,id='',dis='',
-                   open=firstData&&config.autoShow?true:false,
 				   createAd=function(data,metrix){                    //创建metrix值相同的精准匹配广告节点
 						var str='',
 					        len=data.adsSpot.length,
@@ -777,10 +840,6 @@
 
                  var footAd=createFootAd(footData);
                			    
-				if(open){
-				   id="INSTREET_AD_ACTIVE";
-				   dis="display:block;";
-				}	
 			
                 if(!config.showAd&&!config.showFootAd){
 			      return str;
@@ -791,16 +850,14 @@
 	   		      	var li=document.createElement("li");
 			      	li.setAttribute("instreet_ad_id",index);
 			      	li.className="instreet_aditem";
-			      	li.id=id;
 			      	return li;
 				};
 
 			   if(len<=0||!config.showAd){                   //只有底部广告
 			      if(footData&&config.showFootAd){
 	   		      	var li=createLI(0);
-		      		var style=left?"left:"+leftPad+"px;"+dis:"left:"+rightPad+"px;"+dis;
 			      	var str="<div class='instreet_tip'><span class='tip_top'></span><p>热门信息</p><span class='tip_bottom'></span></div>";
-					str+="<div class='instreet_other_box' style='"+style+"'><div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>热门信息</div>";
+					str+="<div class='instreet_other_box'><div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>热门信息</div>";
 					li.innerHTML=str+footAd;
 					liArray.push(li);
 				 }
@@ -823,15 +880,11 @@
 					 case 4:tipId="五";break;
 					 case 5:tipId="六";break;
 				   }
-                  if(i!=0){				    
-					  id="";										
-					  dis="";					
-				  }
+
 				  var li=createLI(i);
 				  li.setAttribute("metrix",aMetrix[i]);
-				  var style=left?"left:"+leftPad+"px;"+dis:"left:"+rightPad+"px;"+dis;
 				  str="<div class='instreet_tip'><span class='tip_top'></span><p>相似商品"+tipId+"</p><span class='tip_bottom'></span></div>";
-				  str+="<div class='instreet_other_box' style='"+style+"'><div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相似商品</div>";
+				  str+="<div class='instreet_other_box' ><div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相似商品</div>";
 				  str+=createAd(data,aMetrix[i]);	 //广告html	  
 				  if(config.showFootAd){
                       str+=footAd;                   //底部广告html                 
@@ -851,11 +904,10 @@
 				   img=obj.img;
 
 			   if(data.weiboSpot.length>0&&config.showWeibo){
-			   	   var li=document.createElement("li"),
-			   	   	   style=left?"left:"+leftPad+"px;":"left:"+rightPad+"px;";
+			   	   var li=document.createElement("li");
 			   	   	li.className="instreet_weibo";   
 			   
-			       str="<a href='javascript:;' class='instreet_tip instreet_weibo_button'></a><div class='instreet_weibo_box' style='"+style+"'>";		
+			       str="<a href='javascript:;' class='instreet_tip instreet_weibo_button'></a><div class='instreet_weibo_box'>";		
 				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关微博</div>";
 				   for(var len=data.weiboSpot.length,i=0;i<len;i++){
 				      var weibo=data.weiboSpot[i],
@@ -891,11 +943,11 @@
 			   	   liArray=[];
 			   if(data.wikiSpot.length>0&&config.showWiki){
 
-   			   	    var li=document.createElement("li"),
-			   	   	   style=left?"left:"+leftPad+"px;":"left:"+rightPad+"px;";
+   			   	    var li=document.createElement("li");
+			   	   	
 			   	   	li.className="instreet_wiki";   
 
-			       str="<a href='javascript:;' class='instreet_tip instreet_wiki_button'></a><div class='instreet_wiki_box' style='"+style+"'>";
+			       str="<a href='javascript:;' class='instreet_tip instreet_wiki_button'></a><div class='instreet_wiki_box'>";
 				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关互动百科</div>";
 				   for(var len=data.wikiSpot.length,i=0;i<len;i++){
 				      var wiki=data.wikiSpot[i],
@@ -929,10 +981,10 @@
 			   	  liArray=[];
 			   if(config.showNews){
 
-   			   	    var li=document.createElement("li"),
-			   	   	   style=left?"left:"+leftPad+"px;":"left:"+rightPad+"px;";
+   			   	    var li=document.createElement("li");
+			   	   	   
 			   	   	li.className="instreet_news";  
-			       str="<a href='javascript:;' class='instreet_tip instreet_news_button'></a><div class='instreet_news_box' style='"+style+"'>";
+			       str="<a href='javascript:;' class='instreet_tip instreet_news_button'></a><div class='instreet_news_box'>";
 				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关新闻讯息</div>";				
 				   str+='<div class="other_news_box no_border"><iframe frameborder="0" width="300" height="250" marginwidth="0" marginheight="0" src="http://www.google.com/uds/modules/elements/newsshow/iframe.html?topic=h&rsz=small&format=300x250"></iframe></div></div>';			   
 			   	   li.innerHTML=str;
@@ -946,10 +998,10 @@
 					left=obj.isLeft,
 					url="http://www.instreet.cn/weather?location=&callback=showWeather_"+data.index;
 				if(config.showWeather){
-		   	      var li=document.createElement("li"),
-			   	   	   style=left?"left:"+leftPad+"px;":"left:"+rightPad+"px;";
+		   	      var li=document.createElement("li");
+			   	   	   
 			   	  li.className="instreet_weather"; 
-				  str="<a href='javascript:;' class='instreet_tip instreet_weather_button'></a><div class='instreet_weather_box' style='"+style+"'>";
+				  str="<a href='javascript:;' class='instreet_tip instreet_weather_button'></a><div class='instreet_weather_box'>";
 				  str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关天气讯息</div>";
 				  str+="<div class='other_weather_box no_border'><iframe name='weather_inc' src='http://tianqi.xixik.com/cframe/2' width='290' height='70' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'></iframe></div></div>";
 			   	  li.innerHTML=str;
@@ -1001,23 +1053,34 @@
 		   }
 		
 		};
-		//mixConfig(instreet_config);
+		
 
 		/************************* 
 		*init function
 		*************************/
 		function init(){
 
+			 mixConfig(instreet_config);                  //组合配置信息
 		     instreet.init();
 			 cache.initData();
-			 ev.bind(window,'load',function(){instreet.reLocateAd();instreet.reLocateSpot();ev.bind(window,'resize',function(){instreet.reLocateAd();instreet.reLocateSpot();});	});	 
+			 ev.bind(window,'load',function(){
+			 	instreet.reLocateAd();		 		
+			 });	
+			 ev.bind(window,'resize',function(){instreet.reLocateAd();}); 
+			 //dom ready后搜索是否有新的图片
+			 document.DomReady(function(){
+			 		instreet.search()
+			 });
+			 //定时检测图片是否变化
+             var ts=new TimerTick(cache.adsArray);
+             ts.go();
 
 		};
 		
 		
 		
-        //document.DomReady(function(){
-             init();
-		//});
+        //插件初始化
+        init();
+
         
     })(window);
