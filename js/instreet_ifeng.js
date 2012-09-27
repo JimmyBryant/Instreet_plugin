@@ -23,6 +23,9 @@
 		   leftPad=-331,
 		   rightPad=28,
 		   isFirst=true;
+
+		 var isIE6= !!window.ActiveXObject&&!window.XMLHttpRequest;   
+		 var isIE7= /msie 7/i.test(navigator.userAgent); 
         
 		/********************************
 		*Config对象
@@ -388,7 +391,7 @@
 				 var active_box=$('INSTREET_AD_ACTIVE');
 				 if(active_box){
 					 active_box.id="";					 
-					 active_box.firstChild.className=='instreet_share_button'&&show(active_box.firstChild)						 
+					 active_box.firstChild.className=='instreet_share_button'&&show(active_box.firstChild);						 
 					 active_box.children.length>1&& hide(active_box.lastChild);					    					 
 				 }
 			},
@@ -503,7 +506,7 @@
 			},
 			chooseLeft    :function(){						//判断广告放置在图片左侧或者右侧
 				var img=this.img,pos=ev.getXY(img);
-				this.isLeft=pos.x+img.offsetWidth+360>document.body.clientWidth?true:false
+				this.isLeft=pos.x+img.offsetWidth+360>document.body.clientWidth?true:false;
 				return this.isLeft;    
 			},
 			createSpot:function(spotData){
@@ -701,7 +704,7 @@
                    	   if(lis[j].children.length>1){
                    		var box=lis[j].lastChild;
                    		if(box.className!="instreet_share_icons"){
-                   		    dir=_this.chooseLeft()?leftPad+"px":rightPad+"px" 
+                   		    dir=_this.chooseLeft()?leftPad+"px":rightPad+"px" ;
 	                   		box.style.left=dir;
                    		 }
                    	   } 
@@ -939,7 +942,7 @@
 			createWiki:function(data,obj){
 			   var str="",
 			   	   left=obj.isLeft,
-			   	   img=obj.img
+			   	   img=obj.img,
 			   	   liArray=[];
 			   if(data.wikiSpot.length>0&&config.showWiki){
 
@@ -974,16 +977,14 @@
 			   			
 			},
 			createNews  :function(data,obj){		  
-			  data={widgetSid:"79cjp47BnLo3NdNaLeICIw",imageNumId:3210181,imageUrlHash:"-5247197737280147510",newsSpot:[{type:5,content:"6月30日晚，<font color='#CC0033'></font> 次出征选择黑色波点古董裙，黑发红唇，气势依旧。", title:"<font color='#CC0033'>范冰冰</font>为扮美不惜争分夺秒在车里也敷面膜(图)", url:"http%3A%2F%2Fwww.chinanews.com%2Fyl%2F2012%2F07-03%2F4003609.shtml",publisher:"中国新闻网",titleNoFormatting:"范冰冰为扮美不惜争分夺秒在车里也敷面膜(图)",unescapedUrl:"http://www.chinanews.com/yl/2012/07-03/4003609.shtml"}]};
-
 			   var str="",
 			   	  left=obj.isLeft,
 			   	  liArray=[];
 			   if(config.showNews){
 
-   			   	    var li=document.createElement("li");
+   			   	   var li=document.createElement("li");
 			   	   	   
-			   	   	li.className="instreet_news";  
+			   	   li.className="instreet_news";  
 			       str="<a href='javascript:;' class='instreet_tip instreet_news_button'></a><div class='instreet_news_box'>";
 				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关新闻讯息</div>";				
 				   str+='<div class="other_news_box no_border"><iframe frameborder="0" width="300" height="250" marginwidth="0" marginheight="0" src="http://www.google.com/uds/modules/elements/newsshow/iframe.html?topic=h&rsz=small&format=300x250"></iframe></div></div>';			   
@@ -994,7 +995,7 @@
 			},
 			createWheather:function(data,obj){
 			    
-			    var str="",liArray=[]
+			    var str="",liArray=[],
 					left=obj.isLeft,
 					url="http://www.instreet.cn/weather?location=&callback=showWeather_"+data.index;
 				if(config.showWeather){
