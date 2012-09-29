@@ -1,17 +1,21 @@
 ﻿/*************************************
-*尚街广告插件 2.1.0
-*1.支持通过上移代码，加速广告展现
+*尚街广告插件 2.0.3
+*1.修复广告定位不准确的bug
 *2.新增对幻灯形式图库页面的支持
-*
+*3.修复广告出现在图片中不能关闭的bug
+*4.新增天气和新闻的统计
 *************************************/
 (function(window,undefined){
         
-		if (window.InstreetWidget != null||typeof window.InstreetWidget!="undefined"){
+		if (typeof window.InstreetWidget!="undefined"||window.InstreetWidget != null){
 			return null;
 		} else {
-			window.InstreetWidget = new Object();
-			window.InstreetWidget.version = "2.1.0";
-			window.InstreetWidget.name = "InstreetWidget";
+
+			window.InstreetWidget = {
+				version : "2.0.3",
+		        name    : "InstreetWidget"
+			}; 
+
 		}
 
 	   var document = window.document,
@@ -22,10 +26,9 @@
            readylist=[],
 		   leftPad=-331,
 		   rightPad=28,
-		   isFirst=true;
+		   isFirst=true,
+		   wait=false;
 
-		 var isIE6= !!window.ActiveXObject&&!window.XMLHttpRequest;   
-		 var isIE7= /msie 7/i.test(navigator.userAgent); 
         
 		/********************************
 		*Config对象
@@ -36,7 +39,8 @@
 					callbackurl	:	"http://ts.instreet.cn:90/push.action",
 						murl	:	"http://ts.instreet.cn:90/tracker.action",
 						iurl    :	"http://ts.instreet.cn:90/tracker8.action",
-						ourl	:	"http://ts.instreet.cn:90/loadImage.action",
+						ourl	:	"http://ts.instreet.cn:90/loadImage.action",						
+					//redurl	:	"http://test.instreet.cn/click.action",	
 					// callbackurl	:	"http://test.instreet.cn/push.action",
 					// 	murl	:	"http://test.instreet.cn/tracker.action",
 					// 	iurl    :	"http://test.instreet.cn/tracker8.action",
@@ -166,7 +170,7 @@
             hide=function(elem){elem.style.display="none"},
             show=function(elem){elem.style.display="block"} ;
         /*********************************
-        *为document扩展DomReady方法
+        *扩展DomReady方法
         **********************************/
         var readylist=[];
 		var run = function () {   
@@ -213,14 +217,14 @@
 
 
 		    },
-		    onImgLoad  :function(image){
-				 var img=new Image();
-				 img.src=image.src,
-				 img.insId=image.insId;
-				 if(img.complete){
+		    onImgLoad  :function(img){                
+				 var image=new Image();
+				 image.src=img.src,
+				 image.insId=img.insId;
+				 if(image.complete){
 				    cache.loadData(image);
 				 }else{
-					 img.onload=function(){					   
+					 image.onload=function(){					   
 					   var obj=this;
 					   obj.onload=null;
 					   cache.loadData(image);  
@@ -228,11 +232,11 @@
 			     }
 		    },
 			loadData     :function(img){
-			   var index=img.insId;		   
+			   var index=img.insId,clientImg=imgs[index];		   
 			   if(img.width>=config.imiw&&img.height>=config.imih){
-			   	 if(img.clientWidth>=config.imiw&&img.clientHeight>=config.imiw){		
-				   InstreetAd.recordImage(img);			   
-				   cache.createJsonp(img);
+			   	 if(clientImg.clientWidth>=config.imiw&&clientImg.clientHeight>=config.imih){		
+				   InstreetAd.recordImage(clientImg);			   
+				   cache.createJsonp(clientImg);
 			   	  }
 			   }
 			},
@@ -354,6 +358,7 @@
 						     var adbox=parent.parentNode;
 							 hide(adbox);
 							 adbox.parentNode.id='';
+						  wait=true;
 					   }
 					}
 					//分享按钮点击事件
@@ -412,13 +417,17 @@
 
 					var side=ad.sideWrapper,li=side.firstChild;
 					if(li&&li.children.length>1){
-						li.id="INSTREET_AD_ACTIVE";
-						show(li.lastChild);
+						if(!$("INSTREET_AD_ACTIVE")){          //判断是否已经有广告显示广告被显示
+							li.id="INSTREET_AD_ACTIVE";
+							show(li.lastChild);
+						}
 					}
 
 				}
 
-			},
+			}
+			/*
+			,
 			search   :function(){                     //搜索未被发现的图片
 
 				var images=document.getElementsByTagName("img");
@@ -434,6 +443,7 @@
 				}
 
 			}
+			*/
 
 		};
         
@@ -599,10 +609,12 @@
                     tip.onmouseover=function(e){
                        var parent=this.parentNode,adItem=this.nextSibling;
 					   clearTimeout(outFlag);
-					   instreet.closeActiveAd();
-					   parent.id='INSTREET_AD_ACTIVE';
-					   show(adItem);
-
+					   if(parent.id!="INSTREET_AD_ACTIVE"){
+						   instreet.closeActiveAd();
+						   parent.id='INSTREET_AD_ACTIVE';
+						   show(adItem);
+						   //_this.recordShow(parent); 
+						}                 
 					};
 					
 					tip.onmouseout=function(){
@@ -628,7 +640,7 @@
 					      var event=ev.getEvent(e),
 					  		 rela=ev.getRelatedTarget(event);
 	                       if(!this.contains(rela)){
-	                       	 _this.recordAction(this);	
+	                       	 _this.recordWatch(this);	
 	                       }
 						}
 					 }								 		 
@@ -644,22 +656,40 @@
 		  	   	    	return;
 		  	   	    }else{
 		  	   	    	var li=side.firstChild,children=li.children;
-		  	   	    	if(children&&children.length>1){
+		  	   	    	if(_this.isLeft&&wait){		  	   	    		
+		  	   	    		return;
+		  	   	    	}
+		  	   	    	else if(children&&children.length>1){
 		  	   			   instreet.closeActiveAd();
 		  	   			   li.id="INSTREET_AD_ACTIVE";
 		  	   			   show(li.lastChild);
-		  	   			   InstreetAd.recordImgAction(img.insId);
+		  	   			   _this.recordShow(li);
 		  	   			}
 		  	   		}
 
                });
    		  	   ev.bind(img,'mouseout',function(){
 					outFlag=setTimeout(instreet.closeActiveAd,config.timer);
+					wait=false;
                });
 
 		  },
+		  //鼠标移动到图片的时候发送展现记录
+		  recordShow: function(li){  
+
+		       var _this=this,data=_this.dataPackage,img=_this.img,
+				   ul=config.iurl,pd=data.widgetSid,muh=data.imageUrlHash,
+				   iu=encodeURIComponent(encodeURIComponent(img.src));
+				if(li.className=="instreet_aditem"){  
+					ul+="?pd="+pd+"&muh="+muh+"&iu="+iu;
+				}else{
+					return;
+				}
+				ev.importFile('js',ul);
+		   
+		  },
 	       //鼠标移动到广告或者微博、百科上发送行为记录
- 	      recordAction:function(tar){   		       
+ 	      recordWatch:function(tar){   		       
 
 			      var  _this=this,data=_this.dataPackage,
 			      	   img=_this.img,
@@ -672,17 +702,28 @@
 					   ad='',
 					   at='',
 					   ift=0,
-					   tty=1,adReg=/other_ad_box/,weiboReg=/other_weibo_box/,wikiReg=/other_wiki_box/,footReg=/other_foot_ad/;
-                    if(adReg.test(tar.className)){
+					   tty=1,adReg=/other_ad_box/,weiboReg=/other_weibo_box/,wikiReg=/other_wiki_box/,footReg=/other_foot_ad/,
+					   weatherReg=/other_weather_box/,newsReg=/other_news_box/;
+                    var className=tar.className;
+
+                    if(adReg.test(className)){
 					   ad=tar.getAttribute('adsid');
 					   at=1;
-					}else if(weiboReg.test(tar.className)){
+					   tty=0;
+					}else if(weiboReg.test(className)){
 					   ift=2;
-					}else if(wikiReg.test(tar.className)){
+					}else if(wikiReg.test(className)){
 					   ift=4;
-					}else if(footReg.test(tar.className)){
+					}else if(weatherReg.test(className)){
+					   ift=7;
+					}else if(newsReg.test(className)){
+					   ift=5;
+					}else if(footReg.test(className)){
 					   ad=data.badsSpot[0].adsId;
 					   at=data.badsSpot[0].adsType;
+					   tty=0;
+					}else{
+						return;
 					}
 													
 					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg=";				
@@ -695,7 +736,7 @@
                       side=_this.sideWrapper,
                       spotsArray=_this.spotsArray,
                       img=_this.img,
-                      dis=img.clientWidth>=config.imiw&&img.clientWidth>=config.imih?"block":"none",
+                      dis=img.clientWidth>=config.imiw&&img.clientHeight>=config.imih?"block":"none",
                       pos=ev.getXY(img);
 
                    side.style.cssText="top:"+pos.y+"px;left:"+(pos.x+img.offsetWidth)+"px;margin-top:5px;display:"+dis+";";
@@ -768,18 +809,7 @@
 			  ev.importFile('js',ul);
 		   
 	    };
-	    /**************************************
-	    *鼠标移动到图片上的时候发送行为记录
-	    **************************************/
-	    InstreetAd.recordImgAction=function(index){                           
-		       var ad=cache.adsArray[index],img=ad.img,data=ad.dataPackage,
-				   ul=config.iurl,pd=data.widgetSid,muh=data.imageUrlHash,
-				   iu=encodeURIComponent(encodeURIComponent(img.src));
-				   
-				ul+="?pd="+pd+"&muh="+muh+"&iu="+iu;
-				ev.importFile('js',ul);
-		   
-		};
+
 
 
 
@@ -1069,9 +1099,9 @@
 			 });	
 			 ev.bind(window,'resize',function(){instreet.reLocateAd();}); 
 			 //dom ready后搜索是否有新的图片
-			 document.DomReady(function(){
-			 		instreet.search()
-			 });
+			 // document.DomReady(function(){
+			 // 		instreet.search()
+			 // });
 			 //定时检测图片是否变化
              var ts=new TimerTick(cache.adsArray);
              ts.go();
@@ -1079,9 +1109,10 @@
 		};
 		
 		
-		
-        //插件初始化
-        init();
+		document.DomReady(function(){
+        	//插件初始化
+        	init();
+    	});
 
         
     })(window);
