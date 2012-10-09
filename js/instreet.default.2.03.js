@@ -1,35 +1,39 @@
-(function(window,undefined){
+﻿(function(window,undefined){
         
-		if (typeof window.InstreetWidget!="undefined"||window.InstreetWidget != null){
+		if (typeof(window.InstreetWidget) != "undefined" || (window.InstreetWidget != null)){
 			return null;
 		} else {
-
 			window.InstreetWidget = {
-				version : "@REVISION@",
+				version : "2.0.3",
 		        name    : "InstreetWidget"
 			}; 
-
 		}
 
 	   var document = window.document,
 		   navigator = window.navigator,
 		   location = window.location,
 		   imgs=[],
-		   outFlag,
            readylist=[],
-		   leftPad=-331,
-		   rightPad=28,
            config = {
+						redurl	:	"http://www.instreet.cn/click.action",
+					//widgetSid	:	"79cjp47BnLo3NdNaLeICIw",
+					//widgetSid   :   "77WCO3MnOq5GgvoFH0fbH2",
 						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet_default.css",
-						redurl	:	"http://push.instreet.cn/click.action",
-					callbackurl	:	"http://push.instreet.cn/push.action",
-						murl	:	"http://push.instreet.cn/tracker.action",
-						iurl    :	"http://push.instreet.cn/tracker8.action",
-						ourl	:	"http://push.instreet.cn/loadImage.action",	
+					ocssurl		:	"http://static.instreet.cn/widgets/push/css/InstreetWidget_ifeng.css",
+					callbackurl	:	"http://ts.instreet.cn:90/push.action",
+						murl	:	"http://ts.instreet.cn:90/tracker.action",
+						iurl    :	"http://ts.instreet.cn:90/tracker8.action",
+						ourl	:	"http://ts.instreet.cn:90/loadImage.action",
 						imih	:	290,
 						imiw	:	290,
+						timer   :   1000,
+						triggerFootAd: "mouse",        //mouse为鼠标移动到图片显示、scroll为页面滚动的时候显示
+						showAd  :   true,
+						showFootAd: true,
+				        showWeibo:  true,
+						showWiki:   true,
 						position:   'right'
-		    },		
+		    },			
 			ev = {                  
 				bind : function(element,type,handler){
 					if(element.addEventListener){
@@ -233,216 +237,114 @@
 			  parent.removeChild(this.container);
 			}
 		};
-		var imgReady = (function () {
 
-			var list = [], intervalId = null,
-
-		 
-
-			// 用来执行队列
-
-			tick = function () {
-
-				var i = 0;
-
-				for (; i < list.length; i++) {
-
-					list[i].end ? list.splice(i--, 1) : list[i]();
-
-				};
-
-				!list.length && stop();
-
-			},
-
-		 
-
-			// 停止所有定时器队列
-
-			stop = function () {
-
-				clearInterval(intervalId);
-
-				intervalId = null;
-
-			};
-
-		 
-
-			return function (img, ready, load, error) {
-
-				var onready, width, height, newWidth, newHeight;
-
+		var slideDown=function(ele,speed){
 		
-				// 如果图片被缓存，则直接返回缓存数据
+		    var slider=function(ele, speed){
+			    
+				this.ele=ele;
+				this.speed=speed||500;
+				this.flag=null;
 
-				if (img.complete) {
-
-					ready.call(img);
-
-					load && load.call(img);
-
-					return;
-
-				};
-
-		 
-
-				width = img.width;
-
-				height = img.height;
-
-		 
-
-				// 加载错误后的事件
-
-				img.onerror = function () {
-
-					error && error.call(img);
-
-					onready.end = true;
-
-					img = img.onload = img.onerror = null;
-
-				};
-
-		 
-
-				// 图片尺寸就绪
-
-				onready = function () {
-
-					newWidth = img.width;
-
-					newHeight = img.height;
-
-					if (newWidth !== width || newHeight !== height ||
-
-						// 如果图片已经在其他地方加载可使用面积检测
-
-						newWidth * newHeight > 1024
-
-					) {
-
-						ready.call(img);
-
-						onready.end = true;
-
-					};
-
-				};
-
-				onready();
-
-		 
-
-				// 完全加载完毕的事件
-
-				img.onload = function () {
-
-					// onload在定时器时间差范围内可能比onready快
-
-					// 这里进行检查并保证onready优先执行
-
-					!onready.end && onready();
-
-		 
-
-					load && load.call(img);
-
-		 
-
-					// IE gif动画会循环执行onload，置空onload即可
-
-					img = img.onload = img.onerror = null;
-
-				};
-
-		 
-
-				// 加入队列中定期执行
-
-				if (!onready.end) {
-
-					list.push(onready);
-
-					// 无论何时只允许出现一个定时器，减少浏览器性能损耗
-
-					if (intervalId === null) intervalId = setInterval(tick, 40);
-
-				};
-
-			};
-
-		})();
-		var flagDwon=null,
-		    slideDown=function(ele, speed){
-			ele.style.display ="block";						
-			speed = speed || 500;				
-			var height=ele.offsetHeight,startTime=new Date().getTime();
-			ele.style.marginTop=height+'px';
-			
-			
-			loop=function(){
-               var p=(new Date().getTime()-startTime)/speed,
-				   swing=((Math.cos(p*Math.PI)/2) + 0.5);
-                ele.style.marginTop=Math.floor(height*swing)+'px';				
-				if (p<=1) {
-				    clearTimeout(flagDwon);
-					flagDwon=setTimeout(loop,10)
-				}				
 				
-	        };
-			loop();
+				var height=this.ele.offsetHeight;
+				this.ele.style.display ="block";										
+				this.ele.style.marginTop=height+'px';
+									
+			};
+			slider.prototype.animate=function(){
+			   var _this=this, ele=_this.ele,speed=_this.speed,
+				   startTime=new Date().getTime();
+			   var	loop=function(){
+				   var p=(new Date().getTime()-startTime)/speed,
+					   swing=((Math.cos(p*Math.PI)/2) + 0.5);
+					ele.style.marginTop=Math.floor(ele.offsetHeight*swing)+'px';				
+					if (p<=1) {
+					    clearTimeout(_this.flag);
+						_this.flag=setTimeout(loop,10);
+					}				
+					
+				};
+				loop();
+			
+			};
+			slider.prototype.stop=function(){
+			   clearTimeout(this.flag);
+			};
+			return new slider(ele, speed);
 		};
 		
-
+		/********************************
+		*cache对象，加载广告数据
+		********************************/
 		var cache={
 		    dataArray  :[],
 			avaImages  :[],
+			adsArray   :[],
 	        initData   :function(){
-
-			   for(var i=0,len=imgs.length;i<len;i++){
 			    
-			     var index=i,img=new Image();
-                 img.src=imgs[index].src;				 
-				 img.setAttribute('instreet_img_id',index);
-				 imgReady(img,this.ready,this.loadData);
-                
-				}
+			   for(var i=0,len=imgs.length;i<len;i++){
+			   	  var img=imgs[i];
+			   	  img.insId=i;img.setAttribute("instreet_img_id",i);
+			   	  cache.onImgLoad(img);
+			   }
 
 		    },
-			ready     :function(){
-			    if(this.width<config.imiw||this.height<config.imih){
-				
-				    this.onload=this.onerror=null;
-				}
-			},
-			loadData     :function(){
+		    onImgLoad  :function(img){
+				 var image=new Image();
+				 image.src=img.src,
+				 image.insId=img.insId;
+				 if(image.complete){
+				    cache.loadData(image);
+				 }else{
+					 IMG.onload=function(){					   
+					   var obj=this;
+					   obj.onload=null;
+					   cache.loadData(image);  
+					 }				 
+			     }
+		    },
+			loadData     :function(img){
 			   
-			   var index=this.getAttribute('instreet_img_id'),clientImg=imgs[index];
+			   var index=img.insId,clientImg=imgs[index];
                if(clientImg){			   
-				   if(clientImg.width>=config.imiw&&clientImg.height>=config.imih){				   
-					   cache.createJsonp(index);
-					   instreet.recordImage(clientImg);
-				   }
+				   if(img.width>=config.imiw&&img.height>=config.imih){
+					   	if(clientImg.clientWidth>=config.imiw&&clientImg.clientHeight>=config.imih){				   
+						   cache.createJsonp(clientImg);
+						   instreet.recordImage(clientImg);
+					    }
+					}
 			   }
+
 			},
-			createJsonp  :function(index){
-			   var iu=encodeURIComponent(encodeURIComponent(imgs[index].src)),url=config.callbackurl+"?index="+index+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp";
+			createJsonp  :function(img){
+			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp";
 			   ev.importFile('js',url);
 			}
 		
-		},
-		instreet={
+		};
+
+		/*********************************
+		*instreet对象
+		*********************************/
+		var instreet={
+			container :null,
+			widgetBox :null,
 		    init   :function(){
 			    var cssUrl=config.cssurl;
 				//var cssUrl='css/instreet_default.css';
 				ev.importFile('css',cssUrl);
 				this.getImgs();
-				this.createHolder();
-				this.bindEvents();
+				instreet.createContainer();
+				widgetBox=new WidgetsBox();
+				//this.bindEvents();
 								
+			},
+			createContainer: function(){						//创建广告容器
+		       var container=document.createElement('div');        
+			   container.id="INSTREET_CONTAINER";
+			   instreet.container=container;
+			   document.body.insertBefore(container,document.body.firstChild);				
 			},
 			dataReady:function(data){       //图片数据请求完成后所执行的方法
 				var c=$('INSTREET_CONTAINER'),icon_holder=this.createIcons(data),
@@ -462,7 +364,7 @@
 					   if(rel&&rel.tagName=='IMG'&&rel.getAttribute('instreet_img_id')==index){  
 						  return;
 					   }else{
-					    if(foot&&!foot.getAttribute("width")){
+					    if(foot&&config.triggerFootAd=="mouse"){              //处于"mouse"触发模式时，鼠标离开底部广告 底部隐藏
 						   ev.hide(foot.firstChild);
 						  }
 					   }
@@ -485,7 +387,7 @@
 						var event=ev.getEvent(eve),
 							rel=ev.getRelatedTarget(event),
 							index=this.getAttribute('instreet_img_id');
-					   if(!this.getAttribute("width")){	
+					   if(config.triggerFootAd=="mouse"){	 
 						   if(rel&&rel.tagName=='IMG'&&rel.getAttribute('instreet_img_id')==index){
 							  return;
 						   }else{
@@ -494,15 +396,16 @@
 					    }
 					    instreet.hideAll(index);
 					};
+					instreet.lazyTrigger();
 				 }
 			},
 			getImgs:function(){		
 			
 				  var images=document.getElementsByTagName('img'),img;
 				  for(var i=0,len=images.length;i<len;i++){
-					img=images[i];
+					  img=images[i];
 					//if(img.style.display!='none'&&img.style.visibility!='hidden'){
-					  img.setAttribute('instreet_img_id',i.toString());
+					  img.setAttribute('instreet_img_id',i);
 					  imgs[i]=img;
 					//}
 				  }		   
@@ -554,7 +457,7 @@
 					else if(tar.id="instreet_ads_focus"){
 					    ad=tar.getAttribute("adsid");
                         at=1;
-                        tty=0;
+						tty=0;
 					}
 					   
 					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&tg=&ift="+ift;				
@@ -757,9 +660,10 @@
 						 str+=fra.slice(0,-2)+'></iframe>';
 					  }
 					  str+="</div>";
-					  if(!config.openFootAd){
+					  
+					  //if(!config.openFootAd){
 					    foot.style.display="none";
-					  }
+					  //}
 					  foot.innerHTML=str;
 					  return foot;
 				   
@@ -984,9 +888,9 @@
 							  ev.show(spots[i]);
 						   }
 					   }
-					   if(foot&&foot.style.display=='none'){
+					   if(foot&&foot.style.display=='none'&&config.triggerFootAd=="mouse"){                    
 					      ev.show(foot);
-					      slideDown(foot.firstChild);
+					      slideDown(foot.firstChild).animate();
 					   }
 					   container.setAttribute('instreet_img_id',index);
 					   if(toolbar){
@@ -1006,6 +910,29 @@
 			    }
 			
 			},
+			lazyTrigger:function(){                                 //延迟显示底部广告
+			
+			   if(config.triggerFootAd!=="scroll"){
+			      return;
+			   }
+			   var images=cache.avaImages,
+				  scrollTop=window.scrollY,
+				  height=window.innerHeight;
+				for(var i=0,len=images.length;i<len;i++){
+				   var img=images[i], pos=ev.getXY(img),index=img.getAttribute('instreet_img_id'),
+				       foot=instreet.findFootByImg(index);
+					
+					if(!foot||foot.style.display!="none"){
+						continue;
+					}else if(scrollTop+height>pos.y&&scrollTop<=pos.y+img.height){
+					
+					   ev.show(foot);slideDown(foot.firstChild).animate();
+				    				   
+				    }
+				}
+			
+			
+			},
 			hideAll:function(index){
 			   	var	container=$('INSTREET_CONTAINER'),
 					toolbar=instreet.findToolByImg(index),
@@ -1013,7 +940,7 @@
 				    spots=spotW.getElementsByTagName('a'),
 					foot=instreet.findFootByImg(index);
 			   var spot_focus=$('instreet_spot_focus');
-			   if(foot&&!foot.getAttribute("width")){
+			   if(foot&&config.triggerFootAd=="mouse"){
 				  ev.hide(foot);
 				  ev.hide(foot.firstChild);
 			   }
@@ -1107,13 +1034,14 @@
 				var c=$('INSTREET_CONTAINER'),ads=ev.$(c,null,'ads_holder')[0],weibo=ev.$(c,null,'weibo_holder')[0],wiki=ev.$(c,null,'wiki_holder')[0];
 			    ev.bind(document.body,'mouseover',instreet.eventDelegate);
 				ev.bind(document.body,'mouseout',instreet.eventDelegate);
-				ev.bind(document.body,'click',instreet.eventDelegate);              
+				ev.bind(document.body,'click',instreet.eventDelegate);
+				if(config.triggerFootAd=="scroll"){ev.bind(window,'scroll',instreet.lazyTrigger);}
 				ev.bind(window,'load',function(){instreet.checkPosition();ev.bind(window,'resize',instreet.checkPosition);
 				});
 				c.onmouseover=function(event){
 
 				   var index=this.getAttribute('instreet_img_id'),spots,toolbar,foot;
-;
+
 				   if(index!=undefined){
 					   if(imgs[index].getAttribute('showAd')!='false'){
 					   
@@ -1125,7 +1053,7 @@
 								  ev.show(spots[i]);
 							   }
 							  }
-							  if(foot){
+							  if(foot&&config.triggerFootAd=="mouse"){
 								ev.show(foot);
 								ev.show(foot.firstChild);
 							  }
@@ -1186,21 +1114,154 @@
 			}
 		};
 
+
+		/***********************************
+		* WidgetsBox   广告容器类
+		************************************/
+		var WidgetsBox=function(){
+			this.init();
+		};
+
+		WidgetsBox.prototype.init=function(){                //widgetsbox初始化函数
+			                   		      
+		    var holder=document.createElement("div"),
+		    	section=document.createDocumentFragment(),
+		        ad=document.createElement("div"),weibo=document.createElement("div"),wiki=document.createElement("div");
+		    holder.className="widgets_wrapper";
+		    ad.className="ads_holder";
+		    weibo.className="weibo_holder";
+		    wiki.className="wiki_holder";
+		    section.appendChild(ad);
+		    section.appendChild(weibo);
+		    section.appendChild(wiki);
+		    holder.appendChild(section);
+		    //adBox="<div class='ads_wrapper'><div class='ads_holder'></div><div class='weibo_holder'></div><div class='wiki_holder'></div></div>",
+			// spotBox="<div class='spot_wrapper'></div>",
+			// footBox="<div class='foot_wrapper'></div>",
+			// iconBox="<div class='icon_wrapper'></div>";
+
+			instreet.container.appendChild(holder);
+			this.ad=ad;this.weibo=weibo;this.wiki=wiki;
 		
+		};
+
+		/***************************************
+		*InstreetAd类
+		***************************************/
+		var InstreetAd=function(data){			
+			var img=imgs[data.index];
+			this.adsData=data;
+			this.spotsArray=[];
+			this.init();
+		};
+		InstreetAd.prototype={
+			constructor:InstreetAd,
+			init       :function(){
+				var wrapper=document.createElement("div");
+				instreet.container.appendChild(wrapper);
+				this.wrapper=wrapper;
+				this.createSpots();
+				this.locate();
+			},
+			createSpots:function(){                 //创建一张图片的所有spots
+			  
+			    var _this=this,container=instreet.container,data=_this.adsData,
+				    index=parseInt(data.index),wrapper=_this.wrapper,w,
+				    metrixArray=[],i,len,w,spot;
+				if(config.showAd){               //创建adSpot	
+					for(i=0,len=data.adsSpot.length;i<len;i++){
+						var ad=data.adsSpot[i];
+						metrixArray.push(parseInt(ad.metrix));						
+					}
+					metrixArray=ev.aTrim(metrixArray);            //数组去重
+					for(i=0,len=metrixArray.length;i<len;i++){
+						w=data.adsSpot[0].width;
+						spot=InstreetAd.createSpot({type:'ad',metrix:metrixArray[i],width:w});
+						wrapper.appendChild(spot);
+						_this.spotsArray.push[spot];
+					}
+				}
+				if(config.showWeibo){              //创建weiboSpot
+					for(i=0,len=data.weiboSpot.length;i<len;i++){
+						w=data.weiboSpot[0].width;
+						spot=InstreetAd.createSpot({type:'weibo',metrix:data.weiboSpot[i],width:w});
+						wrapper.appendChild(spot);
+						_this.spotsArray.push[spot];
+					}
+				}
+				if(config.showWiki){              //创建wikiSpot
+					for(i=0,len=data.wikiSpot.length;i<len;i++){
+						w=data.wikiSpot[0].width;
+						spot=InstreetAd.createSpot({type:'wiki',metrix:data.wikiSpot[i],width:w});
+						wrapper.appendChild(spot);
+						_this.spotsArray.push[spot];
+					}
+				}
+			   
+			   
+			
+			},
+			getCoor  :function(spot){
+
+                var _this=this,img=_this.img,
+      				metrix=spot.metrix,ox=metrix%3000,
+				    oy=Math.round(metrix/3000),w=spot.originWidth,zoomNum=img.width/w,
+				    x=ox*zoomNum,y=oy*zoomNum,pos=ev.getXY(img);	
+
+				return {top:(y+pos.y),left:(x+pos.x)};	
+                
+			},
+			locate  :function(){
+				var _this=this,spots=_this.spotsArray;
+				for(var len=spots.length,i=0;i<len;i++){
+					var spot=spots[i];
+					var coor=_this.getCoor(spot);
+					spot.style.cssText="top:"+coor.top+"px;left:"+coor.left+"px;display:block;";
+				}
+			}
+
+		};
+		InstreetAd.createSpot=function(obj){        //创建spot		    
+
+			  if(obj){
+				   var spot=document.createElement('a');
+				   if(obj.type=="ad"){
+				      spot.className="instreet_spot_ads";
+				   }
+				   else if(obj.type=="weibo"){  
+				      spot.className="instreet_spot_weibo";
+				   }
+				   else if(obj.type=="wiki"){
+	  			      spot.className="instreet_spot_wiki";
+	  			   }else{
+	  			   	  return;
+	  			   }
+				   spot.href="javascript:;";
+				   spot.metrix=obj.metrix;
+				   spot.originWidth=obj.width;
+				   return spot;
+			   }
+			    			
+		};
+
+
+
+		/*********************************
+		*jsonp callback
+		**********************************/
 		window['insjsonp']=function(data){
 			if(data){
-			  var id=data.index,img=imgs[id];
-			  cache.dataArray[id]=data;
+			  var index=data.index,img=imgs[index];
+			  cache.dataArray[index]=data;
 			  cache.avaImages.push(img);
 			  img.setAttribute('instreet_data_ready',true);
-			  instreet.dataReady(data);
+			  cache.adsArray[index]=new InstreetAd(data);
 			}
 				
 		};
-
-		/*****************************
-		*Mix config
-		*****************************/
+		
+		
+		/********Mix config*************/
 		var mixConfig=function(c){
 		   if(c&&typeof c=="object"){
 		   
@@ -1213,8 +1274,8 @@
 		   }
 		
 		};
-		
 		mixConfig(instreet_config);
+		
         /*******插件初始化******/
         var init=function(){
 		
@@ -1227,4 +1288,6 @@
             init();
 		});
 		
- })(window);		
+ })(window);	
+		
+	

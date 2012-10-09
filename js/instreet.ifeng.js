@@ -12,7 +12,7 @@
 		} else {
 
 			window.InstreetWidget = {
-				version : "2.0.3",
+				version : "@REVISION@",
 		        name    : "InstreetWidget"
 			}; 
 
@@ -34,31 +34,32 @@
 		*Config对象
 		*********************************/
 		var config = {
-						redurl	:	"http://www.instreet.cn/click.action",
+
 						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet_ifeng.css",
-					callbackurl	:	"http://ts.instreet.cn:90/push.action",
-						murl	:	"http://ts.instreet.cn:90/tracker.action",
-						iurl    :	"http://ts.instreet.cn:90/tracker8.action",
-						ourl	:	"http://ts.instreet.cn:90/loadImage.action",						
+						redurl	:	"http://push.instreet.cn/click.action",
+					callbackurl	:	"http://push.instreet.cn/push.action",
+						murl	:	"http://push.instreet.cn/tracker.action",
+						iurl    :	"http://push.instreet.cn/tracker8.action",
+						ourl	:	"http://push.instreet.cn/loadImage.action",						
 					//redurl	:	"http://test.instreet.cn/click.action",	
 					// callbackurl	:	"http://test.instreet.cn/push.action",
 					// 	murl	:	"http://test.instreet.cn/tracker.action",
 					// 	iurl    :	"http://test.instreet.cn/tracker8.action",
 					// 	ourl	:	"http://test.instreet.cn/loadImage.action",
-						imih	:	300,
-						imiw	:	300,
-						timer   :   1000,
-						widgetSid:"79cjp47BnLo3NdNaLeICIw",
-						showAd:true,
-						showFootAd:true,
-						showWeibo:true,
-						showWiki:true,
-						showShare:true,
-						showWeather:true,
-						showNews:true,
-						showMD  :true,
-						openFootAd:true,
-						autoShow:  true
+						imih	:	290,
+						imiw	:	290,
+						timer   :   1000
+						// widgetSid:"79cjp47BnLo3NdNaLeICIw",
+						// showAd:true,
+						// showFootAd:true,
+						// showWeibo:true,
+						// showWiki:true,
+						// showShare:true,
+						// showWeather:true,
+						// showNews:true,
+						// showMD  :true,
+						// openFootAd:true,
+						// autoShow:  false
 						
 		};
 
