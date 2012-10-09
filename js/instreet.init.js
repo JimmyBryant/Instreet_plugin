@@ -3,9 +3,7 @@
 var instreet_config;
 (function(){
   var scripts=document.getElementsByTagName("script"),len=scripts.length,src=scripts[len-1].src,reg=/pd=([^?|&]*)/,widgetSid,
-  	  actionUrl="http://ts.instreet.cn:90/statCheck.action",
-      //actionUrl="http://test.instreet.cn/statCheck.action",
-      prefix="http://static.instreet.cn/widgets/push/js/";
+  	  actionUrl="http://push.instreet.cn/statCheck.action",prefix="http://static.instreet.cn/widgets/push/js/",
       defaultUrl=prefix+"instreet.default.min.js",ifengUrl=prefix+"instreet.ifeng.min.js";  
 
    if(src.match(reg)){

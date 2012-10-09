@@ -14,6 +14,7 @@
 		   location = window.location,
 		   imgs=[],
            readylist=[],
+           urlPrefix="",
            config = {
 						redurl	:	"http://www.instreet.cn/click.action",
 					//widgetSid	:	"79cjp47BnLo3NdNaLeICIw",

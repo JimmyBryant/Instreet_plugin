@@ -33,19 +33,15 @@
 		/********************************
 		*Config对象
 		*********************************/
+		var prefix="http://push.instreet.cn/";
 		var config = {
 
 						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet_ifeng.css",
-						redurl	:	"http://push.instreet.cn/click.action",
-					callbackurl	:	"http://push.instreet.cn/push.action",
-						murl	:	"http://push.instreet.cn/tracker.action",
-						iurl    :	"http://push.instreet.cn/tracker8.action",
-						ourl	:	"http://push.instreet.cn/loadImage.action",						
-					//redurl	:	"http://test.instreet.cn/click.action",	
-					// callbackurl	:	"http://test.instreet.cn/push.action",
-					// 	murl	:	"http://test.instreet.cn/tracker.action",
-					// 	iurl    :	"http://test.instreet.cn/tracker8.action",
-					// 	ourl	:	"http://test.instreet.cn/loadImage.action",
+						redurl	:	prefix+"click.action",
+					callbackurl	:	prefix+"push.action",
+						murl	:	prefix+"tracker.action",
+						iurl    :	prefix+"tracker8.action",
+						ourl	:	prefix+"loadImage.action",						
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
