@@ -3,8 +3,9 @@
 var instreet_config;
 (function(){
   var scripts=document.getElementsByTagName("script"),len=scripts.length,src=scripts[len-1].src,reg=/pd=([^?|&]*)/,widgetSid,
-  	  actionUrl="http://push.instreet.cn/statCheck.action",prefix="http://static.instreet.cn/widgets/push/js/",
-      defaultUrl=prefix+"instreet.default.min.js",ifengUrl=prefix+"instreet.ifeng.min.js";  
+  	  actionUrl="http://push.instreet.cn/statCheck.action",prefix="js/",//prefix="http://static.instreet.cn/widgets/push/js/",
+      d=new Date(),shortTime=d.getFullYear().toString()+(d.getMonth()+1)+d.getDate(),vc="?v="+shortTime,
+      defaultUrl=prefix+"instreet.default.js"+vc,ifengUrl=prefix+"instreet.ifeng.min.js"+vc;  
 
    if(src.match(reg)){
      widgetSid=src.match(reg)[1];
@@ -29,7 +30,7 @@ var instreet_config;
 			
 	  }
   
-  }
+  };
   
   document.write('<script src="'+actionUrl+'" charset="utf-8" type="text/javascript"><'+'/script>');
 

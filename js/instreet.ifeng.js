@@ -50,12 +50,12 @@
 						// showFootAd:true,
 						// showWeibo:true,
 						// showWiki:true,
-						// showShare:true,
+						// showShareButton:true,
 						// showWeather:true,
 						// showNews:true,
 						// showMD  :true,
 						// openFootAd:true,
-						// autoShow:  false
+						// footAuto:  false
 						
 		};
 
@@ -253,7 +253,6 @@
 				  var ad=new InstreetAd(data);
 				  cache.adsArray[index]=ad;
 				  instreet.autoShow(ad);
-				  isFirst=false;
 				}
 				
 		};
@@ -410,7 +409,7 @@
 			},
 			autoShow  :function(ad){                  //自动展示第一个加载成功的广告
 
-				if(isFirst){
+				if(config.footAuto&&isFirst){
 
 					var side=ad.sideWrapper,li=side.firstChild;
 					if(li&&li.children.length>1){
@@ -421,6 +420,7 @@
 					}
 
 				}
+				isFirst=false;
 
 			}
 			/*
@@ -1040,7 +1040,7 @@
 			},
 			createShare :function(){
 			   var str='',liArray=[];
-			   if(config.showShare){
+			   if(config.showShareButton){
 		   	      var li=document.createElement("li");
 			   	  li.className="instreet_share"; 
 			   	  str="<a class='instreet_share_button' title='分享图片'></a><div class='instreet_share_icons'><a class='instreet_sina'  title='新浪微博'></a><a class='instreet_renren' title='人人网' ></a><a class='instreet_tx' title='腾讯微博'></a></div>";
@@ -1052,7 +1052,7 @@
 			},
 			createMD   :function(){
 			   var str='',liArray=[];
-			   if(config.showMD){
+			   if(config.showMeiding){
 			   	  var li=document.createElement("li");
 			   	  li.className="instreet_imeiding"; 
 				  str="<a class='share_button' href='http://www.imeiding.com' target='_blank' title='每叮网'></a>";
