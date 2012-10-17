@@ -1,9 +1,10 @@
 ﻿/*************************************
 *尚街广告插件 2.0.3
-*1.修复广告定位不准确的bug
+*1.优化广告定位
 *2.新增对幻灯形式图库页面的支持
 *3.修复广告出现在图片中不能关闭的bug
-*4.新增天气和新闻的统计
+*4.新增天气和新闻的mouseover统计
+*5.增加图片分享统计
 *************************************/
 (function(window,undefined){
         
@@ -41,7 +42,8 @@
 					callbackurl	:	prefix+"push.action",
 						murl	:	prefix+"tracker.action",
 						iurl    :	prefix+"tracker8.action",
-						ourl	:	prefix+"loadImage.action",						
+						ourl	:	prefix+"loadImage.action",
+						surl    :   prefix+"share/weiboshare",						
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
@@ -361,7 +363,9 @@
 					else if(tar.className=='instreet_sina'||tar.className=='instreet_renren'||tar.className=='instreet_tx'){
 					   var other=tar.parentNode.parentNode.parentNode;
 					   var index=other.getAttribute('instreet_img_id');
-					   var picUrl=imgs[index].src;
+					   var picUrl=imgs[index].src,shareTo=tar.className.replace("instreet_","");
+					   var recordUrl=config.surl+"?content=''&imgUrl="+encodeURIComponent(picUrl)+"&pageUrl="+encodeURIComponent(location.href)+"&shareTo="+shareTo;
+					   ev.importFile('js',recordUrl);
 					   switch(tar.className){
 						    case "instreet_sina": 
 							window.open('http://v.t.sina.com.cn/share/share.php?title='+encodeURIComponent(document.title)+'&url='+encodeURIComponent(document.URL)+'&pic='+encodeURIComponent(picUrl),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=580, height=500");
@@ -380,9 +384,9 @@
 				  
 			   };
 
-			   ev.bind(document.body,'mouseover',eventDelegate);
+			   ev.bind(instreet.container,'mouseover',eventDelegate);
 			  // ev.bind(document.body,'mouseout',eventDelegate);
-			   ev.bind(document.body,'click',eventDelegate);
+			   ev.bind(instreet.container,'click',eventDelegate);
 			
 			},
 
@@ -1004,7 +1008,7 @@
 			   			
 			},
 			createNews  :function(data,obj){		  
-			   var str="",
+			   var str="",newsUrl="http://www.google.com/uds/modules/elements/newsshow/iframe.html?topic=h&rsz=small&format=300x250",
 			   	  left=obj.isLeft,
 			   	  liArray=[];
 			   if(config.showNews){
@@ -1014,7 +1018,7 @@
 			   	   li.className="instreet_news";  
 			       str="<a href='javascript:;' class='instreet_tip instreet_news_button'></a><div class='instreet_news_box'>";
 				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关新闻讯息</div>";				
-				   str+='<div class="other_news_box no_border"><iframe frameborder="0" width="300" height="250" marginwidth="0" marginheight="0" src="http://www.google.com/uds/modules/elements/newsshow/iframe.html?topic=h&rsz=small&format=300x250"></iframe></div></div>';			   
+				   str+='<div class="other_news_box no_border"><iframe frameborder="0" width="300" height="250" marginwidth="0" marginheight="0" src="'+newsUrl+'"></iframe></div></div>';			   
 			   	   li.innerHTML=str;
 				   liArray.push(li);
 			   }
@@ -1055,7 +1059,7 @@
 			   if(config.showMeiding){
 			   	  var li=document.createElement("li");
 			   	  li.className="instreet_imeiding"; 
-				  str="<a class='share_button' href='http://www.imeiding.com' target='_blank' title='每叮网'></a>";
+				  str="<a class='share_button' href='http://www.imeiding.com?ufrom=ad' target='_blank' title='每叮网'></a>";
 			   	  li.innerHTML=str;
 				  liArray.push(li);
 			   }             

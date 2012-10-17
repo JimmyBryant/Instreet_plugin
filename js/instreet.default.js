@@ -592,7 +592,7 @@
                 icon.className="instreet_icons_holder";
 				icon.setAttribute('instreet_img_id',index);
 				icon.style.cssText="left:"+left+"px;top:"+top+"px;";					
-				str="<a title='尚街网' instreet_img_id='"+index+"' class='icon_logo' href='javascript:;'></a><dl class='tool_bar'><dd><a href='http://www.imeiding.com' target='_blank' class='icon_setting'></a></dd><dd><a title='分享' href='javascript:;' class='icon_share'></a><div instreet_img_id='"+index+"' class='instreet_share_icons "+config.position+"'>";
+				str="<a title='尚街网' instreet_img_id='"+index+"' class='icon_logo' href='javascript:;'></a><dl class='tool_bar'><dd><a href='http://www.imeiding.com?ufrom=ad' target='_blank' class='icon_setting'></a></dd><dd><a title='分享' href='javascript:;' class='icon_share'></a><div instreet_img_id='"+index+"' class='instreet_share_icons "+config.position+"'>";
 				str+="<a class='instreet_sina'href='javascript:;'title='分享到新浪微博'></a><a title='分享到人人网' href='javascript:;' class='instreet_renren'></a><a href='javascript:;' title='分享到腾讯微博' class='instreet_tx'></a></div></dd><dd><a instreet_img_id='"+index+"' title='尚街网' href='javascript:;' class='icon_logo_hover'></a></dd></dl>";
 				icon.innerHTML=str;
 			    return icon;
