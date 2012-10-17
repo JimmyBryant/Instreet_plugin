@@ -363,8 +363,8 @@
 					else if(tar.className=='instreet_sina'||tar.className=='instreet_renren'||tar.className=='instreet_tx'){
 					   var other=tar.parentNode.parentNode.parentNode;
 					   var index=other.getAttribute('instreet_img_id');
-					   var picUrl=imgs[index].src,shareTo=tar.className.replace("instreet_","");
-					   var recordUrl=config.surl+"?content=''&imgUrl="+encodeURIComponent(picUrl)+"&pageUrl="+encodeURIComponent(location.href)+"&shareTo="+shareTo;
+					   var picUrl=imgs[index].src,shareTo=tar.className.replace("instreet_",""),widgetSid=cache.adsArray[index].dataPackage.widgetSid;
+					   var recordUrl=config.surl+"?content=''&imgUrl="+encodeURIComponent(picUrl)+"&widgetSid="+widgetSid+"&pageUrl="+encodeURIComponent(location.href)+"&shareTo="+shareTo;
 					   ev.importFile('js',recordUrl);
 					   switch(tar.className){
 						    case "instreet_sina": 
