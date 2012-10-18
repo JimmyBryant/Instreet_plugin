@@ -1,10 +1,9 @@
 ﻿/*************************************
-*尚街广告插件 2.0.3
-*1.优化广告定位
-*2.新增对幻灯形式图库页面的支持
-*3.修复广告出现在图片中不能关闭的bug
-*4.新增天气和新闻的mouseover统计
-*5.增加图片分享统计
+*
+*尚街广告插件 @REVISION@
+*1.修改鼠标移动到图片返回参数
+*2.增加spot和tip点击的统计
+*
 *************************************/
 (function(window,undefined){
         
@@ -41,7 +40,7 @@
 						redurl	:	prefix+"click.action",
 					callbackurl	:	prefix+"push.action",
 						murl	:	prefix+"tracker.action",
-						iurl    :	prefix+"tracker8.action",
+						iurl    :	prefix+"tracker90.action",
 						ourl	:	prefix+"loadImage.action",
 						surl    :   prefix+"share/weiboshare",						
 						imih	:	290,
@@ -515,7 +514,7 @@
 			   instreet.container.appendChild(side);
 
 			},
-			chooseLeft    :function(){						//判断广告放置在图片左侧或者右侧
+			chooseLeft    :function(){						//判断广告放置在图片左侧还是右侧
 				var img=this.img,pos=ev.getXY(img);
 				this.isLeft=pos.x+img.offsetWidth+360>document.body.clientWidth?true:false;
 				return this.isLeft;    
@@ -545,7 +544,7 @@
 					insId=_this.dataPackage.index,
 					side=_this.sideWrapper;		   				
 				spot.onmouseover=function(){
-						instreet.closeActiveAd();
+						
 					    
 						var boxes,box,
 							metrix=this.metrix,
@@ -556,14 +555,19 @@
 						   for(var i=0,len=boxes.length;i<len;i++){
 
 						      if(boxes[i].getAttribute('metrix')==metrix){
-							    clearTimeout(outFlag);
-							    boxes[i].id="INSTREET_AD_ACTIVE";
-								show(boxes[i].lastChild);
+							    clearTimeout(outFlag);		
+							    if(!boxes[i].id){	
+							    	instreet.closeActiveAd();				    
+								    boxes[i].id="INSTREET_AD_ACTIVE";
+									show(boxes[i].lastChild);
+									_this.recordShow(9);
+								}
 							  }
 						   }
+
 						 }
 						 else{
-						 
+							instreet.closeActiveAd();
 							if(spot.className=='instreet_weibo_spot'){
 								box=ev.$(side,null,'instreet_weibo')[0];
 								items=ev.$(box,null,'other_weibo_box');
@@ -614,7 +618,7 @@
 						   instreet.closeActiveAd();
 						   parent.id='INSTREET_AD_ACTIVE';
 						   show(adItem);
-						   //_this.recordShow(parent); 
+						   _this.recordShow(9); 
 						}                 
 					};
 					
@@ -635,8 +639,7 @@
 					};
 
 					var children=adItem.children;
-
-					for(var j=1,len=children.length;j<len;j++){                //记录鼠标行为
+					for(var j=1,len=children.length;j<len;j++){     //记录鼠标mouseover到广告和app上的行为   
 						children[j].onmouseover=function(e){
 					      var event=ev.getEvent(e),
 					  		 rela=ev.getRelatedTarget(event);
@@ -664,7 +667,7 @@
 		  	   			   instreet.closeActiveAd();
 		  	   			   li.id="INSTREET_AD_ACTIVE";
 		  	   			   show(li.lastChild);
-		  	   			   _this.recordShow(li);
+		  	   			   _this.recordShow(10);
 		  	   			}
 		  	   		}
 
@@ -676,18 +679,38 @@
 
 		  },
 		  //鼠标移动到图片的时候发送展现记录
-		  recordShow: function(li){  
+		  recordShow: function(flag){  
 
 		       var _this=this,data=_this.dataPackage,img=_this.img,
 				   ul=config.iurl,pd=data.widgetSid,muh=data.imageUrlHash,
-				   iu=encodeURIComponent(encodeURIComponent(img.src));
-				if(li.className=="instreet_aditem"){  
-					ul+="?pd="+pd+"&muh="+muh+"&iu="+iu;
-				}else{
-					return;
-				}
-				ev.importFile('js',ul);
-		   
+				   iu=encodeURIComponent(encodeURIComponent(img.src)),
+				   li=$('INSTREET_AD_ACTIVE');
+				var adsId="",adsType="";
+
+				if(li.className=="instreet_aditem"){ 
+				   var children=li.lastChild.children,
+				    	idArr=[],typeArr=[]; 
+					for(var i=1,len=children.length;i<len;i++){
+						var child=children[i];
+						var id=child.getAttribute("adsid"),type="";
+						if(id){                      //存在id则是匹配广告，否则是底部广告						
+							for(var j=0,length=data.adsSpot.length;j<length;j++){
+								if(id=data.adsSpot[j].adsId){
+									type=data.adsSpot[j].adsType;
+									break;
+								}
+							}
+						}else{
+							id=data.badsSpot[0].adsId;
+							type=data.badsSpot[0].adsType;
+						}
+						idArr.push(id);
+						typeArr.push(type);
+					}
+					adsId=idArr.join(",");adsType=typeArr.join(",");
+					ul+="?pd="+pd+"&muh="+muh+"&iu="+iu+"&adsId="+adsId+"&adsType="+adsType+"&flag="+flag;
+					ev.importFile('js',ul);
+				}		   
 		  },
 	       //鼠标移动到广告或者微博、百科上发送行为记录
  	      recordWatch:function(tar){   		       
@@ -706,7 +729,6 @@
 					   tty=1,adReg=/other_ad_box/,weiboReg=/other_weibo_box/,wikiReg=/other_wiki_box/,footReg=/other_foot_ad/,
 					   weatherReg=/other_weather_box/,newsReg=/other_news_box/;
                     var className=tar.className;
-
                     if(adReg.test(className)){
 					   ad=tar.getAttribute('adsid');
 					   at=1;
@@ -728,8 +750,7 @@
 					}
 													
 					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg=";				
-					ev.importFile('js',ul);
-				
+					ev.importFile('js',ul);				
 			},
 			locateAd :function(){                    //定位广告
 
