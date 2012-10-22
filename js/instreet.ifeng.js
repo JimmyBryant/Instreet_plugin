@@ -1,8 +1,7 @@
 ﻿/*************************************
 *
 *尚街广告插件 @REVISION@
-*1.修改鼠标移动到图片返回参数
-*2.增加spot和tip mouseover的统计
+*1.可设置页面最多投放广告数
 *
 *************************************/
 (function(window,undefined){
@@ -45,7 +44,9 @@
 						surl    :   prefix+"share/weiboshare",						
 						imih	:	290,
 						imiw	:	290,
-						timer   :   1000
+						timer   :   1000,
+						adsNum	:   2
+
 						// widgetSid:"79cjp47BnLo3NdNaLeICIw",
 						// showAd:true,
 						// showFootAd:true,

@@ -1,0 +1,301 @@
+#instreet-plugin-container{
+	font: 12px/1.5 tahoma,arial,"宋体";
+	color: #000;
+}
+#instreet-plugin-container ul,#instreet-plugin-container li,#instreet-plugin-container p,#instreet-plugin-container h1,
+#instreet-plugin-container h2,#instreet-plugin-container h3,#instreet-plugin-container dl,#instreet-plugin-container dd,
+#instreet-plugin-container dt{
+	margin: 0;padding: 0;
+}
+#instreet-plugin-container ul,#instreet-plugin-container li{
+	list-style: none;
+}
+#instreet-plugin-container h3{font-size: 14px;}
+/*
+ * Clearfix: contain floats
+ *
+ * For modern browsers
+ * 1. The space content is one way to avoid an Opera bug when the
+ *    `contenteditable` attribute is included anywhere else in the document.
+ *    Otherwise it causes space to appear at the top and bottom of elements
+ *    that receive the `clearfix` class.
+ * 2. The use of `table` rather than `block` is only necessary if using
+ *    `:before` to contain the top-margins of child elements.
+ */
+
+#instreet-plugin-container .clearfix:before,
+#instreet-plugin-container .clearfix:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+#instreet-plugin-container .clearfix:after {
+    clear: both;
+}
+/*
+ * For IE 6/7 only
+ * Include this rule to trigger hasLayout and contain floats.
+ */
+
+#instreet-plugin-container .clearfix {
+    *zoom: 1;
+}
+
+/*******************/
+.in-ad-wrapper{
+	position: absolute;
+	z-index: 2147483640; 
+	overflow: hidden;
+	width: 30px;
+	top:0%;
+	left: 84.9%;
+}
+
+/****************************
+*the style of ad tip
+*****************************/
+.in-tabs-wrapper{
+	float: right;
+}
+.in-tabs-wrapper li.tip{
+	width: 30px;
+	height: 64px;
+	position: relative;
+}
+.in-tabs-wrapper .tip a{
+	position: absolute;
+	top:0;
+	left:0; 
+	background: #F2F2F2;
+    color: #555555;
+    float: right;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px 2px;
+    text-align: center;
+    text-decoration: none;
+    width: 20px;
+    border: 1px solid #DDD;
+    border-top-color: #F9F9F9;
+/*    transition:all 0.15s;
+    -moz-transition:all 0.15s;
+	-webkit-transition:all 0.15s;
+	-o-transition:all 0.15s;
+	-ms-transition:all 0.15s;*/
+
+}
+.in-tabs-wrapper .first a{
+	border-top: 1px solid #DDD;
+	border-radius: 0 6px 0 0;
+}
+.in-tabs-wrapper .focus a{
+    background-color: #e6e6e6;
+    color: #000;
+    padding:5px 4px;
+    border-radius:0 4px 4px 0; 
+}
+/*.in-tabs-wrapper .tip a:hover{
+    background-color: #e6e6e6;
+    color: #000;
+    padding:5px 4px;
+    border-radius:0 4px 4px 0; 
+}*/
+.in-tabs-wrapper .tip a span{    
+	display: block;
+    height: 16px;
+    width: 16px;
+    margin: 0 auto;
+    background:url(../images/in-sprites.png) no-repeat;
+}
+
+.in-tabs-wrapper .tip .shop span{
+	background-position: 0 0;
+}
+.in-tabs-wrapper .tip .ad span{
+	background-position: 0px -64px;
+}
+.in-tabs-wrapper .tip .weibo span{
+	background-position: 0px -48px;
+}
+.in-tabs-wrapper .tip .wiki span{
+	background-position: 0 -97px;
+}
+.in-tabs-wrapper .tip .weather span{
+	background-position: 0 -32px;
+}
+.in-tabs-wrapper .tip .news span{
+	background-position: 0px -80px;
+}
+.in-tabs-wrapper .tip .share span{
+	background-position: 0 -16px;
+}
+
+
+/*********************************
+*style of ad content
+*********************************/
+.in-contents-wrapper{
+	width: 260px;
+	float: left;
+	position: relative;
+}
+.in-contents-wrapper li{
+	position: absolute;
+	width: 100%;
+	display: none;
+}
+.in-contents-wrapper li .title{
+	background-color:#e6e6e6;
+	border-top: 1px solid #DDD;
+	border-bottom: 1px solid #DDD;
+	color: #555;
+}
+#instreet-plugin-container .title{
+	padding: 2px 5px;
+}
+.in-contents-wrapper li .title .in-close{
+	text-decoration: none;
+	color: #555;
+	float: right;
+	-webkit-transition:color 0.1s;
+	-moz-transition:color 0.1s;
+	-o-transition:color 0.1s;
+	-ms-transition:color 0.1s;
+	transition:color 0.1s;
+}
+.in-contents-wrapper li .title .in-close:hover{
+	color: #000;
+}
+.in-contents-wrapper li .main-cont{
+	background:#F1F1F1;
+    padding: 5px;
+    border-bottom: 1px solid #DDDDDD;
+}
+
+/*************************
+*style of shop
+*************************/
+.in-contents-wrapper .shop .pro-box{
+	display: block;
+	position: relative;
+	background-color: #000000;
+}
+.in-contents-wrapper .shop .pro-box img{
+	display: block;
+    transition:all 0.25s ease-in 0.1s;
+    -moz-transition:all 0.25s ease-in 0.1s;
+	-webkit-transition:all 0.25s 0.1s;
+	-o-transition:all 0.25s 0.1s;
+	-ms-transition:all 0.25s 0.1s;
+}
+.in-contents-wrapper .shop .pro-box:hover img{
+	opacity: 0.4;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
+	filter: alpha(opacity=40);
+}
+.in-contents-wrapper .shop .pro-info{
+	position: absolute;
+    top: 0;
+    left: 0;
+    width:100%;
+    height: 0;
+    overflow: hidden;
+    cursor: pointer;
+    transition:all 0.3s ease-in;
+    -moz-transition:all 0.3s ease-in;
+	-webkit-transition:all 0.3s ease-in;
+	-o-transition:all 0.3s ease-in;
+	-ms-transition:all 0.3s ease-in;
+}
+.in-contents-wrapper .shop .pro-box:hover .pro-info{
+	height: 100%;
+}
+.in-contents-wrapper .shop .pro-name{
+    display: block;
+	font-size: 15px;
+	height: 25%;
+	padding: 25% 5px 0;
+	overflow: hidden;
+	white-space: normal;
+	word-wrap: break-word;
+	color: #F8E0C5;
+	text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+.in-contents-wrapper .shop .pro-name:hover{
+	color:#F1F1F1; 
+	text-shadow: 0 0 10px #F8E0C5;
+}
+.in-contents-wrapper .shop .pro-price,
+.in-contents-wrapper .shop .pro-tobuy{
+	display: inline-block;
+	*zoom:1;
+  	color: #FFFFFF;
+    text-align: center;
+    width: 50%;
+}
+.in-contents-wrapper .shop .pro-price{
+	font-size: 20px;
+	height: 50%;
+	line-height: 6em;
+}
+.in-contents-wrapper .shop .pro-tobuy{
+
+}
+.in-contents-wrapper .shop .pro-tobuy em{
+	background-image: -moz-linear-gradient(top, rgba(255, 255, 255, .3), rgba(255, 255, 255, 0));
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .3),
+          0 2px 2px -1px rgba(0, 0, 0, .5),
+          0 1px 0 rgba(255, 255, 255, .3) inset;
+	background-color:#C43C35;
+	text-shadow: 0 1px 0 rgba(0,0,0,.5);
+	display: inline-block;
+	padding:6px 20px;
+	border: 1px solid #C43C35;
+	border-radius:5px; 
+	color: #FFF;
+	font: bold 12px/1.8 "宋体";
+	font-style: normal;
+
+}
+.in-contents-wrapper .shop .pro-tobuy em:hover{
+	background-color: #ee5f5b;
+}
+.in-contents-wrapper .shop .pro-tobuy em:active{
+	background: #c43c35;
+    text-shadow: none;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .3) inset;
+}
+/******************************
+*style of share
+*****************************/
+.in-contents-wrapper .share .main-cont a{
+	display: inline-block;
+	background: url(../images/share-icons.png) no-repeat;
+	width: 32px;
+	height: 32px;
+}
+.in-contents-wrapper .share .main-cont .sina-ico{
+	background-position: 0 0;
+}
+.in-contents-wrapper .share .main-cont .tx-ico{
+	background-position: 0 -34px;
+}
+.in-contents-wrapper .share .main-cont .qz-ico{
+	background-position: 0 -68px;
+}
+.in-contents-wrapper .share .main-cont .renren-ico{
+	background-position: 0 -103px;
+}
+
+.in-contents-wrapper .share .main-cont .sohu-ico{
+	background-position: 0 -172px;
+}
+.in-contents-wrapper .share .main-cont .wangyi-ico{
+	background-position: 0 -137px;
+}
+.in-contents-wrapper .share .main-cont .douban-ico{
+	background-position: 0 -242px;
+}
+.in-contents-wrapper .share .main-cont .kaixin-ico{
+	background-position: 0 -207px;
+}
