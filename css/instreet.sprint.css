@@ -10,6 +10,7 @@
 #instreet-plugin-container ul,#instreet-plugin-container li{
 	list-style: none;
 }
+#instreet-plugin-container a img{border:none;}
 #instreet-plugin-container h3{font-size: 14px;}
 /*
  * Clearfix: contain floats
@@ -168,6 +169,7 @@
     padding:8px 7px;
     font-size: 0;
     border-bottom: 1px solid #BBB;
+    box-shadow: 1px 0 #BBBBBB, -1px 0 #BBBBBB;
 }
 
 
@@ -198,18 +200,11 @@
     top: 0;
     left: 0;
     width:100%;
-    height: 0;
+    height:100%;
     overflow: hidden;
     cursor: pointer;
-    transition:all 0.3s ease-in;
-    -moz-transition:all 0.3s ease-in;
-	-webkit-transition:all 0.3s ease-in;
-	-o-transition:all 0.3s ease-in;
-	-ms-transition:all 0.3s ease-in;
 }
-.in-contents-wrapper .shop .pro-box:hover .pro-info{
-	height: 100%;
-}
+
 .in-contents-wrapper .shop .pro-name{
     display: block;
 	font-size: 15px;
@@ -220,42 +215,78 @@
 	word-wrap: break-word;
 	color: #F8E0C5;
 	text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+	opacity: 0;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+	filter: alpha(opacity=0);
+    transition:opacity 0.3s;
+    -moz-transition:all 0.3s;
+	-webkit-transition:all 0.3s;
+	-o-transition:all 0.3s;
+	-ms-transition:all 0.3s;
+}
+.in-contents-wrapper .shop .pro-box:hover .pro-name{
+	opacity: 1;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+	filter: alpha(opacity=100);
 }
 .in-contents-wrapper .shop .pro-name:hover{
 	color:#F1F1F1; 
 	text-shadow: 0 0 10px #F8E0C5;
 }
-.in-contents-wrapper .shop .pro-price,
+
 .in-contents-wrapper .shop .pro-tobuy{
-	display: inline-block;
-	*zoom:1;
-  	color: #FFFFFF;
-    text-align: center;
-    width: 50%;
+	float: right;
+	text-align: center;
+	width: 0;
+	height: 50%;
+	overflow: hidden;
+	position: relative;
+    transition:all 0.35s ease-in;
+    -moz-transition:all 0.35s ease-in;
+	-webkit-transition:all 0.35s ease-in;
+	-o-transition:all 0.35s ease-in;
+	-ms-transition:all 0.35s ease-in;
 }
 .in-contents-wrapper .shop .pro-price{
+	display: block;
 	font-size: 20px;
+	color: #FFF;
 	height: 50%;
+	width: 0;
 	line-height: 6em;
+	text-align: center;
+	overflow: hidden;
+    transition:all 0.35s ease-in;
+    -moz-transition:all 0.35s ease-in;
+	-webkit-transition:all 0.35s ease-in;
+	-o-transition:all 0.35s ease-in;
+	-ms-transition:all 0.35s ease-in;
 }
-.in-contents-wrapper .shop .pro-tobuy{
-
+.in-contents-wrapper .shop .pro-box:hover .pro-price{
+	width: 50%;
+}
+.in-contents-wrapper .shop .pro-box:hover .pro-tobuy{
+	width: 50%;
 }
 .in-contents-wrapper .shop .pro-tobuy em{
+	background-image: linear-gradient(top, rgba(255, 255, 255, .3), rgba(255, 255, 255, 0));
 	background-image: -moz-linear-gradient(top, rgba(255, 255, 255, .3), rgba(255, 255, 255, 0));
-    box-shadow: 0 1px 0 rgba(0, 0, 0, .3),
-          0 2px 2px -1px rgba(0, 0, 0, .5),
-          0 1px 0 rgba(255, 255, 255, .3) inset;
-	background-color:#C43C35;
+	background-image: -webkit-linear-gradient(top, rgba(255, 255, 255, .3), rgba(255, 255, 255, 0));
+	background-image: -o-linear-gradient(top, rgba(255, 255, 255, .3), rgba(255, 255, 255, 0));
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .3),0 2px 2px -1px rgba(0, 0, 0, .5),0 1px 0 rgba(255, 255, 255, .3) inset;
 	text-shadow: 0 1px 0 rgba(0,0,0,.5);
-	display: inline-block;
+	background-color:#C43C35;
 	padding:6px 20px;
 	border: 1px solid #C43C35;
 	border-radius:5px; 
 	color: #FFF;
 	font: bold 12px/1.8 "宋体";
 	font-style: normal;
-
+    left: 13%;
+    position: absolute;
+    top: 35%;
+    width: 52px;
+    height: 22px;
 }
 .in-contents-wrapper .shop .pro-tobuy em:hover{
 	background-color: #ee5f5b;
@@ -268,12 +299,13 @@
 /******************************
 *style of share
 *****************************/
-li.share .main-cont{
+.in-contents-wrapper li.share .main-cont{
 	padding: 12px 7px;
 }
 .in-contents-wrapper .share .main-cont a{
 	display: inline-block;
 	background: url(../images/share-icons.png) no-repeat;
+	_background:url(../images/share-icons-ie6.png) no-repeat;
 	width: 32px;
 	height: 32px;
     margin: 5px 9px;
@@ -307,6 +339,6 @@ li.share .main-cont{
 /****************************
 *style of weather
 ****************************/
-li.weather .main-cont{
+.in-contents-wrapper li.weather .main-cont{
 	padding: 12px 7px;
 }

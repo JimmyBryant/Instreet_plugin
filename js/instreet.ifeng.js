@@ -54,9 +54,8 @@
 						// showShareButton:true,
 						// showWeather:true,
 						// showNews:true,
-						// showMD  :true,
-						// openFootAd:true,
-						//footAuto:  false
+						// showMeiding  :true,
+						// footAuto:  false
 						
 		};
 
@@ -406,7 +405,7 @@
                for(i in adsArray){
 
                   var adObj=adsArray[i];
-                  adObj.locateAd();
+                  adObj.locateAd&&adObj.locateAd();
 			 
 			    }
 			},
@@ -731,6 +730,7 @@
 					   adData,
 					   ad='',
 					   at='',
+					   tg='',
 					   ift=0,
 					   tty=1,adReg=/other_ad_box/,weiboReg=/other_weibo_box/,wikiReg=/other_wiki_box/,footReg=/other_foot_ad/,
 					   weatherReg=/other_weather_box/,newsReg=/other_news_box/;
@@ -741,8 +741,10 @@
 					   tty=0;
 					}else if(weiboReg.test(className)){
 					   ift=2;
+					   tg=ev.$(tar,'','name')[0].innerHTML||'';
 					}else if(wikiReg.test(className)){
 					   ift=4;
+					   tg=ev.$(tar,'','name')[0].innerHTML||'';
 					}else if(weatherReg.test(className)){
 					   ift=7;
 					}else if(newsReg.test(className)){
@@ -755,7 +757,7 @@
 						return;
 					}
 													
-					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg=";				
+					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg="+tg;				
 					ev.importFile('js',ul);				
 			},
 			locateAd :function(){                    //定位广告
