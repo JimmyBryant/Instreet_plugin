@@ -95,26 +95,26 @@ _娱乐频道_光明网</title>
 
 	 		<li class="clearfix tip first">
 	 		<a class="shop" href="javascript:;">
-	 		<span></span>折扣
+	 		<span></span><em>折扣</em>
 	 		</a>
 	 		</li>
 	 		<li class="clearfix tip">
-	 		<a class="ad" href="javascript:;"><span></span>推广</a>
+	 		<a class="ad" href="javascript:;"><span></span><em>推广</em></a>
 	 		</li>
 <!-- 	 		<li class="clearfix tip">
-	 		<a class="weibo" href="javascript:;"><span></span>微博</a>
+	 		<a class="weibo" href="javascript:;"><span></span><em>微博</em></a>
 	 		</li>
 	 		<li class="clearfix tip">
-	 		<a class="wiki" href="javascript:;"><span></span>百科</a>
+	 		<a class="wiki" href="javascript:;"><span></span><em>百科</em></a>
 	 		</li> -->
 	 		<li class="clearfix tip">
-	 		<a class="news" href="javascript:;"><span></span>新闻</a>
+	 		<a class="weather" href="javascript:;"><span></span><em>天气</em></a>
 	 		</li>
 	 		<li class="clearfix tip">
-	 		<a class="weather" href="javascript:;"><span></span>天气</a>
+	 		<a class="news" href="javascript:;"><span></span><em>新闻</em></a>
 	 		</li>
 	 		<li class="clearfix tip">
-	 		<a class="share" href="javascript:;"><span></span>分享</a>
+	 		<a class="share" href="javascript:;"><span></span><em>分享</em></a>
 	 		</li>
 
 	 	</ul>
@@ -126,7 +126,7 @@ _娱乐频道_光明网</title>
 	 			<div class="main-cont">
 	 				<a target="_blank" class="pro-box" href="http://www.instreet.cn">
 	 				<img 
-	 				 src="http://img02.taobaocdn.com/bao/uploaded/i2/T1EPjRXkVjXXXzGpw__105208.jpg_250x250.jpg"
+	 				 src="images/tad.jpg"
 	 				 /><label class="pro-info"><span class="pro-name">名人瑞裳2012秋冬新款女装欧美修身系带长款风衣女外套春秋12537</span><span class="pro-price">¥199.00</span><span class="pro-tobuy"><em>进入商店</em></span></label>
 	 				</a>
 	 			</div>
@@ -165,7 +165,7 @@ _娱乐频道_光明网</title>
 
 		 	<li class="news">
 	 			<h3 class="title clearfix"><a title="关闭" href="javascript:;" class="in-close">×</a>
-	 			热门新闻
+	 			热点新闻
 	 			</h3>
 	 			<div class="main-cont">
 	 				<img src="images/news.png">
@@ -175,42 +175,44 @@ _娱乐频道_光明网</title>
 	 	</div>
 	</div>
 
-	<script type="text/javascript">
-		var timerId=null;
-		$('.in-tabs-wrapper li').mouseover(function(){
-			clearTimeout(timerId);
-			var tar=this;
-			timerId=setTimeout(function(){show(tar)},150);
-		});
-		var closing=false;
-		var show=function(tar){
+<script type="text/javascript">
+	var timerId=null;
+	$('.in-tabs-wrapper li').mouseover(function(){
+		clearTimeout(timerId);
+		var tar=this;
+		timerId=setTimeout(function(){show(tar)},150);
+	});
+	var closing=false;
+	var show=function(tar){
 
-			if(closing){
-				return;
-			}
-			$('#instreet-plugin-container .in-tabs-wrapper .focus').removeClass('focus');
-			$(tar).addClass('focus');
-			var cn=$(tar).find('a').attr('class');
-			if($(".in-ad-wrapper").height()!=290){
-			$(".in-ad-wrapper").animate({width:'290px'},400,'swing',function(){
-				$('.in-contents-wrapper').find('li').hide();
-				$('.in-contents-wrapper').find('li.'+cn).show();
-			});
-			}
-		},
-		hide=function(){
-			closing=true;
-			$(".in-ad-wrapper").animate({width:'30px'},'fast','swing',function(){
-					$('#instreet-plugin-container .in-tabs-wrapper .focus').removeClass('focus');
-			});
-		};
-		$('.in-close').click(function(){
-
-			hide();
-			setTimeout(function(){closing=false;},1000);
+		if($(tar).hasClass('focus')||closing){
+			return;
+		}
+		$('#instreet-plugin-container .in-tabs-wrapper .focus').removeClass('focus');
+		$(tar).addClass('focus');
+		var cn=$(tar).find('a').attr('class');
+		if($(".in-ad-wrapper").height()!=290){
+		$(".in-ad-wrapper").animate({width:'290px'},400,'swing',function(){
+			$('.in-contents-wrapper').find('li').hide();
+			$('.in-contents-wrapper').find('li.'+cn).show();
 
 		});
-	</script>
+		}
+	},
+	hide=function(){
+		closing=true;
+		$('.in-contents-wrapper').find('li').hide();
+		$(".in-ad-wrapper").animate({width:'25px'},'fast','swing',function(){
+				$('#instreet-plugin-container .in-tabs-wrapper .focus').removeClass('focus');
+		});
+	};
+	$('.in-close').click(function(){
+
+		hide();
+		setTimeout(function(){closing=false;},1000);
+
+	});
+</script>
 	<!--结束-->
 
   <div class="contentLeft">

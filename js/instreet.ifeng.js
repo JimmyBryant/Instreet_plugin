@@ -1,7 +1,8 @@
 ﻿/*************************************
 *
 *尚街广告插件 @REVISION@
-*1.可设置页面最多投放广告数
+*1.修改鼠标移动到图片返回参数
+*2.增加spot和tip mouseover的统计
 *
 *************************************/
 (function(window,undefined){
@@ -44,9 +45,7 @@
 						surl    :   prefix+"share/weiboshare",						
 						imih	:	290,
 						imiw	:	290,
-						timer   :   1000,
-						adsNum	:   2
-
+						timer   :   1000
 						// widgetSid:"79cjp47BnLo3NdNaLeICIw",
 						// showAd:true,
 						// showFootAd:true,
@@ -57,7 +56,7 @@
 						// showNews:true,
 						// showMD  :true,
 						// openFootAd:true,
-						// footAuto:  false
+						//footAuto:  false
 						
 		};
 
@@ -407,7 +406,7 @@
                for(i in adsArray){
 
                   var adObj=adsArray[i];
-                  adObj.locateAd&&adObj.locateAd();
+                  adObj.locateAd();
 			 
 			    }
 			},
@@ -417,9 +416,12 @@
 
 					var side=ad.sideWrapper,li=side.firstChild;
 					if(li&&li.children.length>1){
-						if(!$("INSTREET_AD_ACTIVE")){          //判断是否已经有广告显示广告被显示
+						if(!$("INSTREET_AD_ACTIVE")){          //判断是否已经有广告被显示
 							li.id="INSTREET_AD_ACTIVE";
 							show(li.lastChild);
+							if(li.className=="instreet_aditem"){
+								ad.recordShow(9);
+							}
 						}
 					}
 
@@ -619,7 +621,9 @@
 						   instreet.closeActiveAd();
 						   parent.id='INSTREET_AD_ACTIVE';
 						   show(adItem);
-						   _this.recordShow(9); 
+						   if(parent.className=='instreet_aditem'){
+						   	 _this.recordShow(9); 
+						   }
 						}                 
 					};
 					
@@ -709,9 +713,10 @@
 						typeArr.push(type);
 					}
 					adsId=idArr.join(",");adsType=typeArr.join(",");
-					ul+="?pd="+pd+"&muh="+muh+"&iu="+iu+"&ad="+adsId+"&at="+adsType+"&flag="+flag;
-					ev.importFile('js',ul);
-				}		   
+				}
+				ul+="?pd="+pd+"&muh="+muh+"&iu="+iu+"&ad="+adsId+"&at="+adsType+"&flag="+flag;
+				ev.importFile('js',ul);
+						   
 		  },
 	       //鼠标移动到广告或者微博、百科上发送行为记录
  	      recordWatch:function(tar){   		       

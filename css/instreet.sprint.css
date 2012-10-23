@@ -45,8 +45,7 @@
 .in-ad-wrapper{
 	position: absolute;
 	z-index: 2147483640; 
-	overflow: hidden;
-	width: 30px;
+	width: 26px;
 	top:0%;
 	left: 84.9%;
 }
@@ -58,44 +57,44 @@
 	float: right;
 }
 .in-tabs-wrapper li.tip{
-	width: 30px;
-	height: 64px;
+	width: 26px;
 	position: relative;
 }
 .in-tabs-wrapper .tip a{
-	position: absolute;
+/*	position: absolute;
 	top:0;
-	left:0; 
+	left:0; */
+	float: left;
 	background: #F2F2F2;
     color: #555555;
-    float: right;
     font-size: 12px;
     font-weight: bold;
-    padding: 5px 2px;
+    padding: 4.5px 2px;
     text-align: center;
     text-decoration: none;
     width: 20px;
-    border: 1px solid #DDD;
-    border-top-color: #F9F9F9;
-/*    transition:all 0.15s;
-    -moz-transition:all 0.15s;
-	-webkit-transition:all 0.15s;
-	-o-transition:all 0.15s;
-	-ms-transition:all 0.15s;*/
-
+    border: 1px solid #BBB;
+    border-top-color: #FFF;
+}
+.in-tabs-wrapper .tip a em{
+	font-style: normal;
+	display: none;
 }
 .in-tabs-wrapper .first a{
-	border-top: 1px solid #DDD;
+	border-top: 1px solid #BBB;
 	border-radius: 0 6px 0 0;
 }
 .in-tabs-wrapper .focus a{
-    background-color: #e6e6e6;
+    background-color: #E1E1E1;
     color: #000;
-    padding:5px 4px;
-    border-radius:0 4px 4px 0; 
+/*    padding:5px 4px;
+    border-radius:0 4px 4px 0; */
+}
+.in-tabs-wrapper .focus a em{
+	display: block;
 }
 /*.in-tabs-wrapper .tip a:hover{
-    background-color: #e6e6e6;
+    background-color: #E1E1E1;
     color: #000;
     padding:5px 4px;
     border-radius:0 4px 4px 0; 
@@ -135,19 +134,17 @@
 *style of ad content
 *********************************/
 .in-contents-wrapper{
-	width: 260px;
+	width: 264px;
 	float: left;
 	position: relative;
 }
 .in-contents-wrapper li{
-	position: absolute;
-	width: 100%;
 	display: none;
 }
 .in-contents-wrapper li .title{
-	background-color:#e6e6e6;
-	border-top: 1px solid #DDD;
-	border-bottom: 1px solid #DDD;
+	background-color:#E1E1E1;
+	border-top: 1px solid #BBB;
+	border-bottom: 1px solid #BBB;
 	color: #555;
 }
 #instreet-plugin-container .title{
@@ -168,13 +165,16 @@
 }
 .in-contents-wrapper li .main-cont{
 	background:#F1F1F1;
-    padding: 5px;
-    border-bottom: 1px solid #DDDDDD;
+    padding:8px 7px;
+    font-size: 0;
+    border-bottom: 1px solid #BBB;
 }
+
 
 /*************************
 *style of shop
 *************************/
+
 .in-contents-wrapper .shop .pro-box{
 	display: block;
 	position: relative;
@@ -268,11 +268,15 @@
 /******************************
 *style of share
 *****************************/
+li.share .main-cont{
+	padding: 12px 7px;
+}
 .in-contents-wrapper .share .main-cont a{
 	display: inline-block;
 	background: url(../images/share-icons.png) no-repeat;
 	width: 32px;
 	height: 32px;
+    margin: 5px 9px;
 }
 .in-contents-wrapper .share .main-cont .sina-ico{
 	background-position: 0 0;
@@ -298,4 +302,11 @@
 }
 .in-contents-wrapper .share .main-cont .kaixin-ico{
 	background-position: 0 -207px;
+}
+
+/****************************
+*style of weather
+****************************/
+li.weather .main-cont{
+	padding: 12px 7px;
 }

@@ -22,26 +22,26 @@
 
 	 		<li class="clearfix tip first">
 	 		<a class="shop" href="javascript:;">
-	 		<span></span>折扣
+	 		<span></span><em>折扣</em>
 	 		</a>
 	 		</li>
 	 		<li class="clearfix tip">
-	 		<a class="ad" href="javascript:;"><span></span>推广</a>
+	 		<a class="ad" href="javascript:;"><span></span><em>推广</em></a>
 	 		</li>
 	 		<li class="clearfix tip">
-	 		<a class="share" href="javascript:;"><span></span>分享</a>
+	 		<a class="weibo" href="javascript:;"><span></span><em>微博</em></a>
 	 		</li>
 	 		<li class="clearfix tip">
-	 		<a class="weibo" href="javascript:;"><span></span>微博</a>
+	 		<a class="wiki" href="javascript:;"><span></span><em>百科</em></a>
 	 		</li>
 	 		<li class="clearfix tip">
-	 		<a class="wiki" href="javascript:;"><span></span>百科</a>
+	 		<a class="weather" href="javascript:;"><span></span><em>天气</em></a>
 	 		</li>
 	 		<li class="clearfix tip">
-	 		<a class="weather" href="javascript:;"><span></span>天气</a>
+	 		<a class="news" href="javascript:;"><span></span><em>新闻</em></a>
 	 		</li>
 	 		<li class="clearfix tip">
-	 		<a class="news" href="javascript:;"><span></span>新闻</a>
+	 		<a class="share" href="javascript:;"><span></span><em>分享</em></a>
 	 		</li>
 
 	 	</ul>
@@ -53,8 +53,8 @@
 	 			<div class="main-cont">
 	 				<a target="_blank" class="pro-box" href="http://www.instreet.cn">
 	 				<img 
-	 				 src="http://img02.taobaocdn.com/bao/uploaded/i2/T1EPjRXkVjXXXzGpw__105208.jpg_250x250.jpg"
-	 				 /><label class="pro-info"><span class="pro-name">名人瑞裳2012秋冬新款女装欧美修身系带长款风衣女外套春秋12537</span><span class="pro-price">¥199.00</span><span class="pro-tobuy"><em>进入商店</em></span></label>
+	 				 src="images/tad.jpg"/><label class="pro-info"><span class="pro-name">名人瑞裳2012秋冬新款女装欧美修身系带长款风衣女外套春秋12537</span>
+	 				 <span class="pro-price">¥199.00</span><span class="pro-tobuy"><em>进入商店</em></span></label>
 	 				</a>
 	 			</div>
 	 		</li>
@@ -62,10 +62,22 @@
 	 			<h3 class="title clearfix"><a title="关闭" href="javascript:;" class="in-close">×</a>
 	 			产品推广
 	 			</h3>
-	 			<div class="main-cont">
-	 				<iframe scrolling="no"  width="250" height="250" frameborder="0" src="http://push.instreet.cn/pages/googleads/googleAd.jsp?slot=1014301444" marginheight="0" marginwidth="0" border="0">
-	 				</iframe>
-	 			</div>
+	 			<div class="main-cont"><img src="images/gad.png"></img></div>
+	 		</li>
+		 	<li class="weather">
+	 			<h3 class="title clearfix"><a title="关闭" href="javascript:;" class="in-close">×</a>
+	 			天气预报
+	 			</h3>
+	 			<div class="main-cont">	 				
+	 				<img src="images/weather.png">
+				</div>
+	 		</li>
+
+		 	<li class="news">
+	 			<h3 class="title clearfix"><a title="关闭" href="javascript:;" class="in-close">×</a>
+	 			热门新闻
+	 			</h3>
+	 			<div class="main-cont"><img src="images/news.png"></div>
 	 		</li>
 		 	<li class="share">
 	 			<h3 class="title clearfix"><a title="关闭" href="javascript:;" class="in-close">×</a>
@@ -98,7 +110,7 @@
 	var closing=false;
 	var show=function(tar){
 
-		if(closing){
+		if($(tar).hasClass('focus')||closing){
 			return;
 		}
 		$('#instreet-plugin-container .in-tabs-wrapper .focus').removeClass('focus');
@@ -108,12 +120,14 @@
 		$(".in-ad-wrapper").animate({width:'290px'},400,'swing',function(){
 			$('.in-contents-wrapper').find('li').hide();
 			$('.in-contents-wrapper').find('li.'+cn).show();
+
 		});
 		}
 	},
 	hide=function(){
 		closing=true;
-		$(".in-ad-wrapper").animate({width:'30px'},'fast','swing',function(){
+		$('.in-contents-wrapper').find('li').hide();
+		$(".in-ad-wrapper").animate({width:'26px'},'fast','swing',function(){
 				$('#instreet-plugin-container .in-tabs-wrapper .focus').removeClass('focus');
 		});
 	};
