@@ -1,8 +1,8 @@
 ﻿/*************************************
 *
 *尚街广告插件 @REVISION@
-*1.修改鼠标移动到图片返回参数
-*2.增加spot和tip mouseover的统计
+*新增功能
+*1.通过adsLimit增加广告数量控制
 *
 *************************************/
 (function(window,undefined){
@@ -46,6 +46,7 @@
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
+						//adsLimit :  2
 						// widgetSid:"79cjp47BnLo3NdNaLeICIw",
 						// showAd:true,
 						// showFootAd:true,
@@ -231,9 +232,12 @@
 			loadData     :function(img){
 			   var index=img.insId,clientImg=imgs[index];		   
 			   if(img.width>=config.imiw&&img.height>=config.imih){
-			   	 if(clientImg.clientWidth>=config.imiw&&clientImg.clientHeight>=config.imih){		
-				   InstreetAd.recordImage(clientImg);			   
-				   cache.createJsonp(clientImg);
+			   	 if(clientImg.clientWidth>=config.imiw&&clientImg.clientHeight>=config.imih){
+				   	  if(typeof config.adsLimit=="number"&&config.adsLimit>0){		
+						   InstreetAd.recordImage(clientImg);			   
+						   cache.createJsonp(clientImg);
+						   config.adsLimit--;
+				   	  }
 			   	  }
 			   }
 			},
