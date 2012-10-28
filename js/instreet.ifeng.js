@@ -1,8 +1,9 @@
 ﻿/*************************************
 *
 *尚街广告插件 @REVISION@
-*新增功能
+*    
 *1.通过adsLimit增加广告数量控制
+*2.修复ie缓存请求的bug
 *
 *************************************/
 (function(window,undefined){
@@ -46,7 +47,7 @@
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
-						//adsLimit :  2
+						//adsLimit :  2,
 						// widgetSid:"79cjp47BnLo3NdNaLeICIw",
 						// showAd:true,
 						// showFootAd:true,
@@ -202,7 +203,6 @@
         *cache对象，加载广告数据
         **********************************/
 		var cache={
-		    //dataArray  :[],
 			avaImages  :[],
 			adsArray   :[],
 	        initData   :function(){
@@ -233,11 +233,13 @@
 			   var index=img.insId,clientImg=imgs[index];		   
 			   if(img.width>=config.imiw&&img.height>=config.imih){
 			   	 if(clientImg.clientWidth>=config.imiw&&clientImg.clientHeight>=config.imih){
-				   	  if(typeof config.adsLimit=="number"&&config.adsLimit>0){		
-						   InstreetAd.recordImage(clientImg);			   
-						   cache.createJsonp(clientImg);
-						   config.adsLimit--;
-				   	  }
+				   	  if(typeof config.adsLimit=="number"&&config.adsLimit<=0){	
+				   	  	return;
+				   	  }	
+					   InstreetAd.recordImage(clientImg);			   
+					   cache.createJsonp(clientImg);
+					   config.adsLimit&&config.adsLimit--;
+				   	  
 			   	  }
 			   }
 			},
@@ -271,17 +273,8 @@
 			spotBox     :   null,
 		    init        :  function(data){
 
-		   	   var images=document.getElementsByTagName('img'),img;
-			   for(var i=0,len=images.length;i<len;i++){
-				    img=images[i];
-				    //if(img.style.display!='none'&&img.style.visibility!='hidden'){
-	 					  //img.setAttribute('instreet_img_id',i.toString());	 					 
-	 					  img.insId=i;
-						  imgs[i]=img;
-					//}
-			   }
+		   	   imgs=document.getElementsByTagName('img');
 			   var cssUrl=config.cssurl;
-			   //var cssUrl="css/instreet_ifeng.css";
 			   ev.importFile('css',cssUrl);
 		       instreet.createContainer();
 			   this.bindBodyEvent();
@@ -717,7 +710,8 @@
 					}
 					adsId=idArr.join(",");adsType=typeArr.join(",");
 				}
-				ul+="?pd="+pd+"&muh="+muh+"&iu="+iu+"&ad="+adsId+"&at="+adsType+"&flag="+flag;
+				var time=new Date().getTime();  
+				ul+="?pd="+pd+"&muh="+muh+"&iu="+iu+"&ad="+adsId+"&at="+adsType+"&flag="+flag+"&time="+time;
 				ev.importFile('js',ul);
 						   
 		  },
@@ -761,7 +755,8 @@
 						return;
 					}
 													
-					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg="+tg;				
+					var time=new Date().getTime();  								
+					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg="+tg+"&time="+time;				
 					ev.importFile('js',ul);				
 			},
 			locateAd :function(){                    //定位广告
@@ -839,7 +834,8 @@
 			   t=encodeURIComponent(encodeURIComponent(document.title)),
 			   ul=config.ourl;
 
-			  ul+="?iu="+iu+"&pd="+pd+"&pu="+pu+"&t="+t;
+			var time=new Date().getTime();   
+			  ul+="?iu="+iu+"&pd="+pd+"&pu="+pu+"&t="+t+"&time="+time;
 			  ev.importFile('js',ul);
 		   
 	    };
@@ -1041,7 +1037,7 @@
 			   			
 			},
 			createNews  :function(data,obj){		  
-			   var str="",newsUrl="http://www.google.com/uds/modules/elements/newsshow/iframe.html?topic=h&rsz=small&format=300x250",
+			   var str="",newsUrl="http://push.instreet.cn/baidunews",
 			   	  left=obj.isLeft,
 			   	  liArray=[];
 			   if(config.showNews){
