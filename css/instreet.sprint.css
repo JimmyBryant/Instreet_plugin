@@ -11,7 +11,7 @@
 	list-style: none;
 }
 #instreet-plugin-container a img{border:none;}
-#instreet-plugin-container h3{font-size: 14px;}
+#instreet-plugin-container h3{font-size: 14px;font-weight: bold;}
 /*
  * Clearfix: contain floats
  *
@@ -63,7 +63,7 @@
 .in-tabs-wrapper .tab a{
 	/*float: left;*/
 	display: block;
-	background: #F2F2F2;
+	background: #F1F1F1;
     color: #555555;
     font-size: 12px;
     font-weight: bold;
@@ -71,15 +71,15 @@
     text-align: center;
     text-decoration: none;
     width: 20px;
-    border: 1px solid #DDD;
-    border-top-color:#F8F8F8;
+    border: 1px solid #BBB;
+    border-top-color:#FFF;
 }
 .in-tabs-wrapper .tab a em{
 	font-style: normal;
 	display: none;
 }
 .in-tabs-wrapper .first a{
-	border-top: 1px solid #DDD;
+	border-top: 1px solid #BBB;
 	/*border-radius: 0 4px 0 0;*/
 }
 .in-tabs-wrapper .focus a{
@@ -134,6 +134,7 @@
 .in-contents-wrapper{
 	width: 0px;
 	float: left;
+	text-align: left;
 	overflow: hidden;
 }
 .in-contents-wrapper li{
@@ -141,7 +142,7 @@
 }
 .in-contents-wrapper li .title{
 	background-color:#E6E6E6;
-	border: 1px solid #DDD;
+	border: 1px solid #BBB;
 	border-bottom: none;
 	border-radius: 0 5px 0 0;
 	/*border-left: 1px solid #BBBBBB;*/
@@ -168,7 +169,7 @@
     padding:8px 7px;
     font-size: 0;
     /*border-left: 1px solid #BBBBBB;*/
-    border: 1px solid #DDD;
+    border: 1px solid #BBB;
     overflow: hidden;
 }
 
@@ -471,6 +472,7 @@
 *****************************/
 .in-contents-wrapper li.share .main-cont{
 	padding: 12px 7px;
+	text-align: left;
 }
 .in-contents-wrapper .share .main-cont a{
 	display: inline-block;
@@ -517,11 +519,21 @@
 *style of spot
 ****************************/
 #instreet-plugin-spotbox a{
-	background: #FFF;
+	background: #F1F1F1;
 	width: 30px;
 	height: 30px;
 	position: absolute;
-	opacity: .4;
-	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
-	filter: alpha(opacity=40);
+	opacity: .1;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=10)";
+	filter: alpha(opacity=10);
+	-moz-transition: all 0.25s ease-in;
+	-webkit-transition: all 0.25s ease-in;
+	-o-transition: all 0.25s ease-in;
+	-ms-transition: all 0.25s ease-in;
 }
+#instreet-plugin-spotbox a:hover{
+	opacity: 1;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+	filter: alpha(opacity=100);
+	box-shadow: 0 0 6px 2px rgba(0,0,0,.8);
+};

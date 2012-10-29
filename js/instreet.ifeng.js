@@ -4,6 +4,7 @@
 *    
 *1.通过adsLimit增加广告数量控制
 *2.修复ie缓存请求的bug
+*3.支持中新网图库
 *
 *************************************/
 (function(window,undefined){
@@ -47,17 +48,18 @@
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
-						//adsLimit :  2,
-						// widgetSid:"79cjp47BnLo3NdNaLeICIw",
-						// showAd:true,
-						// showFootAd:true,
-						// showWeibo:true,
-						// showWiki:true,
-						// showShareButton:true,
-						// showWeather:true,
-						// showNews:true,
-						// showMeiding  :true,
-						// footAuto:  false
+						,
+						// adsLimit :  2,
+						widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
+						showAd:true,
+						showFootAd:true,
+						showWeibo:true,
+						showWiki:true,
+						showShareButton:true,
+						showWeather:true,
+						showNews:true,
+						showMeiding  :true,
+					    footAuto:  false
 						
 		};
 
@@ -446,25 +448,19 @@
 
 		};
         
-         var TimerId=null;         //全局时间函数计时器
-
-         /**********************************
-         *TimerTick 类
-         ***********************************/
-         var TimerTick=function(arr){
-            this.queue=arr;
-            this.go=function(){
-                 var arr=this.queue;
-                 TimerId=setInterval(function(){
+	     /**********************************
+	     *TimerTick 方法
+	     ***********************************/
+	    var TimerTick=(function(){
+	    	var timerId=null;   //全局时间函数计时器
+	    	return function(arr){
+	             timerId=setInterval(function(){
 		         	 for(var i=0;i<arr.length;i++){
 						arr[i]&&arr[i].detect();
 		         	 }
-                 },1000);
-
-
-         	}
-
-         };
+	             },1000);
+	    	};
+	    })();
 
 
         /********************************
@@ -812,7 +808,15 @@
                     origin.src=img.src;
                 }
                 else if(img.clientWidth!=origin.width||img.clientHeight!=origin.height){
-
+                		if(img.clientWidth==0||img.clientHeight==0){
+                			var images=document.images;
+                			for(var i=images.length;i--;){
+                				if(images[i].src==img.src&&img!==images[i]){
+                					images[i].insId=img.insId;
+                					_this.img=images[i];
+                				}
+                			}
+                		}
                 		_this.locateAd();
                 }
                 
@@ -1121,7 +1125,7 @@
 		*************************/
 		function init(){
 
-			 mixConfig(instreet_config);                  //组合配置信息
+			 typeof instreet_config!='undefined'&&mixConfig(instreet_config);                  //组合配置信息
 		     instreet.init();
 			 cache.initData();
 			 ev.bind(window,'load',function(){
@@ -1133,8 +1137,7 @@
 			 // 		instreet.search()
 			 // });
 			 //定时检测图片是否变化
-             var ts=new TimerTick(cache.adsArray);
-             ts.go();
+             TimerTick(cache.adsArray);
 
 		};
 		

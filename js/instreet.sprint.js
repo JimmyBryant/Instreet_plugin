@@ -439,10 +439,21 @@
 	})();
 
 
+    
 
-
-
-
+     /**********************************
+     *TimerTick 方法
+     ***********************************/
+    var TimerTick=(function(){
+    	var timerId=null;   //全局时间函数计时器
+    	return function(arr){
+             timerId=setInterval(function(){
+	         	 for(var i=0;i<arr.length;i++){
+					arr[i]&&arr[i].detect();
+	         	 }
+             },1000);
+    	};
+    })();
 
 
         /*********************************
@@ -539,9 +550,11 @@
 		*InstreetAd类
 		************************************/
 		var InstreetAd=function(data,container){
+			var img=imgs[data.index];
 			this.data=data;
 			this.container=container;
-			this.img=imgs[data.index];
+			this.img=img;
+			this.originInfo={width:img.clientWidth,height:img.clientHeight,src:img.src};
 			this.spotsArray=[];
 			this.timerId=null;
 			this.init();
@@ -613,10 +626,11 @@
 				var _this=this,img=_this.img,pos=ev.getXY(img),w=img.offsetWidth,
 				left=pos.x+w+1+"px",top=pos.y+"px",spotsArray=_this.spotsArray;
 				_this.adWrapper.style.cssText="left:"+left+";top:"+top;
+
                if(spotsArray.length>0){              //如果存在spot，同时也对其重定位
 
-                     var w=spotsArray[0].imgWidth,
-                     	 zoomNum=img.width/w,
+                     var oWidth=spotsArray[0].imgWidth,
+                     	 zoomNum=img.width/oWidth,
 					 	 r=15;
                       
 	                  for(var j=spotsArray.length;j--;){
@@ -722,7 +736,38 @@
 		
 					};
 
-				}			
+				}
+				//spots event	
+				for(var j=0,l=_this.spotsArray.length;j<l;j++){
+					var spot=_this.spotsArray[j];
+					spot.onmouseover=function(){
+						clearTimeout(_this.timerId);
+						switch(spot.className){
+							case "instreet-shopSpot":
+							var tab=ev.$(_this.tabs,null,'shop')[0].parentNode,
+								sel=ev.$(_this.contents,null,'in-shop-selector')[0].children[this.index];
+							var isFocus=sel.className.match(" focus");	
+							InstreetAd.chooseItem(sel,this.index);
+							_this.showApp(tab);
+							if(!isFocus){
+								_this.recordShow(9); //record adShow times
+							}     
+							break;
+							case "instreet-weiboSpot":
+							var tab=ev.$(_this.tabs,null,'weibo')[0].parentNode,
+							sel=ev.$(_this.contents,null,'in-weibo-selector')[0].children[this.index];
+							InstreetAd.chooseItem(sel,this.index);
+							_this.showApp(tab);
+							break;
+							case "instreet-wikiboSpot":
+							var tab=ev.$(_this.tabs,null,'wiki')[0].parentNode;
+							sel=ev.$(_this.contents,null,'in-wiki-selector')[0].children[this.index];
+							InstreetAd.chooseItem(sel,this.index);
+							_this.showApp(tab);
+							break;
+						}
+					}
+				}		
 
 			},
 			closeApps:function(){
@@ -786,25 +831,56 @@
 			    }
 			    ev.importFile('js',recordUrl);     //记录分享行为
 			},
+			detect   :function(){                     //每隔一段时间开始检测图片对象是否change
+
+                var _this=this,img=_this.img,origin=_this.originInfo,
+                	side=_this.sideWrapper;
+
+                if(img.src&&img.src!=origin.src){
+                    var parent=side.parentNode||document.body;
+                    parent.removeChild(side);
+                    cache.onImgLoad(img);
+                    origin.src=img.src;
+                }
+                else if(img.clientWidth!=origin.width||img.clientHeight!=origin.height){
+                		if(img.clientWidth==0||img.clientHeight==0){
+                			var images=document.images;
+                			for(var i=images.length;i--;){
+                				if(images[i].src==img.src&&img!==images[i]){
+                					images[i].insId=img.insId;
+                					_this.img=images[i];
+                				}
+                			}
+                		}
+                		_this.locate();
+                }
+                
+
+			},
+
 		   //鼠标移动到图片的时候发送展现记录
 		   recordShow: function(flag){  
 
 		       var _this=this,data=_this.data,img=_this.img,
 				   ul=config.iurl,pd=data.widgetSid,muh=data.imageUrlHash,
 				   iu=encodeURIComponent(encodeURIComponent(img.src)),focus=ev.$(_this.tabs,null,'focus')[0];
-				var adsId="",adsType="";
+				var adsId="",adsType="",index=0;
 
 				if(focus){ 
 					if(focus.lastChild.className=="ad"){
 						adsId=data.badsSpot[0].adsId;
 						adsType=data.badsSpot[0].adsType;
 					}else if(focus.lastChild.className=="shop"){
-						each(ev.$(_this.contents,null,'in-shop-selector')[0].children,function(index){
-							if(this.className.match(" focus")){
-								adsId=data.adsSpot[index].adsId;
-								adsType=data.adsSpot[index].adsType;
+						var sels=ev.$(_this.contents,null,'in-shop-selector')[0].children;
+					
+						for(var j=0,len=sels.length;j<len;j++){
+							if(sels[j].className.match(" focus")){
+								index=j;break;
 							}
-						})
+						}
+
+						adsId=data.adsSpot[index].adsId;
+						adsType=data.adsSpot[index].adsType;						
 
 					}
 				}
@@ -1148,8 +1224,7 @@
 			 // 		instreet.search()
 			 // });
 			 //定时检测图片是否变化
-             //var ts=new TimerTick(cache.adsArray);
-             //ts.go();
+             TimerTick(cache.adsArray);
 
 		};
 		
