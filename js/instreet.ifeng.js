@@ -48,18 +48,18 @@
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
-						,
+						// ,
 						// adsLimit :  2,
-						widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
-						showAd:true,
-						showFootAd:true,
-						showWeibo:true,
-						showWiki:true,
-						showShareButton:true,
-						showWeather:true,
-						showNews:true,
-						showMeiding  :true,
-					    footAuto:  false
+						// widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
+						// showAd:true,
+						// showFootAd:true,
+						// showWeibo:true,
+						// showWiki:true,
+						// showShareButton:true,
+						// showWeather:true,
+						// showNews:true,
+						// showMeiding  :true,
+					    // footAuto:  false
 						
 		};
 

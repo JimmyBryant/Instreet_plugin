@@ -456,9 +456,9 @@
     })();
 
 
-        /*********************************
-        *cache对象，加载广告数据
-        **********************************/
+    /*********************************
+    *cache对象，加载广告数据
+    **********************************/
 		var cache={
 
 			adsArray   :[],
@@ -724,12 +724,16 @@
 					};
 					//tab mouseout
 					tab.onmouseout=function(){
-						// var list=_this.tabs.children;
+
 
 					};
 					//content mouseover
-					content.onmouseover=function(){
+					content.onmouseover=function(e){
+						var event=ev.getEvent(e),tar=ev.getRelatedTarget(event);
 						show(this);
+						if(!this.contains(tar)){
+							_this.recordWatch(this);
+						}
 					};
 					//content mouseout
 					content.onmouseout=function(){
@@ -797,6 +801,16 @@
 				if(css.get(_this.contents,'width')==0){
 					animate(_this.contents,{width:'266px'},200,'linear');
 				}
+			},
+			getSelectedIndex:function(type){
+
+               var cn='in-'+type+'-selector', sels=ev.$(this.contents,null,cn)[0]?ev.$(this.contents,null,cn)[0].children:[];
+               for(var j=0,len=sels.length;j<len;j++){
+               		if(sels[j].className.match(" focus")){
+               			return j;
+               		}
+               }
+               return 0;
 			},
 			shareImg :function(icon){
 				var _this=this,picUrl=encodeURIComponent(_this.img.src),shareTo=icon.className.replace("-ico",""),widgetSid=_this.data.widgetSid,time=new Date().getTime(),
@@ -870,15 +884,8 @@
 					if(focus.lastChild.className=="ad"){
 						adsId=data.badsSpot[0].adsId;
 						adsType=data.badsSpot[0].adsType;
-					}else if(focus.lastChild.className=="shop"){
-						var sels=ev.$(_this.contents,null,'in-shop-selector')[0].children;
-					
-						for(var j=0,len=sels.length;j<len;j++){
-							if(sels[j].className.match(" focus")){
-								index=j;break;
-							}
-						}
-
+					}else if(focus.lastChild.className=="shop"){						
+						index=_this.getSelectedIndex("shop");
 						adsId=data.adsSpot[index].adsId;
 						adsType=data.adsSpot[index].adsType;						
 
@@ -904,24 +911,24 @@
 					   at='',
 					   tg='',
 					   ift=0,
-					   tty=1,adReg=/other_ad_box/,weiboReg=/other_weibo_box/,wikiReg=/other_wiki_box/,footReg=/other_foot_ad/,
-					   weatherReg=/other_weather_box/,newsReg=/other_news_box/;
-                    var className=tar.className;
-                    if(adReg.test(className)){
-					   ad=tar.getAttribute('adsid');
-					   at=1;
+					   tty=1;
+                    var cn=tar.className,index=_this.getSelectedIndex(cn);
+                    if(cn=="shop"){
+                       
+					   ad=data.adsSpot[index].adsId;
+					   at=data.adsSpot[index].adsType;
 					   tty=0;
-					}else if(weiboReg.test(className)){
+					}else if(cn=="weibo"){
 					   ift=2;
-					   tg=ev.$(tar,'','name')[0].innerHTML||'';
-					}else if(wikiReg.test(className)){
+					   tg=data.weiboSpot[index].title||'';
+					}else if(cn=="wiki"){
 					   ift=4;
-					   tg=ev.$(tar,'','name')[0].innerHTML||'';
-					}else if(weatherReg.test(className)){
+					   tg=data.wikiSpot[index].title||'';
+					}else if(cn=="weather"){
 					   ift=7;
-					}else if(newsReg.test(className)){
+					}else if(cn=="news"){
 					   ift=5;
-					}else if(footReg.test(className)){
+					}else if(cn=="ad"){
 					   ad=data.badsSpot[0].adsId;
 					   at=data.badsSpot[0].adsType;
 					   tty=0;
