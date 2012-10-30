@@ -525,7 +525,10 @@
 		var instreet={
 
 			init :function(){
-				imgs=document.getElementsByTagName("img");
+	   	        var images=document.getElementsByTagName('img');
+		   	    for(var i=0,len=images.length;i<len;i++){
+		   	  	  imgs[i]=images[i];
+		   	    }
 				var cssurl=config.cssurl;
 				ev.importFile('css',cssurl);
 				instreet.createContainer();
@@ -624,7 +627,7 @@
 			},
 			locate   :function(){                            //定位广告
 				var _this=this,img=_this.img,pos=ev.getXY(img),w=img.offsetWidth,
-				left=pos.x+w+1+"px",top=pos.y+"px",spotsArray=_this.spotsArray;
+				left=pos.x+w+"px",top=pos.y+"px",spotsArray=_this.spotsArray;
 				_this.adWrapper.style.cssText="left:"+left+";top:"+top;
 
                if(spotsArray.length>0){              //如果存在spot，同时也对其重定位
@@ -666,13 +669,19 @@
  					_this.timerId=setTimeout(function(){_this.closeApps()},config.timer);
 				});
 				//
-				_this.adWrapper.onmouseover=function(){
+				_this.tabs.onmouseover=function(){
 					clearTimeout(_this.timerId);
 				};
-				_this.adWrapper.onmouseout=function(){
+				_this.tabs.onmouseout=function(){
 					_this.timerId=setTimeout(function(){_this.closeApps()},config.timer);
 				};
-				_this.adWrapper.onclick=function(e){
+			   _this.contents.onmouseover=function(){
+					clearTimeout(_this.timerId);
+				};
+				_this.contents.onmouseout=function(){
+					_this.timerId=setTimeout(function(){_this.closeApps()},config.timer);
+				};
+				_this.contents.onclick=function(e){
 					var event=ev.getEvent(e),tar=ev.getTarget(event);
 					if(tar.className=='in-close'){
 						_this.closeApps();
@@ -775,6 +784,11 @@
 
 			},
 			closeApps:function(){
+				
+				var _this=this;
+				// animate(_this.contents,{width:0},300,'linear',function(){
+				// 	_this.hideApps();
+				// });
 				this.hideApps();
 				this.contents.style.width=0;
 			},
@@ -1032,7 +1046,7 @@
 					title=app.adsTitle;
 					price=app.adsDiscount||app.adsPrice;
 					imgUrl=app.adsPicUrl.replace("160x160","250x250");
-					str+='<a target="_blank" class="pro-box'+focus+'" href="'+redUrl+'"><img src="'+imgUrl+'"/><label class="pro-info"><span class="pro-name">'+title+'</span><span class="pro-tobuy"><em>进入商店</em></span><span class="pro-price">¥'+price+'</span></label></a>';
+					str+='<a target="_blank" class="pro-box'+focus+'" href="'+redUrl+'"><img src="'+imgUrl+'"/><span class="pro-info"><span class="pro-name">'+title+'</span><span class="pro-tobuy"><em>进入商店</em></span><span class="pro-price">¥'+price+'</span></span></a>';
 					if(len>1)selectStr+='<a href="javascript:;" class="select-item'+focus+'"></a>';
 				}
 	 			str+='</div>'+selectStr+'</div></div>';	 

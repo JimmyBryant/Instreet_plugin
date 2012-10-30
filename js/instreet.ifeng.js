@@ -2,9 +2,7 @@
 *
 *尚街广告插件 @REVISION@
 *    
-*1.通过adsLimit增加广告数量控制
-*2.修复ie缓存请求的bug
-*3.支持中新网图库
+*1.修复鼠标移动到美叮logo再进图片后不发tracker90的bug
 *
 *************************************/
 (function(window,undefined){
@@ -49,7 +47,7 @@
 						imiw	:	290,
 						timer   :   1000
 						// ,
-						// adsLimit :  2,
+					 //    adsLimit :  null,
 						// widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
 						// showAd:true,
 						// showFootAd:true,
@@ -59,7 +57,7 @@
 						// showWeather:true,
 						// showNews:true,
 						// showMeiding  :true,
-					    // footAuto:  false
+					 //    footAuto:  false
 						
 		};
 
@@ -275,8 +273,12 @@
 			spotBox     :   null,
 		    init        :  function(data){
 
-		   	   imgs=document.getElementsByTagName('img');
+		   	  var images=document.getElementsByTagName('img');
+		   	  for(var i=0,len=images.length;i<len;i++){
+		   	  	 imgs[i]=images[i];
+		   	  }
 			   var cssUrl=config.cssurl;
+			   // var cssUrl="css/instreet.ifeng.css";
 			   ev.importFile('css',cssUrl);
 		       instreet.createContainer();
 			   this.bindBodyEvent();
@@ -653,7 +655,7 @@
 		  	   ev.bind(img,'mouseover',function(){
 		  	   	    clearTimeout(outFlag);
 		  	   	    var active=$("INSTREET_AD_ACTIVE");
-		  	   	    if(side.contains(active)){
+		  	   	    if(side.contains(active)&&active.className!="instreet_imeiding"){
 		  	   	    	return;
 		  	   	    }else{
 		  	   	    	var li=side.firstChild,children=li.children;
@@ -893,10 +895,11 @@
 					   }else{
 						  str="<div class='other_foot_ad'>";
 						  if(footData.adsType==3){
-						      var redUrl=config.redurl+"?tty=0&mid="+data.imageNumId+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(footData.adsType||'')+"&ad="+(footData.adsId||'')+"&tg=&rurl="+encodeURIComponent(encodeURIComponent(footData.adsLinkUrl));
-							  str+="<a href='"+redUrl+"'><img src='"+footData.adsPicUrl+"' alt=''/></a>";
+						     var redUrl=config.redurl+"?tty=0&mid="+data.imageNumId+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(footData.adsType||'')+"&ad="+(footData.adsId||'')+"&tg=&rurl="+encodeURIComponent(encodeURIComponent(footData.adsLinkUrl));
+							 str+="<a href='"+redUrl+"'><img src='"+footData.adsPicUrl+"' alt=''/></a>";
 						  }else if(!footData.adsLinkUrl&&footData.description){
 							 var fra=footData.description;
+							 str+="<i class='small-info'></i>";
 							 str+=fra.slice(0,-2)+'></iframe>';
 						  }
 						  str+="</div>";
