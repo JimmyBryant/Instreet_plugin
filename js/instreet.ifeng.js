@@ -45,19 +45,20 @@
 						surl    :   prefix+"share/weiboshare",						
 						imih	:	290,
 						imiw	:	290,
-						timer   :   1000
+						timer   :   1000,
 						// ,
-					 //    adsLimit :  null,
-						// widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
-						// showAd:true,
-						// showFootAd:true,
-						// showWeibo:true,
-						// showWiki:true,
-						// showShareButton:true,
-						// showWeather:true,
-						// showNews:true,
-						// showMeiding  :true,
-					 //    footAuto:  false
+					 	//adsLimit :  null,
+					 	widgetSid: "36wuVtGXVqclEbzGVGJNcY",
+						//widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
+						showAd:true,
+						showFootAd:true,
+						showWeibo:true,
+						showWiki:true,
+						showShareButton:true,
+						showWeather:true,
+						showNews:true,
+						showMeiding  :true,
+					    footAuto:  false
 						
 		};
 
@@ -277,8 +278,8 @@
 		   	  for(var i=0,len=images.length;i<len;i++){
 		   	  	 imgs[i]=images[i];
 		   	  }
-			   var cssUrl=config.cssurl;
-			   // var cssUrl="css/instreet.ifeng.css";
+			   // var cssUrl=config.cssurl;
+			    var cssUrl="css/instreet.ifeng.css";
 			   ev.importFile('css',cssUrl);
 		       instreet.createContainer();
 			   this.bindBodyEvent();
