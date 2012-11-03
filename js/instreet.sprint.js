@@ -1,6 +1,6 @@
 /*****************************
-*sprint.js
 *
+*sprint.js
 *
 ******************************/
 (function(window,undefined){
@@ -31,11 +31,11 @@
    		/********************************
 		*Config对象
 		*********************************/
-		var prefix="http://push.instreet.cn/";
+		var prefix="http://test.instreet.cn/";
 		var config = {
 
-						//cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.sprint.css",
-						cssurl 	:	"css/instreet.sprint.css",
+						//cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.sprint.min.css",
+						cssurl 	:	"css/instreet.sprint.min.css",
 						redurl	:	prefix+"click.action",
 					callbackurl	:	prefix+"push.action",
 						murl	:	prefix+"tracker.action",
@@ -44,10 +44,11 @@
 						surl    :   prefix+"share/weiboshare",						
 						imih	:	290,
 						imiw	:	290,
-						timer   :   1000,
+						timer   :   1000
+						,
 						adsLimit :  5,
-						// widgetSid:"7Hv57yvJk1nQuUBnnZlGZa",
-						widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
+						widgetSid:"50HHkxiAQ0Qnwkkth1Ivjq",
+						//widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
 						showAd:true,
 						showFootAd:true,
 						showWeibo:true,
@@ -56,8 +57,7 @@
 						showWeather:true,
 						showNews:true,
 						showMeiding  :true,
-						footAuto:  true
-						
+						footAuto:  true						
 		};
 
 
@@ -289,7 +289,7 @@
 				}
 				return true;
 
-		}
+		};
 
 	    var Animate= function	(elem,property, duration, easing, callback){               //js动画入口API
 
@@ -464,12 +464,14 @@
 			adsArray   :[],
 	        initData   :function(){
 
-			   for(var i=0,len=imgs.length;i<len;i++){
-			   	  var img=imgs[i];
-			   	  img.insId=i;img.setAttribute("instreet_img_id",i);
+				var images=document.getElementsByTagName('img');
+			   for(var i=0,len=images.length;i<len;i++){
+			   	  var img=images[i];
+			   	  imgs[i]=img;
+			   	  img.insId=i;
+			   	  img.setAttribute("instreet_img_id",i);
 			   	  cache.onImgLoad(img);
 			   }
-
 
 		    },
 		    onImgLoad  :function(img){                
@@ -500,7 +502,8 @@
 			    }
 			},
 			createJsonp  :function(img){
-			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp";
+			   var w=250,h=250;
+			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp"+"&w="+w+"&h="+h;
 			   ev.importFile('js',url);
 			}
 		
@@ -511,7 +514,6 @@
 		    if(data){
 			  var index=data.index,img=imgs[index];
 			  img.setAttribute('instreet_data_ready',true);
-			  InstreetAd.reLocate();        //重新定位已经显示的广告
 			  var ad=new InstreetAd(data,instreet.container);
 			  cache.adsArray[index]=ad;
 			  InstreetAd.autoShow(ad);
@@ -525,10 +527,6 @@
 		var instreet={
 
 			init :function(){
-	   	        var images=document.getElementsByTagName('img');
-		   	    for(var i=0,len=images.length;i<len;i++){
-		   	  	  imgs[i]=images[i];
-		   	    }
 				var cssurl=config.cssurl;
 				ev.importFile('css',cssurl);
 				instreet.createContainer();
@@ -557,11 +555,11 @@
 			this.data=data;
 			this.container=container;
 			this.img=img;
-			this.originInfo={width:img.clientWidth,height:img.clientHeight,src:img.src};
+			this.originInfo={width:img.clientWidth,height:img.clientHeight,src:img.src,pos:ev.getXY(img)};
 			this.spotsArray=[];
 			this.timerId=null;
 			this.init();
-		}
+		};
 
 		InstreetAd.prototype={
 
@@ -851,7 +849,7 @@
 					window.open('http://www.kaixin001.com/login/open_login.php?flag=1&url='+url,'_blank',winStr);
 					break;
 					case "wangyi-ico"  :
-					window.open('http://t.163.com/article/user/checkLogin.do?link='+location.host+'source=&info='+title+url+'&images='+picUrl,'_blank',winStr)		
+					window.open('http://t.163.com/article/user/checkLogin.do?link='+location.host+'source=&info='+title+url+'&images='+picUrl,'_blank',winStr);		
 			    	break;
 			    	case "douban-ico" :
 			    	window.open('http://shuo.douban.com/!service/share?image='+picUrl+'&href='+url+'&name='+title,'_blank',winStr);
@@ -862,7 +860,7 @@
 			detect   :function(){                     //每隔一段时间开始检测图片对象是否change
 
                 var _this=this,img=_this.img,origin=_this.originInfo,
-                	side=_this.sideWrapper;
+                	side=_this.sideWrapper,pos=ev.getXY(img);
 
                 if(img.src&&img.src!=origin.src){
                     var parent=side.parentNode||document.body;
@@ -881,6 +879,12 @@
                 			}
                 		}
                 		_this.locate();
+
+                }else if(pos.x!==origin.pos.x||pos.y!==origin.pos.y){
+                	
+                	    origin.pos=pos;
+						_this.locate();
+
                 }
                 
 
@@ -954,7 +958,7 @@
 					ev.importFile('js',ul);				
 			}
 
-		}
+		};
 
 
 		/*****************************
@@ -1083,7 +1087,7 @@
 			weiboApp:function(obj){
 				if(!config.showWeibo||obj.data.weiboSpot.length==0)
 					return;
-				var tab,cont,data,app,title,redUrl,article,avatar,str="",focus=""
+				var tab,cont,data,app,title,redUrl,article,avatar,str="",focus="",
 					selectStr='<div class="in-weibo-selector">';
 				if(obj.isFirstApp){
 					tab=InstreetAd.createTab('weibo','微博','first');
@@ -1116,7 +1120,7 @@
 			wikiApp:function(obj){
 				if(!config.showWiki||obj.data.wikiSpot.length==0)
 					return;
-				var tab,cont,data,app,title,redUrl,article,avatar,str="",focus=""
+				var tab,cont,data,app,title,redUrl,article,avatar,str="",focus="",
 					selectStr='<div class="in-wiki-selector">';;
 				if(obj.isFirstApp){
 					tab=InstreetAd.createTab('wiki','百科','first');
@@ -1146,7 +1150,10 @@
 			newsApp:function(obj){
 				if(!config.showNews)
 					return;
-				var tab,cont,newsUrl="http://push.instreet.cn/baidunews";
+				var tab,cont,
+				     newsUrl="http://push.instreet.cn/baidunews?size=250"
+					//newsUrl="http://localhost:7456/clivia-branches/baidunews?size=250",
+					;
 				if(obj.isFirstApp){
 					tab=InstreetAd.createTab('news','新闻','first');
 					obj.isFirstApp=false;
@@ -1231,14 +1238,11 @@
 		*************************/
 		function init(){
 
-			 if(typeof instret_config!="undefined"){		//mix配置信息
+			 if(typeof instreet_config!="undefined"){		//mix配置信息
 				 mixConfig(instreet_config);
 			 }                  
 		     instreet.init();
 			 cache.initData();
-			 ev.bind(window,'load',function(){
-			 	InstreetAd.reLocate();		 		
-			 });	
 			 ev.bind(window,'resize',function(){InstreetAd.reLocate();}); 
 			 //dom ready后搜索是否有新的图片
 			 // document.DomReady(function(){

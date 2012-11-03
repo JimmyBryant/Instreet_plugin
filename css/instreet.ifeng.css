@@ -289,16 +289,15 @@
 	position:relative;
 }
 .other_foot_ad i.small-info {
-	background: url(../images/small-info.png) no-repeat 13px 0px;
-    _filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled='true',src="http://static.instreet.cn/widgets/push/images/small-info.png");
-    _background:none;
-	height: 25px;
+	background: url(../images/small-info.png) no-repeat 52px 0px;
+	_filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled='true',src="http://static.instreet.cn/widgets/push/images/small-info.png");
+	_background: none;
+	height: 30px;
 	position: absolute;
 	right: 13px;
 	top: 9px;
-	width: 40px;
+	width: 80px;
 	z-index: 9011;
-
 }
 .instreet_other_close{
 	background:#000;

@@ -2,7 +2,9 @@
 *
 *尚街广告插件 @REVISION@
 *    
-*1.修复鼠标移动到美叮logo再进图片后不发tracker90的bug
+*1.click.action添加mx参数去掉tag和mid参数
+*2.tracker90.action添加mx参数
+*3.tracker.action添加mx参数去掉tag和mid参数
 *
 *************************************/
 (function(window,undefined){
@@ -45,11 +47,11 @@
 						surl    :   prefix+"share/weiboshare",						
 						imih	:	290,
 						imiw	:	290,
-						timer   :   1000,
-						// ,
-					 	//adsLimit :  null,
-					 	widgetSid: "36wuVtGXVqclEbzGVGJNcY",
-						//widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
+						timer   :   1000
+						,
+					 	adsLimit :  null,
+					 	// widgetSid: "36wuVtGXVqclEbzGVGJNcY",
+						widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
 						showAd:true,
 						showFootAd:true,
 						showWeibo:true,
@@ -207,14 +209,13 @@
 			avaImages  :[],
 			adsArray   :[],
 	        initData   :function(){
-
-			   for(var i=0,len=imgs.length;i<len;i++){
-			   	  var img=imgs[i];
+		   	   var images=document.getElementsByTagName('img');
+			   for(var i=0,len=images.length;i<len;i++){
+			   	  var img=images[i];
+			   	  imgs[i]=img;
 			   	  img.insId=i;img.setAttribute("instreet_img_id",i);
 			   	  cache.onImgLoad(img);
 			   }
-
-
 		    },
 		    onImgLoad  :function(img){                
 				 var image=new Image();
@@ -274,12 +275,8 @@
 			spotBox     :   null,
 		    init        :  function(data){
 
-		   	  var images=document.getElementsByTagName('img');
-		   	  for(var i=0,len=images.length;i<len;i++){
-		   	  	 imgs[i]=images[i];
-		   	  }
-			   // var cssUrl=config.cssurl;
-			    var cssUrl="css/instreet.ifeng.css";
+			   var cssUrl=config.cssurl;
+			   //var cssUrl="css/instreet.ifeng.css";
 			   ev.importFile('css',cssUrl);
 		       instreet.createContainer();
 			   this.bindBodyEvent();
@@ -685,7 +682,7 @@
 				   ul=config.iurl,pd=data.widgetSid,muh=data.imageUrlHash,
 				   iu=encodeURIComponent(encodeURIComponent(img.src)),
 				   li=$('INSTREET_AD_ACTIVE');
-				var adsId="",adsType="";
+				var adsId="",adsType="",mx="";
 
 				if(li.className=="instreet_aditem"){ 
 				   var children=li.lastChild.children,
@@ -693,13 +690,16 @@
 					for(var i=1,len=children.length;i<len;i++){
 						var child=children[i];
 						var id=child.getAttribute("adsid"),type="";
+
 						if(id){                      //存在id则是匹配广告，否则是底部广告						
 							for(var j=0,length=data.adsSpot.length;j<length;j++){
-								if(id=data.adsSpot[j].adsId){
+								if(id==data.adsSpot[j].adsId){
 									type=data.adsSpot[j].adsType;
+									mx=data.adsSpot[j].metrix;
 									break;
 								}
 							}
+
 						}else{
 							id=data.badsSpot[0].adsId;
 							type=data.badsSpot[0].adsType;
@@ -710,7 +710,7 @@
 					adsId=idArr.join(",");adsType=typeArr.join(",");
 				}
 				var time=new Date().getTime();  
-				ul+="?pd="+pd+"&muh="+muh+"&iu="+iu+"&ad="+adsId+"&at="+adsType+"&flag="+flag+"&time="+time;
+				ul+="?pd="+pd+"&mx="+mx+"&muh="+muh+"&iu="+iu+"&ad="+adsId+"&at="+adsType+"&flag="+flag+"&time="+time;
 				ev.importFile('js',ul);
 						   
 		  },
@@ -723,6 +723,7 @@
 					   pd=data.widgetSid,
 					   ul=config.murl,
 					   mid=data.imageNumId||'',
+					   mx='',
 					   muh=data.imageUrlHash,
 					   adData,
 					   ad='',
@@ -734,14 +735,21 @@
                     var className=tar.className;
                     if(adReg.test(className)){
 					   ad=tar.getAttribute('adsid');
-					   at=1;
+						for(var j=0,length=data.adsSpot.length;j<length;j++){
+							if(ad==data.adsSpot[j].adsId){
+								at=data.adsSpot[j].adsType;
+								mx=data.adsSpot[j].metrix;
+								break;
+							}
+						}
 					   tty=0;
 					}else if(weiboReg.test(className)){
 					   ift=2;
-					   tg=ev.$(tar,'','name')[0].innerHTML||'';
+					   mx=tar.getAttribute("metrix");
+					  
 					}else if(wikiReg.test(className)){
 					   ift=4;
-					   tg=ev.$(tar,'','name')[0].innerHTML||'';
+					   mx=tar.getAttribute("metrix");
 					}else if(weatherReg.test(className)){
 					   ift=7;
 					}else if(newsReg.test(className)){
@@ -755,7 +763,7 @@
 					}
 													
 					var time=new Date().getTime();  								
-					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg="+tg+"&time="+time;				
+					ul+="?iu="+iu+"&mx="+mx+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&at="+at+"&tty="+tty+"&ift="+ift+"&time="+time;				
 					ev.importFile('js',ul);				
 			},
 			locateAd :function(){                    //定位广告
@@ -873,7 +881,7 @@
 						for(var j=0;j<len;j++){
 							if(data.adsSpot[j].metrix===metrix){
 							  ad=data.adsSpot[j];
-							  redUrl=config.redurl+"?tty=0&mid="+ad.imageNumId+"&muh="+data.imageUrlHash+"&pd="+ad.widgetSid+"&ift=&tg=&at="+ad.adsType+"&ad="+ad.adsId+"&rurl="+encodeURIComponent(encodeURIComponent(ad.adsLinkUrl));
+							  redUrl=config.redurl+"?tty=0&muh="+data.imageUrlHash+"&pd="+ad.widgetSid+"&ift=&at="+ad.adsType+"&ad="+ad.adsId+"&mx="+ad.metrix+"&rurl="+encodeURIComponent(encodeURIComponent(ad.adsLinkUrl));
 							  var className="other_ad_box no_border";
 							  str+="<div adsid='"+ad.adsId+"' class='"+className+"'>";
 					          str+="<table><tbody><tr><td class='td1'><a class='imgbox' href='"+redUrl+"'><img src='"+ad.adsPicUrl+"' alt='' /></a></td>";                                							  
@@ -896,7 +904,7 @@
 					   }else{
 						  str="<div class='other_foot_ad'>";
 						  if(footData.adsType==3){
-						     var redUrl=config.redurl+"?tty=0&mid="+data.imageNumId+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(footData.adsType||'')+"&ad="+(footData.adsId||'')+"&tg=&rurl="+encodeURIComponent(encodeURIComponent(footData.adsLinkUrl));
+						     var redUrl=config.redurl+"?tty=0&mx=&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(footData.adsType||'')+"&ad="+(footData.adsId||'')+"&rurl="+encodeURIComponent(encodeURIComponent(footData.adsLinkUrl));
 							 str+="<a href='"+redUrl+"'><img src='"+footData.adsPicUrl+"' alt=''/></a>";
 						  }else if(!footData.adsLinkUrl&&footData.description){
 							 var fra=footData.description;
@@ -987,8 +995,8 @@
 						  avatar=weibo.avatar,
 						  latestStatus=weibo.latestStatus,
 						  title=weibo.title,
-						  userUrl=config.redurl+"?tty=1&mid="+data.imageNumId+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift="+weibo.type+"&at=&ad=&tg="+encodeURIComponent(encodeURIComponent(title))+"&rurl="+encodeURIComponent(encodeURIComponent(weibo.userUrl)),
 						  metrix=weibo.metrix,
+						  userUrl=config.redurl+"?tty=1&mx="+metrix+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift="+weibo.type+"&at=&ad=&rurl="+encodeURIComponent(encodeURIComponent(weibo.userUrl)),						  
 						  s="";
 						if(i==len-1)  
 							s="<div class='other_weibo_box no_border' metrix='"+metrix+"'>";
@@ -1026,8 +1034,8 @@
 						  firstimg=wiki.firstimg,
 						  isexist=wiki.isexist,
 						  summary=wiki.summary,
-						  url=config.redurl+"?tty=1&mid="+data.imageNumId+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift="+wiki.type+"&at=&ad=&tg="+encodeURIComponent(encodeURIComponent(title))+"&rurl="+encodeURIComponent(encodeURIComponent(wiki.url)),
 						  metrix=wiki.metrix,
+						  url=config.redurl+"?tty=1&mx="+metrix+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift="+wiki.type+"&at=&ad=&rurl="+encodeURIComponent(encodeURIComponent(wiki.url)),						  
 						  s="";
 						if(i==len-1)   
 							s="<div class='other_wiki_box no_border' metrix='"+metrix+"'>";
@@ -1045,7 +1053,9 @@
 			   			
 			},
 			createNews  :function(data,obj){		  
-			   var str="",newsUrl="http://push.instreet.cn/baidunews",
+			   var str="",
+			      //newsUrl="http://push.instreet.cn/baidunews",
+			   	  newsUrl="http://localhost:7456/clivia-branches/baidunews",
 			   	  left=obj.isLeft,
 			   	  liArray=[];
 			   if(config.showNews){
