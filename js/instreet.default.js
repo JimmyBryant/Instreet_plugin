@@ -17,7 +17,7 @@
 		   prefix="http://push.instreet.cn/",
 		   config = {
 
-						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet-ifeng.css",
+						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.ifeng.css",
 						redurl	:	prefix+"click.action",
 					callbackurl	:	prefix+"push.action",
 						murl	:	prefix+"tracker.action",
@@ -29,7 +29,7 @@
 						timer   :   1000
 						,
 						widgetSid: "79cjp47BnLo3NdNaLeICIw",
-						triggerFootAd: "mouse",        //mouse为鼠标移动到图片显示、scroll为页面滚动的时候显示
+						triggerFootAd: "mouse", 
 						showAd  :   true,
 						showFootAd: true,
 				        showWeibo:  true,
@@ -436,30 +436,41 @@
 					}
 				};
 				shop.onmouseover=function(e){
-					var event=ev.getEvent(e),rela=ev.getRelatedTarget(e),
-						ad=cache.adsArray[index];
-
 					index=this.insId;
-					cache.adsArray[index].showWidget();
+					var event=ev.getEvent(e),rela=ev.getRelatedTarget(event),
+						ad=cache.adsArray[index];					
+					ad.showWidget();
 					show(this);
-
+					if(!instreet.shop.contains(rela)){
+						ad.recordWatch(this);
+					}
 
 				};
 				shop.onmouseout=function(e){
 					instreet.leaveApp(e,this.insId,this);					
 				};
-				weibo.onmouseover=function(){
+				weibo.onmouseover=function(e){
 					index=this.insId;
-					cache.adsArray[index].showWidget();
+					var event=ev.getEvent(e),rela=ev.getRelatedTarget(event),
+						ad=cache.adsArray[index];					
+					ad.showWidget();
 					show(this);
+					if(!instreet.weibo.contains(rela)){
+						ad.recordWatch(this);
+					}
 				};
 				weibo.onmouseout=function(e){
 					instreet.leaveApp(e,this.insId,this);
 				};
-				wiki.onmouseover=function(){
+				wiki.onmouseover=function(e){
 					index=this.insId;
-					cache.adsArray[index].showWidget();
+					var event=ev.getEvent(e),rela=ev.getRelatedTarget(event),
+						ad=cache.adsArray[index];					
+					ad.showWidget();
 					show(this);
+					if(!instreet.wiki.contains(rela)){
+						ad.recordWatch(this);
+					}
 				};
 				wiki.onmouseout=function(e){
 					instreet.leaveApp(e,this.insId,this);
@@ -470,6 +481,15 @@
 				hide(instreet.shop);
 				hide(instreet.weibo);
 				hide(instreet.wiki);
+			},
+			enterApp  :function(e,index,app){
+				var event=ev.getEvent(e),rela=ev.getRelatedTarget(e),
+					ad=cache.adsArray[index];					
+				ad.showWidget();
+				show(app);
+				if(!instreet.shop.contains(rela)){
+					ad.recordWatch(app);
+				}
 			},
 			leaveApp  :function(e,index,app){
 				var event=ev.getEvent(e),rela=ev.getRelatedTarget(event);
@@ -504,6 +524,7 @@
 		var InstreetAd=function(data){			
 			var img=imgs[data.index];
 			this.data=data;
+			this.originInfo={width:img.clientWidth,height:img.clientHeight,src:img.src,pos:ev.getXY(img)};
 			this.img=img;
 			this.init();
 		};
@@ -542,6 +563,38 @@
 					var coor=_this.getCoor(spot);
 					spot.style.cssText="top:"+coor.top+"px;left:"+coor.left+"px;";
 				}
+			},
+			detect   :function(){                     //每隔一段时间开始检测图片对象是否change
+
+                var _this=this,img=_this.img,origin=_this.originInfo,
+                	side=_this.sideWrapper,pos=ev.getXY(img);
+
+                if(img.src&&img.src!=origin.src){
+                    var parent=side.parentNode||document.body;
+                    parent.removeChild(side);
+                    cache.onImgLoad(img);
+                    origin.src=img.src;
+                }
+                else if(img.clientWidth!=origin.width||img.clientHeight!=origin.height){
+                		if(img.clientWidth==0||img.clientHeight==0){
+                			var images=document.images;
+                			for(var i=images.length;i--;){
+                				if(images[i].src==img.src&&img!==images[i]){
+                					images[i].insId=img.insId;
+                					_this.img=images[i];
+                				}
+                			}
+                		}
+                		_this.locate();
+
+                }else if(pos.x!==origin.pos.x||pos.y!==origin.pos.y){
+                	
+                	    origin.pos=pos;
+						_this.locate();
+
+                }
+                
+
 			},
 			bindEvents :function(){
 				var _this=this,box=_this.boxWrapper,icons=_this.icons,logo=icons.firstChild,img=_this.img,
@@ -587,6 +640,12 @@
 						if(tar.className=="button-close-ad"){
 							_this.adClosed=false;
 							_this.hideAd();
+						}
+					};
+					ad.onmouseover=function(e){
+						var event=ev.getEvent(e),rela=ev.getRelatedTarget(event);
+						if(!this.contains(rela)){
+							_this.recordWatch(this);
 						}
 					}
 				};
@@ -890,6 +949,9 @@
 							adsType+=adsType==""?app.adsType:","+app.adsType;
 						}
 					}
+				}else if(flag==10&&_this.ad){
+					adsId=data.badsSpot[0].adsId;
+					adsType=data.badsSpot[0].adsType;
 				}
 
 				var time=new Date().getTime();  
@@ -913,22 +975,39 @@
 					   tg='',
 					   ift=0,
 					   tty=1;
-                    var cn=tar.className.replace("-holder");
+                    var cn=tar.className.replace("-holder","");
+                    console.log(cn);
                     if(cn=="shop"){
-                       
-					   ad=data.adsSpot[index].adsId;
-					   at=data.adsSpot[index].adsType;
+                       var metrix=instreet.shop.metrix;
+                       for(var i=0,len=data.adsSpot.length;i<len;i++){
+                       	   var app=data.adsSpot[i];
+                       	   if(app.metrix==metrix){
+                       	   		ad+=ad==""?app.adsId:","+app.adsId;
+                       	   		at+=at==""?app.adsType:","+app.adsType;
+                       	   }
+                       }
 					   tty=0;
 					}else if(cn=="weibo"){
 					   ift=2;
-					   tg=data.weiboSpot[index].title||'';
+					   var metrix=instreet.weibo.metrix;
+                       for(var i=0,len=data.weiboSpot.length;i<len;i++){
+                       	   var app=data.weiboSpot[i];
+                       	   if(app.metrix==metrix){
+                       	   	 tg=app.title||'';
+                       	   	 break;
+                       	   }
+                       }
+					   
 					}else if(cn=="wiki"){
 					   ift=4;
-					   tg=data.wikiSpot[index].title||'';
-					}else if(cn=="weather"){
-					   ift=7;
-					}else if(cn=="news"){
-					   ift=5;
+					   var metrix=instreet.wiki.metrix;
+                       for(var i=0,len=data.wikiSpot.length;i<len;i++){
+                       	   var app=data.wikiSpot[i];
+                       	   if(app.metrix==metrix){
+                       	   	 tg=app.title||'';
+                       	   	 break;
+                       	   }
+                       }
 					}else if(cn=="ad"){
 					   ad=data.badsSpot[0].adsId;
 					   at=data.badsSpot[0].adsType;
@@ -942,7 +1021,20 @@
 			}
 
 		};
+		/************************************
+		*static method
+		************************************/
+		InstreetAd.reLocate =function(){                   //重新定位广告
 
+           var adsArray=cache.adsArray;
+           
+           for(i in adsArray){
+
+              var adObj=adsArray[i];
+              adObj.locate&&adObj.locate();
+		 
+		    }
+		};
 
 
 
@@ -962,6 +1054,20 @@
 				
 		};
 		
+	    /**********************************
+	    *TimerTick 方法
+	    ***********************************/
+	    var TimerTick=(function(){
+	    	var timerId=null;   //全局时间函数计时器
+	    	return function(arr){
+	             timerId=setInterval(function(){
+		         	 for(var i=0;i<arr.length;i++){
+						arr[i]&&arr[i].detect();
+		         	 }
+	             },1000);
+	    	};
+	    })();
+
 		
 		/*********************************
 		*Mix config
@@ -982,10 +1088,19 @@
 		
         //插件初始化
         var init=function(){
-			typeof instreet-config!='undefined'&&mixConfig(instreet-config);
-			instreet.init();
-		    cache.initData();
-		
+
+		 	if(typeof instreet_config!="undefined"){		//mix配置信息
+				 mixConfig(instreet_config);
+			 }                  
+		     instreet.init();
+			 cache.initData();
+			 ev.bind(window,'resize',function(){InstreetAd.reLocate();}); 
+			 //dom ready后搜索是否有新的图片
+			 // document.DomReady(function(){
+			 // 		instreet.search()
+			 // });
+			 //定时检测图片是否变化
+             TimerTick(cache.adsArray);
 		};		
 		
 		document.DomReady(function(){
