@@ -31,11 +31,11 @@
    		/********************************
 		*Config对象
 		*********************************/
-		var prefix="http://test.instreet.cn/";
+		var prefix="http://push.instreet.cn/";
 		var config = {
 
-						//cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.sprint.min.css",
-						cssurl 	:	"css/instreet.sprint.min.css",
+						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.sprint.min.css",
+						// cssurl 	:	"css/instreet.sprint.min.css",
 						redurl	:	prefix+"click.action",
 					callbackurl	:	prefix+"push.action",
 						murl	:	prefix+"tracker.action",
@@ -45,19 +45,19 @@
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
-						,
-						adsLimit :  5,
-						widgetSid:"50HHkxiAQ0Qnwkkth1Ivjq",
-						//widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
-						showAd:true,
-						showFootAd:true,
-						showWeibo:true,
-						showWiki:true,
-						showShareButton:true,
-						showWeather:true,
-						showNews:true,
-						showMeiding  :true,
-						footAuto:  true						
+						// ,
+						// adsLimit :  5,
+						// widgetSid:"50HHkxiAQ0Qnwkkth1Ivjq",
+						// widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
+						// showAd:true,
+						// showFootAd:true,
+						// showWeibo:true,
+						// showWiki:true,
+						// showShareButton:true,
+						// showWeather:true,
+						// showNews:true,
+						// showMeiding  :true,
+						// footAuto:  true						
 		};
 
 
@@ -607,18 +607,18 @@
 				_this.contents=contentWrapper;
 
 			},
-			createSpot :function(appData,index){
-				var oWidth=appData.width,metrix=appData.metrix,
+			createSpot :function(app,index){
+				var oWidth=app.width,metrix=app.metrix,
 				    spot=document.createElement("a"),spotContainer=$("instreet-plugin-spotbox");
 			    spot.href="javascript:;";
 			    spot.index=index;
 				spot.metrix=metrix;
 				spot.imgWidth=oWidth;	
-			    if(appData.adsType)
+			    if(app.adsType)
 			      spot.className="instreet-shopSpot";
-			    else if(appData.type.toString()=="1"||appData.type.toString()=="2")  
+			    else if(app.type.toString()=="1"||app.type.toString()=="2")  
 			      spot.className="instreet-weiboSpot";
-			    else if(appData.type.toString()=="4")
+			    else if(app.type.toString()=="4")
 				  spot.className="instreet-wikiSpot";
 				this.spotsArray.push(spot);
 				spotContainer.appendChild(spot);
@@ -730,10 +730,10 @@
 
 					};
 					//tab mouseout
-					tab.onmouseout=function(){
+					// tab.onmouseout=function(){
 
 
-					};
+					// };
 					//content mouseover
 					content.onmouseover=function(e){
 						var event=ev.getEvent(e),tar=ev.getRelatedTarget(event);
@@ -743,9 +743,9 @@
 						}
 					};
 					//content mouseout
-					content.onmouseout=function(){
+					// content.onmouseout=function(){
 		
-					};
+					// };
 
 				}
 				//spots event	
@@ -753,12 +753,12 @@
 					var spot=_this.spotsArray[j];
 					spot.onmouseover=function(){
 						clearTimeout(_this.timerId);
-						switch(spot.className){
+						switch(this.className){
 							case "instreet-shopSpot":
 							var tab=ev.$(_this.tabs,null,'shop')[0].parentNode,
 								sel=ev.$(_this.contents,null,'in-shop-selector')[0].children[this.index];
-							var isFocus=sel.className.match(" focus");	
-							InstreetAd.chooseItem(sel,this.index);
+							var isFocus=sel.className.match(" focus");							
+							sel&&InstreetAd.chooseItem(sel,this.index);	
 							_this.showApp(tab);
 							if(!isFocus){
 								_this.recordShow(9); //record adShow times
@@ -766,14 +766,14 @@
 							break;
 							case "instreet-weiboSpot":
 							var tab=ev.$(_this.tabs,null,'weibo')[0].parentNode,
-							sel=ev.$(_this.contents,null,'in-weibo-selector')[0].children[this.index];
-							InstreetAd.chooseItem(sel,this.index);
+							sel=ev.$(_this.contents,null,'in-weibo-selector')[0].children[this.index];				
+							sel&&InstreetAd.chooseItem(sel,this.index);	
 							_this.showApp(tab);
 							break;
-							case "instreet-wikiboSpot":
+							case "instreet-wikiSpot":
 							var tab=ev.$(_this.tabs,null,'wiki')[0].parentNode;
 							sel=ev.$(_this.contents,null,'in-wiki-selector')[0].children[this.index];
-							InstreetAd.chooseItem(sel,this.index);
+							sel&&InstreetAd.chooseItem(sel,this.index);
 							_this.showApp(tab);
 							break;
 						}
@@ -973,7 +973,7 @@
 		};
 
 		InstreetAd.chooseItem =function(sel,nth){	
-			if(sel.className.match(" replace")){
+			if(sel.className.match(" focus")){
 				return;
 			}	
 			var selector=sel.parentNode,container=selector.previousSibling,fi=ev.$(container,null,'focus')[0],
@@ -1103,7 +1103,8 @@
 				str+='<div class="in-slider-container">';
 				for(var i=0,len=data.weiboSpot.length;i<len;i++){
 					focus=i==0?" focus":"";
-					app=data.weiboSpot[i];						
+					app=data.weiboSpot[i];	
+					obj.createSpot(app,i);        //创建spot					
 					avatar=app.avatar;
 					icon=app.icon;
 					title=app.title;
@@ -1135,7 +1136,8 @@
 				str+='<div class="in-slider-container">';
 				for(var i=0,len=data.wikiSpot.length;i<len;i++){
 					focus=i==0?" focus":"";
-					app=data.wikiSpot[i];					
+					app=data.wikiSpot[i];	
+					obj.createSpot(app,i);        //创建spot				
 					avatar=app.firstimg;
 					title=app.title;
 					article=app.summary;

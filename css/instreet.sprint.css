@@ -79,7 +79,7 @@
 }
 .in-tabs-wrapper .tab a em{
 	font-style: normal;
-	display: none;
+/*	display: none;*/
 }
 .in-tabs-wrapper .first a{
 	border-top: 1px solid #BBB;
@@ -356,6 +356,7 @@
 *****************************/
 .in-contents-wrapper .weibo .weibo-item{
 	display: none;
+	height: 124px;
 }
 .in-contents-wrapper .weibo .in-slider-container .focus{
 	display: block;
@@ -441,7 +442,9 @@
 ***********************************/
 .in-contents-wrapper .wiki .wiki-item{
 	display: none;
+	height: 114px;
 }
+
 .in-contents-wrapper .wiki .in-slider-container .focus{
 	display: block;
 }
@@ -488,6 +491,7 @@
 .in-contents-wrapper .wiki .right p:hover{
 	border-color: #555;
 }
+
 /******************************
 *style of share
 *****************************/

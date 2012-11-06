@@ -17,7 +17,7 @@
 		   prefix="http://push.instreet.cn/",
 		   config = {
 
-						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.ifeng.css",
+						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.default.min.css",
 						redurl	:	prefix+"click.action",
 					callbackurl	:	prefix+"push.action",
 						murl	:	prefix+"tracker.action",
@@ -27,14 +27,15 @@
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
-						,
-						widgetSid: "79cjp47BnLo3NdNaLeICIw",
-						triggerFootAd: "mouse", 
-						showAd  :   true,
-						showFootAd: true,
-				        showWeibo:  true,
-						showWiki:   true,
-						position:   'right'
+						// ,
+						// adsLimit : 2,
+						// widgetSid: "77WCO3MnOq5GgvoFH0fbH2",
+						// triggerFootAd: "mouse", 
+						// showAd  :   true,
+						// showFootAd: true,
+				  //       showWeibo:  true,
+						// showWiki:   true,
+						// position:   'right'
 		    },			
 			ev = {                  
 				bind : function(element,type,handler){
@@ -178,7 +179,7 @@
             			handler.call(arrs[i],i);
             		}
             	}else{
-            		handler.call(arrs,0);
+            		arrs&&handler.call(arrs,0);
             	}
             }
             ,
@@ -369,18 +370,18 @@
 		    },
 			loadData     :function(img){
 			   
-			   var index=img.insId,clientImg=imgs[index];
-               if(clientImg){			   
-				   if(img.width>=config.imiw&&img.height>=config.imih){
-					   	if(clientImg.clientWidth>=config.imiw&&clientImg.clientHeight>=config.imih){
-
-					   	   instreet.recordImage(clientImg);				   
-						   cache.createJsonp(clientImg);
-						   
-					    }
-					}
-			   }
-
+			   var index=img.insId,clientImg=imgs[index];		   
+			   if(img.width>=config.imiw&&img.height>=config.imih){
+				  if(clientImg.clientWidth>=config.imiw&&clientImg.clientHeight>=config.imih){
+			   	 	  instreet.recordImage(clientImg);	
+				   	  if(typeof config.adsLimit=="number"&&config.adsLimit<=0){	
+				   	  	return;
+				   	  }	
+					   		   
+					   cache.createJsonp(clientImg);
+					   config.adsLimit&&config.adsLimit--;				   	  			   	  					   
+				    }
+				}			   
 			},
 			createJsonp  :function(img){
 			   var w=img.clientWidth,h=0;
@@ -397,8 +398,8 @@
 			container :null,
 			widgetBox :null,
 		    init   :function(){
-			    // var cssUrl=config.cssurl;
-				var cssUrl='css/instreet.default.css';
+			    var cssUrl=config.cssurl;
+			    // var cssUrl='css/instreet.default.css';
 				ev.importFile('css',cssUrl);
 				instreet.createContainer();
 				instreet.bindEvents();
@@ -772,32 +773,32 @@
 					  
 					  ad.className='ad-holder';
 					  str="<div class='ad-cont'><a class='button-close-ad'title='关闭' href='javascript:;'>×</a>";
-					  if(app.adsType){
+					
 					  var redUrl=config.redurl+"?tty=0&mid="+(data.imageNumId||0)+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(app.adsType||'')+"&ad="+(app.adsId||'')+"&tg=&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl||''));
-					     if(app.adsType=='3'){							
-							str+='<a href="'+redUrl+'" class="imgbox" target="_blank"><img class="adimg" src="'+app.adsPicUrl+'" alt=""/></a>';
-						  }else if(app.adsType=='8'){
-							 str+="<img src='"+app.adsPicUrl+"'  media-src='"+app.description+"' class='instreet-video-trigger' alt='' style='cursor:pointer;'/>";
-						  }else if(app.adsType=='9'){
-							 str+="<a href='"+redUrl+"' target='_blank'><embed wmode='transparent' width='300' height='100'  src='"+app.adsPicUrl+"' type='application/x-shockwave-flash'></embed></a>";
-						  }else if(app.adsType=='2'){
-						    h=35;
-							w=width-32;
-							var urlArr=app.adsPicUrl.split(','),pt=30;
-							ad.setAttribute("width",w);
-							ad.setAttribute("height",h+pt);
-						    ad.style.cssText="width:"+w+"px;height:"+h+"px;left:"+pos.x+"px;top:"+(pos.y+height-h-pt)+"px;padding-top:30px;";     
-						    if(w>375){
-							str+="<a href='"+redUrl+"' class='black-bg' target='-blank'><img class='sprite1' src='"+(urlArr[0]||"")+"' alt=''/><span class='slogan'><p class='light'>"+footAd.adsTitle+"</p><p>更多精彩»</p></span></a>";
-							}else{
-							str+="<a href='"+redUrl+"' class='black-bg' target='-blank'><span class='slogan'><p class='light'>"+footAd.adsTitle+"</p><p>更多精彩»</p></span></a>";
-							}
-						  }
-						  
-					  }else if(!app.adsLinkUrl&&app.description){
+				      if(app.adsType=='3'){							
+						str+='<a href="'+redUrl+'" class="imgbox" target="_blank"><img class="adimg" src="'+app.adsPicUrl+'" alt=""/></a>';
+					  }else if(app.adsType=='8'){
+						 str+="<img src='"+app.adsPicUrl+"'  media-src='"+app.description+"' class='instreet-video-trigger' alt='' style='cursor:pointer;'/>";
+					  }else if(app.adsType=='9'){
+						 str+="<a href='"+redUrl+"' target='_blank'><embed wmode='transparent' width='300' height='100'  src='"+app.adsPicUrl+"' type='application/x-shockwave-flash'></embed></a>";
+					  }else if(app.adsType=='2'){
+					    h=35;
+						w=width-32;
+						var urlArr=app.adsPicUrl.split(','),pt=30;
+						ad.setAttribute("width",w);
+						ad.setAttribute("height",h+pt);
+					    ad.style.cssText="width:"+w+"px;height:"+h+"px;left:"+pos.x+"px;top:"+(pos.y+height-h-pt)+"px;padding-top:30px;";     
+					    if(w>375){
+						str+="<a href='"+redUrl+"' class='black-bg' target='-blank'><img class='sprite1' src='"+(urlArr[0]||"")+"' alt=''/><span class='slogan'><p class='light'>"+footAd.adsTitle+"</p><p>更多精彩»</p></span></a>";
+						}else{
+						str+="<a href='"+redUrl+"' class='black-bg' target='-blank'><span class='slogan'><p class='light'>"+footAd.adsTitle+"</p><p>更多精彩»</p></span></a>";
+						}
+					  }	else if(!app.adsLinkUrl&&app.description){
 						 var fra=app.description;
 						 str+=fra.slice(0,-2)+'></iframe>';
 					  }
+						  
+
 					  str+="</div>";
 					  ad.innerHTML=str;
 				   	  _this.boxWrapper.appendChild(ad);
@@ -817,13 +818,13 @@
 			showWidget    :function(){
 				var _this=this,spots=_this.spotHolder,icons=_this.icons;
 				show(icons.lastChild);
-				show(spots.children);
+				spots.children.length&&show(spots.children);
 				icons.style.zIndex=100000;
 			},
 			hideWidget    :function(){
 				var _this=this,spots=_this.spotHolder,icons=_this.icons;
 				hide(icons.lastChild);
-				hide(spots.children);
+				spots.children.length&&hide(spots.children);
 				icons.style.zIndex=99999;
 			},
 			showAd        :function(){
@@ -874,15 +875,16 @@
 					    var app=data.adsSpot[i],						
 						    redUrl=config.redurl+"?tty=0&mid="+app.imageNumId+"&muh="+data.imageUrlHash+"&pd="+app.widgetSid+"&ift=&tg=&at="+app.adsType+"&ad="+app.adsId+"&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl));
 					    if(app.metrix==metrix){
-                            f=adId?'':'instreet-shop-focus';	
-                            if(adId){
-							   str+="<a class='instreet-slider-left' href='javascript:;' title='上一个商品'></a><a title='下一个商品' class='instreet-slider-right' href='javascript:;'></a>";
-							}							
-							str+="<div class='cont-body' id='"+f+"' adsid='"+app.adsId+"' index='"+adId+"'><div class='left'><a class='thumb' target='-blank' href='"+redUrl+"' title='"+app.adsTitle+"'><img src='"+app.adsPicUrl+"'/></a></div><div class='right'><p class='p-desc'><a target='-blank' href='"+redUrl+"'>"+app.adsTitle+"</a></p>";
+   							//f=adId?'':'instreet-shop-focus';	
+                            // if(adId){
+							//    str+="<a class='instreet-slider-left' href='javascript:;' title='上一个商品'></a><a title='下一个商品' class='instreet-slider-right' href='javascript:;'></a>";
+							// }							
+							str+="<div class='cont-body' id='instreet-shop-focus' adsid='"+app.adsId+"' index='"+adId+"'><div class='left'><a class='thumb' target='-blank' href='"+redUrl+"' title='"+app.adsTitle+"'><img src='"+app.adsPicUrl+"'/></a></div><div class='right'><p class='p-desc'><a target='-blank' href='"+redUrl+"'>"+app.adsTitle+"</a></p>";
 							str+="<p class='p-money'>原价：<strong>"+app.adsPrice+"</strong></p><p class='p-nowmoney'>现价：<strong>"+(app.adsDiscount||app.adsPrice)+"</strong></p>";
 							str+="<p class='p-buyit'><a class='button-buy' href='"+redUrl+"' target='-blank'></a></p></div><div class='clear'></div></div>";
-							adId++;
+							// adId++;
 					    }
+
 					 }
 					appBox.innerHTML=str;					
 					break;
@@ -976,7 +978,7 @@
 					   ift=0,
 					   tty=1;
                     var cn=tar.className.replace("-holder","");
-                    console.log(cn);
+
                     if(cn=="shop"){
                        var metrix=instreet.shop.metrix;
                        for(var i=0,len=data.adsSpot.length;i<len;i++){

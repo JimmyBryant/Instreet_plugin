@@ -235,10 +235,11 @@
 			   var index=img.insId,clientImg=imgs[index];		   
 			   if(img.width>=config.imiw&&img.height>=config.imih){
 			   	 if(clientImg.clientWidth>=config.imiw&&clientImg.clientHeight>=config.imih){
+			   	 	  InstreetAd.recordImage(clientImg);	
 				   	  if(typeof config.adsLimit=="number"&&config.adsLimit<=0){	
 				   	  	return;
 				   	  }	
-					   InstreetAd.recordImage(clientImg);			   
+					   		   
 					   cache.createJsonp(clientImg);
 					   config.adsLimit&&config.adsLimit--;
 				   	  
