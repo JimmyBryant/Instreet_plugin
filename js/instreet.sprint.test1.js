@@ -1,8 +1,8 @@
-/*********************************************
+/*****************************
 *
 *sprint.js
 *
-**********************************************/
+******************************/
 (function(window,undefined){
         
 		if (typeof window.InstreetWidget!="undefined"||window.InstreetWidget != null){
@@ -33,8 +33,8 @@
 		var prefix="http://push.instreet.cn/";
 		var config = {
 
-						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.sprint.min.css",
-						// cssurl 	:	"css/instreet.sprint.css",
+						// cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.sprint.min.css",
+						 cssurl 	:	"css/instreet.sprint.css",
 						redurl	:	prefix+"click.action",
 					callbackurl	:	prefix+"push.action",
 						murl	:	prefix+"tracker.action",
@@ -44,18 +44,19 @@
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
-						// ,
-						// adsLimit :  5,
-						// widgetSid:"WkN2vxXpNE7MUOgnYxnAk",
-						// showAd:true,
-						// showFootAd:true,
-						// showWeibo:true,
-						// showWiki:true,
-						// showShareButton:true,
-						// showWeather:true,
-						// showNews:true,
-						// showMeiding  :true,
-						// footAuto:  true						
+						,
+						adsLimit :  5,
+						widgetSid:"4z9rxazql3QnEikIZVMWf6",
+						// widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
+						showAd:true,
+						showFootAd:true,
+						showWeibo:true,
+						showWiki:true,
+						showShareButton:true,
+						showWeather:true,
+						showNews:true,
+						showMeiding  :true,
+						footAuto:  true						
 		};
 
 
@@ -130,6 +131,31 @@
 				   return array;
 				   function sortNum(a,b){return a-b;}
 		    },
+			getStyle:function(elem,style){
+					var value=elem.style[style];
+					if(!value){
+			             if (document.defaultView && document.defaultView.getComputedStyle) {
+			                var _css=document.defaultView.getComputedStyle(elem, null);
+			                value= _css ? _css.getPropertyValue(style) : null;
+			             }else{
+			                if (elem.currentStyle){
+			                    value = elem.currentStyle[style];
+			                }
+			             }
+					}
+
+			        if(style == "opacity"){
+			            try {
+			                value = elem.filters['DXImageTransform.Microsoft.Alpha'].opacity;
+			                value =value/100;
+			            }catch(e) {
+			                try {
+			                    value = elem.filters('alpha').opacity;
+			                } catch(err){}
+			            }
+		        	}
+					return value;
+			},
 		    $:  function(parentNode,tagName,className){  		   
 				   var parent=parentNode||document;
 				   if(document.getElementsByClassName) return parent.getElementsByClassName(className);
@@ -217,226 +243,85 @@
                      doScrollCheck();
 			    }  
 						  
-		}; 
+		};
 
-	var css={                                //css对象，用于设置样式或者获取样式
 
-		   get:function(elem,style){
-
-			   var value;
-			   if(style == "float"){
-				 document.defaultView ? style = 'cssFloat': style='styleFloat';
-			   }
-			   if(style=="opacity"){
-				 document.defaultView ? style = 'opacity': style='filter';
-			   }
-
-			   if (document.defaultView && document.defaultView.getComputedStyle) {
-				 var value=document.defaultView.getComputedStyle(elem, null)[style];
-
-			   }else if (elem.currentStyle){
-
-					value = elem.currentStyle[style];
-					if(style=="filter"){
-
-						if(value.match("alpha")){
-
-							value=parseFloat(value.match(/\d+/)[0])/100;
-
-						}else if(!value){
-
-							value=1;
+		/**************************************
+		*slider对象 包含slideRight和slideLeft
+		**************************************/
+		var Slider=(function(elem,speed){
+			var TimerId=null,list=[];			
+		    var slider=function(elem, speed){
+			    
+				this.elem=elem;
+				this.speed=speed||400;			
+				this.width=parseInt(ev.getStyle(elem,"width"));
+				elem.style.width=0;  								
+			};
+			slider.prototype.slideRight=function(callback){
+			   var _this=this, elem=_this.elem,speed=_this.speed,
+				   start=elem.clientWidth,end=_this.width;
+			    elem.style.display ="block"; 
+			    _this.fx=new Fx(elem,speed,start,end,callback);
+				list.push(_this.fx);			
+			};
+			slider.prototype.slideLeft=function(callback){
+			   var _this=this, elem=_this.elem,speed=_this.speed,
+				   start=elem.clientWidth,end=0;
+				_this.fx=new Fx(elem,speed,start,end,callback);
+				list.push(_this.fx);
+			};
+			slider.prototype.stop=function(){
+				_this.fx.stop();
+			};
+			var Fx=function(elem,speed,start,end,callback){
+				this.elem=elem;
+				this.start=start;
+				this.startTime=new Date().getTime();
+				this.speed=speed;
+				this.end=end;
+				this.callback=callback;
+  				
+				if(!list.length&&!TimerId){
+					TimerId=setInterval(function(){
+						for(var i=0;i<list.length;i++){							
+							list[i].step&&list[i].step();
 						}
-					}
-
-			   }
-
-			   typeof value=="string"&&value.match("px")?value=parseInt(value.replace("px","")):value;          //如果value包含px则转换成num
-			   style=="opacity"?value=parseInt(value):value;
-			   return value;
-
-		   },
-		   set:function(elem,style,value){
-
-			  if(style=="float"){
-				document.defaultView ? style = 'cssFloat': style='styleFloat';
-			  }
-			  if(style=="opacity"){
-				elem.style.filter="alpha(opacity="+value*100+")";
-				elem.style.zoom=1;
-			  }
-				elem.style[style]=value;
-		   }
-
-
-
-		};
-	/**************************
-	*animate方法
-	*************************/		
-	var animate=(function(){
-
-	    var timers=[],       //用于存放Fx对象
-			timerId;         //全局计时器
-		   
-
-		var isEmptyObject=function(obj){            //判断对象是否为空
-
-				for ( var name in obj ) {
-					return false;
+						if(!list.length){
+							Fx.stop();
+						}
+					},13);
 				}
-				return true;
-
-		};
-
-	    var Animate= function	(elem,property, duration, easing, callback){               //js动画入口API
-
-		   var options=Animate.getOpt(duration, easing, callback);                     //修正参数
-
-		   if(elem&&elem.nodeType==1){
-
-			    var start,to;
-			    if(property&&typeof property=="object"){
-
-					if(isEmptyObject(property)){             //如果property为空直接执行callback
-
-					    callback.call(elem);
-
-					}else{
-
-					   for(var name in property){
-
-					      var fx=new FX(elem,options,name);
-						  start=css.get(elem,name);
-						  end=parseFloat(property[name]);
-					      fx.custom(start, end);  
-
-					   }
-
-
-					}
+			};
+			Fx.stop=function(){
+				clearInterval(TimerId);
+				TimerId=null;
+			}
+		 	Fx.prototype.step=function(){
+			   var _this=this,start=_this.start,end=_this.end,
+			   	   p=(new Date().getTime()-_this.startTime)/_this.speed,
+				   swing=(-(Math.cos(p*Math.PI)/2) + 0.5),
+				   gap=end-start;
+					 
+				if(p<=1){ 					
+					_this.elem.style.width=start+(gap*swing)+'px';	
+				}else
+				{   //动画结束
+					_this.stop();
+					_this.callback&&_this.callback(); //执行callback
 
 				}
-
-		   }
-
-		 };
-
-		Animate.getOpt=function(duration, easing, callback){       // 修正参数
-
-			 var options ={duration:duration||200,easing:easing||"linear"};
-			 options.callback=function(){callback&&callback();};
-			 return options;
-
-		};
-
-	    Animate.stop=function(elem,end){                               //停止某个dom元素的动画  end为true则会把动画进行到最后一帧 false则停止到当前帧
-		    end=end||false;
-			for(var i=timers.length;i--;){
-			   var fx=timers[i];
-			   if(fx.elem===elem){
-			    if(end){
-				  fx.update(fx.name,fx.end); 
-				}
-			    timers.splice(i,1);
+			};
+			Fx.prototype.stop=function(){
+			   for(var i=0;i<list.length;i++){
+			   	  if(list[i]&&list[i]===this){
+			   	  	 list.splice(i--,1);
+			   	  }
 			   }
 
 			}
-
-		};
-
-		var FX=function(elem,options,name){                      //FX对象    每一个css属性实例一个FX对象 
-
-			this.elem=elem;
-			this.options=options;
-			this.name=name;
-
-		};
-		FX.prototype.custom=function(from,end){                      //custom方法用于将FX对象推入timers队列
-
-			this.startTime = new Date().getTime();  
-			this.start = from;  
-			this.end = end; 
-
-			timers.push(this);  
-			FX.tick();  
-
-		};
-		FX.prototype.step=function(){
-		    var now=new Date().getTime(),
-				nowPos;
-
-			if(now>this.options.duration+this.startTime){                  //完成动画后执行回调函数并且使用stop方法将fx从timers队列清除
-			   nowPos=this.end;
-			   this.options.callback.call(this.elem);  
-			   this.stop();		
-			}else{
-			    var n = now - this.startTime;  
-	            var state = n / this.options.duration;  
-	            var pos =Easing[this.options.easing](state, 0, 1, this.options.duration);  
-	            nowPos = this.start + ((this.end - this.start) * pos);  
-	        }  
-
-	        this.update(this.name,nowPos);  
-		};
-
-		FX.prototype.stop=function(){
-
-			for(var i=timers.length;i--;){
-
-				if(timers[i]===this){
-					timers.splice(i,1);
-				}
-			}
-
-		};
-
-		FX.prototype.update=function(name,value){
-
-			if(name!="opacity")
-			{
-				value+="px";
-			}
-
-			css.set(this.elem,name,value);
-
-		};
-
-
-		FX.tick = function(){  
-	        if (timerId) return;                                   //如果计时器已经在走则退出
-	   
-	        timerId = setInterval(function(){  
-	            for (var i = 0,len=timers.length;i<len;i++){  
-	                timers[i]&&timers[i].step();  
-	            }  
-	            if (!timers.length){  
-	                FX.stop();  
-	            }  
-	        }, 13);  
-	    };  
-	     
-		FX.stop = function(){                                  //清除全局计时器 停止所有动画 
-	        clearInterval(timerId);   
-	        timerId = null;  
-	    };
-
-	    var Easing={                                         //easing对象
-	 	
-			linear: function( p ) {
-				return p;
-			},
-			swing: function( p ) {
-				return ( -Math.cos( p*Math.PI ) / 2 ) + 0.5;
-			}
-
-		};	
-
-		return Animate;
-
-	})();
-
-
+			return slider;
+		})();
     
 
      /**********************************
@@ -500,8 +385,8 @@
 			    }
 			},
 			createJsonp  :function(img){
-			   var w=250,h=250,pu=encodeURIComponent(encodeURIComponent(location.href));
-			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pu="+pu+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp"+"&w="+w+"&h="+h;
+			   var w=250,h=250;
+			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp"+"&w="+w+"&h="+h;
 			   ev.importFile('js',url);
 			}
 		
@@ -603,6 +488,7 @@
 				_this.adWrapper=adWrapper;
 				_this.tabs=tabWrapper;
 				_this.contents=contentWrapper;
+				_this.slider=new Slider(contentWrapper);
 
 			},
 			createSpot :function(app,index){
@@ -624,8 +510,7 @@
 			locate   :function(){                            //定位广告
 				var _this=this,img=_this.img,pos=ev.getXY(img),w=img.offsetWidth,
 				left=pos.x+w+"px",top=pos.y+"px",spotsArray=_this.spotsArray;
-				var dis=img.clientWidth>=config.imiw&&img.clientHeight>=config.imih?"block":"none";
-				_this.adWrapper.style.cssText="left:"+left+";top:"+top+";display:"+dis;
+				_this.adWrapper.style.cssText="left:"+left+";top:"+top;
 
                if(spotsArray.length>0){              //如果存在spot，同时也对其重定位
 
@@ -649,31 +534,32 @@
 			bindEvents :function(){
 				var _this=this,list=_this.tabs.children,contents=_this.contents.children;
 
-				//bind img event 
-				_this.bindImgEvents(_this.img);
-				// _this.findCover();
+				//为图片绑定事件
+				_this.bindImg();
+
+				//tabs events
 				_this.tabs.onmouseover=function(){
 					clearTimeout(_this.timerId);
 				};
 				_this.tabs.onmouseout=function(){
-					_this.timerId=setTimeout(function(){_this.closeApp()},config.timer);
+					_this.timerId=setTimeout(function(){_this.closeApps()},config.timer);
 				};
 			   _this.contents.onmouseover=function(){
 					clearTimeout(_this.timerId);
 				};
 				_this.contents.onmouseout=function(){
-					_this.timerId=setTimeout(function(){_this.closeApp()},config.timer);
+					_this.timerId=setTimeout(function(){_this.closeApps()},config.timer);
 				};
 				_this.contents.onclick=function(e){
 					var event=ev.getEvent(e),tar=ev.getTarget(event);
 					if(tar.className=='in-close'){
-						_this.closeApp();
+						_this.closeApps();
 					}else if(tar.parentNode.className=="in-share-icons"){
 						_this.shareImg(tar);
 					}
 					ev.stopPropagation(event);
 				};
-				// click shop slider item
+				// click shop selector item
 				var shopSelector=ev.$(_this.contents,null,'in-shop-selector')[0];
 				shopSelector&&each(shopSelector.children,function(index){
 					var item=this;
@@ -681,7 +567,7 @@
 						InstreetAd.chooseItem(this,index);
 					};
 				});
-				// click weibo slider item
+				// click weibo selector item
 				var weiboSelector=ev.$(_this.contents,null,'in-weibo-selector')[0];
 				weiboSelector&&each(weiboSelector.children,function(index){
 					var item=this;
@@ -690,7 +576,7 @@
 					};
 				});
 				
-				// click wiki slider item
+				// click wiki selector item
 				var wikiSelector=ev.$(_this.contents,null,'in-wiki-selector')[0];
 				wikiSelector&&each(wikiSelector.children,function(index){
 					var item=this;
@@ -742,13 +628,7 @@
 							case "instreet-shopSpot":
 							var tab=ev.$(_this.tabs,null,'shop')[0].parentNode,
 								sel=ev.$(_this.contents,null,'in-shop-selector')[0].children[this.index];
-							var isFocus;
-							if(sel){
-							    isFocus=sel.className.match(" focus");
-							}							
-							else{
-								isFocus=tab.className.match(" focus");
-							}							
+							var isFocus=sel.className.match(" focus");							
 							sel&&InstreetAd.chooseItem(sel,this.index);	
 							_this.showApp(tab);
 							if(!isFocus){
@@ -772,36 +652,31 @@
 				}		
 
 			},
-			bindImgEvents  :function(img){           //为图片绑定事件
-				var _this=this;
+			bindImg  :function(){
+				var _this=this,img=_this.img;
 				//img mouseover
-				ev.bind(img,'mouseover',function(){
+				ev.bind(_this.img,'mouseover',function(){
 					clearTimeout(_this.timerId);
-					if(_this.contents.offsetWidth==0){
+					console.log(_this.contents.style.display)
+					if(_this.contents.style.display=="none"){
 						_this.showApp();
 						_this.recordShow(10);
 					}
 				});
 				//img mouseout
-				ev.bind(img,'mouseout',function(){
- 					_this.timerId=setTimeout(function(){_this.closeApp()},config.timer);
+				ev.bind(_this.img,'mouseout',function(){
+ 					_this.timerId=setTimeout(function(){_this.closeApps()},config.timer);
 				});
 			},
-			// findCover:function(){             //查找覆盖在img上的cover
-			// 	var _this=this,img=_this.img,all=document.getElementsByTagName("a"),i=0,
-			// 		len=all.length;
-			// 	for(;i<len;i++){
-			// 		var a=all[i];
-			// 		if(css.get(a,"position")==="absolute"){
-			// 			var pos=ev.getXY(a),imgPos=_this.originInfo.pos;				
-			// 			if(pos.y<=imgPos.y&&(pos.y+a.offsetHeight)>imgPos.y){
-			// 				if(pos.x<=(imgPos.x+img.offsetWidth)&&(pos.x+a.offsetWidth)>imgPos.x){
-			// 					_this.bindImgEvents(a);
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// },
+			closeApps:function(){
+				
+				var _this=this;
+				_this.slider.slideLeft(function(){
+					_this.hideApps();
+				});
+				
+				// this.contents.style.width=0;
+			},
 			hideApps:function(){
 				var _this=this,list=_this.tabs.children;
 				//寻找focus tab
@@ -812,11 +687,8 @@
 				}
 				hide(_this.contents.children);
 			},
-			closeApp:function(){				
-				this.hideApps();
-				this.contents.style.width=0;
-			},
 			showApp: function(tab){   
+
 				var _this=this,list=_this.tabs.children,type;        
 				if(!tab){
 					tab=list[0];
@@ -825,9 +697,10 @@
 				_this.hideApps();
 				tab.className+=" focus";
 				show(ev.$(_this.contents,'li',type));
-				if(css.get(_this.contents,'width')==0){
-					animate(_this.contents,{width:'266px'},200,'linear');
-				}
+				_this.slider.slideRight();
+				// if(css.get(_this.contents,'width')==0){
+				// 	animate(_this.contents,{width:'266px'},200,'linear');
+				// }
 			},
 			getSelectedIndex:function(type){
 
@@ -876,25 +749,26 @@
 
                 var _this=this,img=_this.img,origin=_this.originInfo,
                 	side=_this.sideWrapper,pos=ev.getXY(img);
+
                 if(img.src&&img.src!=origin.src){
                     var parent=side.parentNode||document.body;
                     parent.removeChild(side);
                     cache.onImgLoad(img);
                     origin.src=img.src;
                 }
-                else if(img.clientWidth<=0||img.clientHeight<=0){               		
-        			var images=document.images;
-        			for(var i=images.length;i--;){
-        				if(images[i].src==img.src&&images[i].clientWidth>=config.imiw&&images[i].clientHeight>=config.imih){
-        					images[i].insId=img.insId;
-        					_this.img=images[i];
-        					origin.pos=pos;       //修改原来的pos值   
-        					_this.bindImgEvents(_this.img);
-        					// _this.findCover();            
-        					break;
-        				}
-        			}
-            		_this.locate();
+                else if(img.clientWidth!=origin.width||img.clientHeight!=origin.height){
+                		if(img.clientWidth==0||img.clientHeight==0){
+                			var images=document.images;
+                			for(var i=images.length;i--;){
+                				if(images[i].src==img.src&&img!==images[i]){
+                					images[i].insId=img.insId;
+                					_this.img=images[i];
+                					_this.bindImg();
+                					break;
+                				}
+                			}
+                		}
+                		_this.locate();
 
                 }else if(pos.x!==origin.pos.x||pos.y!==origin.pos.y){
                 	
@@ -912,7 +786,7 @@
 		       var _this=this,data=_this.data,img=_this.img,
 				   ul=config.iurl,pd=data.widgetSid,muh=data.imageUrlHash,
 				   iu=encodeURIComponent(encodeURIComponent(img.src)),focus=ev.$(_this.tabs,null,'focus')[0];
-				var adsId="",adsType="",index=0,mx='';
+				var adsId="",adsType="",index=0;
 
 				if(focus){ 
 					if(focus.lastChild.className=="ad"){
@@ -922,11 +796,11 @@
 						index=_this.getSelectedIndex("shop");
 						adsId=data.adsSpot[index].adsId;
 						adsType=data.adsSpot[index].adsType;						
-						mx=data.adsSpot[index].metrix;
+
 					}
 				}
 				var time=new Date().getTime();  
-				ul+="?pd="+pd+"&mx="+mx+"&muh="+muh+"&iu="+iu+"&ad="+adsId+"&at="+adsType+"&flag="+flag+"&time="+time;
+				ul+="?pd="+pd+"&muh="+muh+"&iu="+iu+"&ad="+adsId+"&at="+adsType+"&flag="+flag+"&time="+time;
 				ev.importFile('js',ul);
 						   
 		   },
@@ -945,21 +819,19 @@
 					   at='',
 					   tg='',
 					   ift=0,
-					   tty=1,
-					   mx='';
+					   tty=1;
                     var cn=tar.className,index=_this.getSelectedIndex(cn);
                     if(cn=="shop"){
                        
 					   ad=data.adsSpot[index].adsId;
 					   at=data.adsSpot[index].adsType;
-					   mx=data.adsSpot[index].metrix;
 					   tty=0;
 					}else if(cn=="weibo"){
 					   ift=2;
-					   mx=data.weiboSpot[index].metrix||'';
+					   tg=data.weiboSpot[index].title||'';
 					}else if(cn=="wiki"){
 					   ift=4;
-					   mx=data.wikiSpot[index].metrix||'';
+					   tg=data.wikiSpot[index].title||'';
 					}else if(cn=="weather"){
 					   ift=7;
 					}else if(cn=="news"){
@@ -972,7 +844,7 @@
 						return;
 					}
 					var time=new Date().getTime();  								
-					ul+="?iu="+iu+"&mx="+mx+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&at="+at+"&tty="+tty+"&ift="+ift+"&time="+time;				
+					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg="+tg+"&time="+time;				
 					ev.importFile('js',ul);				
 			}
 
@@ -1065,7 +937,7 @@
 					focus=i==0?" focus":"";
 					app=data.adsSpot[i];
 					obj.createSpot(app,i);        //创建spot
-					redUrl=config.redurl+"?tty=0&mx="+app.metrix+"&muh="+data.imageUrlHash+"&pd="+app.widgetSid+"&ift=&at="+app.adsType+"&ad="+app.adsId+"&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl));
+					redUrl=config.redurl+"?tty=0&mid="+app.imageNumId+"&muh="+data.imageUrlHash+"&pd="+app.widgetSid+"&ift=&tg=&at="+app.adsType+"&ad="+app.adsId+"&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl));
 					title=app.adsTitle;
 					price=app.adsDiscount||app.adsPrice;
 					imgUrl=app.adsPicUrl.replace("160x160","250x250");
@@ -1086,25 +958,16 @@
 				}else{
 					tab=InstreetAd.createTab('ad','推广');
 				}
-				data=obj.data;				
+				data=obj.data;
 				app=data.badsSpot[0];
-
-				// app.adsType=9;
-				// app.description="http://static.youku.com/v1.0.0223/v/swf/loader.swf?winType=adshow&VideoIDS=118492875&isAutoPlay=true&delayload=true&isShowRelatedVideo=false&imglogo=http://static.atm.youku.com/Youku2012/201211/1112/20635/280-210.jpg";
-				
 				cont=document.createElement("li");
 				cont.className="ad";
-				redUrl=config.redurl+"?tty=0&mx=&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(app.adsType||'')+"&ad="+(app.adsId||'')+"&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl||''));
 				str='<h3 class="title clearfix"><a title="关闭" href="javascript:;" class="in-close">×</a>产品推广</h3><div class="main-cont">';
-			  	if(app.adsType==3){      //图片广告			     
+
+			  	if(app.adsType==3){
+			      redUrl=config.redurl+"?tty=0&mid="+data.imageNumId+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(app.adsType||'')+"&ad="+(app.adsId||'')+"&tg=&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl));
 				  str+="<a class='large-image' target='_blank' href='"+redUrl+"'><img src='"+app.adsPicUrl+"' alt=''/></a>";
-			  	}else if(app.adsType==9){              //flash广告
-			  	  str+='<object id="afg-adloader" width="250" height="250"  align="middle" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,0,0" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">';
-				  str+='<param value="always" name="allowScriptAccess"/><param value="'+app.adsPicUrl+'" name="movie"/><param value="high" name="quality"/><param value="opaque" name="wmode"/><param value="high" name="quality"><param value="#F1F1F1" name="bgcolor"/>';
-				  str+='<embed width="250" height="250" align="middle" pluginspage="http://www.adobe.com/go/getflashplayer"  type="application/x-shockwave-flash" allowscriptaccess="always" wmode="opaque"  bgcolor="#F1F1F1" quality="high" src="'+app.adsPicUrl+'"></object>';
-			  	  str+='<a class="flash-cover" href="'+redUrl+'" target="_blank"></a>';
-			  	}
-			  	else if(!app.adsLinkUrl&&app.description){   //谷歌广告
+			  	}else if(!app.adsLinkUrl&&app.description){
 				  var frame=app.description;
 				  str+='<i class="small-info"></i>';
 				  str+=frame.slice(0,-2)+'></iframe>';
@@ -1138,7 +1001,7 @@
 					icon=app.icon;
 					title=app.title;
 					article=app.latestStatus;
-					redUrl=config.redurl+"?tty=1&mx="+app.metrix+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift="+app.type+"&at=&ad=&rurl="+encodeURIComponent(encodeURIComponent(app.userUrl));
+					redUrl=config.redurl+"?tty=1&mid="+data.imageNumId+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift="+app.type+"&at=&ad=&tg="+encodeURIComponent(encodeURIComponent(title))+"&rurl="+encodeURIComponent(encodeURIComponent(app.userUrl));
 					str+='<div class="weibo-item'+focus+'"><div class="left"><a href="'+redUrl+'" target="_blank" title="'+title+'"><img src="'+avatar+'"/></a></div><div class="right"><h3><a href="'+redUrl+'" target="_blank">'+title+'</a></h3><p><em class="arrow-one"></em><em class="arrow-two"></em>'+article+'</p><div class="icon-section"><a href="'+redUrl+'" target="_blank"><img src="'+icon+'"/></a></div></div></div>';				
 					if(len>1)selectStr+='<a href="javascript:;" class="select-item'+focus+'"></a>';
 				}
@@ -1170,7 +1033,7 @@
 					avatar=app.firstimg;
 					title=app.title;
 					article=app.summary;
-					redUrl=config.redurl+"?tty=1&mx="+app.metrix+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift="+app.type+"&at=&tg="+encodeURIComponent(encodeURIComponent(title))+"&rurl="+encodeURIComponent(encodeURIComponent(app.url));
+					redUrl=config.redurl+"?tty=1&mid="+data.imageNumId+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift="+app.type+"&at=&ad=&tg="+encodeURIComponent(encodeURIComponent(title))+"&rurl="+encodeURIComponent(encodeURIComponent(app.url));
 					str+='<div class="wiki-item'+focus+'"><div class="left"><a class="thumb" href="'+redUrl+'" target="_blank" title="'+title+'"><img src="'+avatar+'"/></a><h3><a class="tagName" href="'+redUrl+'" target="_blank">'+title+'</a></h3></div><div class="right"><p><em class="arrow-one"></em><em class="arrow-two"></em>'+article+'</p><div class="icon-section"><a href="'+redUrl+'" target="_blank"><img src="http://static.instreet.cn/widgets/push/images/icon_baike.png"/></a></div></div></div>';
 					if(len>1)selectStr+='<a href="javascript:;" class="select-item'+focus+'"></a>';
 				}
@@ -1181,9 +1044,9 @@
 			newsApp:function(obj){
 				if(!config.showNews)
 					return;
-				var tab,cont,data=obj.data,
-				     newsUrl="http://push.instreet.cn/baidunews?size=250",				     
-				     app=data.newsSpot,i=0,len=app.length
+				var tab,cont,
+				     newsUrl="http://push.instreet.cn/baidunews?size=250"
+					//newsUrl="http://localhost:7456/clivia-branches/baidunews?size=250",
 					;
 				if(obj.isFirstApp){
 					tab=InstreetAd.createTab('news','新闻','first');
@@ -1195,18 +1058,7 @@
    			   	var cont=document.createElement("li");			   	   	   
 		   	    cont.className="news";  
 		        str='<h3 class="title clearfix"><a title="关闭" href="javascript:;" class="in-close">×</a>热点新闻</h3><div class="main-cont">';
-			    if(len<1)
 			    str+='<iframe name="weather_inc" src="'+newsUrl+'" width="250" height="250" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>';
-			    else{
-			    	str+='<div class="news-box">';
-			    	for(;i<len;i++){
-				   	 	var news=app[i],title=news.newsTitle,url=news.newsUrl,date=news.newsDate.split(":"),
-				   	 	    url=config.redurl+"?tty=1&mx=&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=5&at=&ad=&rurl="+encodeURIComponent(encodeURIComponent(url));						  ;
-				   	 	str+='<a href="'+url+'" target="_blank">'+title+'</a><span>'+date[0]+':'+date[1]+'</span>';
-				   	 	if(i==4){break;}
-			    	}
-			    	str+='</div>';
-			    }
 			    str+='</div>';
 		   	    cont.innerHTML=str;
 			   
@@ -1215,9 +1067,7 @@
 			weatherApp:function(obj){
 				if(!config.showWeather)
 					return;
-				var tab,cont,
-					// weatherUrl="http://tianqi.xixik.com/cframe/8";
-					weatherUrl="http://m.weather.com.cn/n/pn10/weather.htm";
+				var tab,cont,weatherUrl="http://tianqi.xixik.com/cframe/8";
 				if(obj.isFirstApp){
 					tab=InstreetAd.createTab('weather','天气','first');
 					obj.isFirstApp=false;
@@ -1227,7 +1077,7 @@
    			   	var cont=document.createElement("li");			   	   	   
 		   	    cont.className="weather";  
 		        str='<h3 class="title clearfix"><a title="关闭" href="javascript:;" class="in-close">×</a>天气预报</h3><div class="main-cont">';
-			    str+='<iframe name="weather_inc" src="'+weatherUrl+'" width="250" height="80" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" allowtransparency="true" ></iframe>';
+			    str+='<iframe name="weather_inc" src="'+weatherUrl+'" width="250" height="84" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>';
 			    str+='</div>';
 		   	    cont.innerHTML=str;
 				return {tab:tab,cont:cont};
@@ -1288,6 +1138,10 @@
 		     instreet.init();
 			 cache.initData();
 			 ev.bind(window,'resize',function(){InstreetAd.reLocate();}); 
+			 //dom ready后搜索是否有新的图片
+			 // document.DomReady(function(){
+			 // 		instreet.search()
+			 // });
 			 //定时检测图片是否变化
              TimerTick(cache.adsArray);
 

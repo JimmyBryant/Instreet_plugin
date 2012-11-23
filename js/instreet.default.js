@@ -1,4 +1,4 @@
-﻿(function(window,undefined){
+(function(window,undefined){
         
 		if (typeof(window.InstreetWidget) != "undefined" || (window.InstreetWidget != null)){
 			return null;
@@ -16,7 +16,7 @@
            readylist=[],
 		   prefix="http://push.instreet.cn/",
 		   config = {
-
+			    	    // cssurl  :'css/instreet.default.css',
 						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.default.min.css",
 						redurl	:	prefix+"click.action",
 					callbackurl	:	prefix+"push.action",
@@ -28,9 +28,10 @@
 						imiw	:	290,
 						timer   :   1000
 						// ,
-						// adsLimit : 2,
-						// widgetSid: "77WCO3MnOq5GgvoFH0fbH2",
-						// triggerFootAd: "mouse", 
+						// adsLimit : null,
+						// footAuto : true,
+						// widgetSid: "2uBGRDtPoUnQ6PrBqQVOlG",
+						// trigger  : "mouse", 
 						// showAd  :   true,
 						// showFootAd: true,
 				  //       showWeibo:  true,
@@ -282,23 +283,22 @@
 		    var slider=function(elem, speed){
 			    
 				this.elem=elem;
-				this.speed=speed||500;
+				this.speed=speed||300;
 				this.flag=null;				
-				this.height=parseInt(ev.getStyle(elem,'height'));
+				this.height=elem.clientHeight;
 				elem.style.height=0;  
 
 			};
 			slider.prototype.slideDown=function(callback){
 			   var _this=this, elem=_this.elem,speed=_this.speed,
 				   startTime=new Date().getTime(),
-				   now=parseInt(elem.style.height),gap=_this.height-now;
+				   now=elem.clientHeight,gap=_this.height-now;
 
 			   elem.style.display ="block"; 
 			   var	loop=function(){
 				    var p=(new Date().getTime()-startTime)/speed,
 					   swing=(-Math.cos( p*Math.PI ) / 2 ) + 0.5;
 					elem.style.height=now+(gap*swing)+'px';	
-
 					if (p<=1) {
 					    clearTimeout(_this.flag);
 						_this.flag=setTimeout(loop,30);
@@ -312,7 +312,7 @@
 			};
 			slider.prototype.slideUp=function(callback){
 			   var _this=this, elem=_this.elem,speed=_this.speed,
-				   startTime=new Date().getTime(),now=parseInt(parseInt(elem.style.height)),gap=-now;
+				   startTime=new Date().getTime(),now=elem.clientHeight,gap=-now;
 
 			   var	loop=function(){
 				   var p=(new Date().getTime()-startTime)/speed,
@@ -399,7 +399,6 @@
 			widgetBox :null,
 		    init   :function(){
 			    var cssUrl=config.cssurl;
-			    // var cssUrl='css/instreet.default.css';
 				ev.importFile('css',cssUrl);
 				instreet.createContainer();
 				instreet.bindEvents();
@@ -514,7 +513,6 @@
 
 			}
 
-
 		};
 
 
@@ -545,7 +543,6 @@
 				boxWrapper.appendChild(spotHolder);
 				_this.boxWrapper=boxWrapper;
 				_this.spotHolder=spotHolder;
-
 				_this.createIconsHolder();
 				_this.createSpots();
 				_this.createAd();
@@ -553,12 +550,12 @@
 			},
 			locate  :function(){
 				var _this=this,spots=_this.spotHolder.children,icons=_this.icons,ad=_this.ad,img=_this.img,pos=ev.getXY(img),
-					icons_left,icons_top,imgW=img.offsetWidth,imgH=img.offsetHeight,pad=5;
-					
-				icons_left=config.position=="left"?pos.x+pad+"px":pos.x+imgW-icons.offsetWidth-pad+"px";
-				icons_top=pos.y+imgH-icons.offsetHeight+"px";					
-				icons.style.cssText="left:"+icons_left+";top:"+icons_top;
-
+					icons_left,icons_top,imgW=img.offsetWidth,imgH=img.offsetHeight,pad=2;
+		        var dis=_this.data.badsSpot.length?"none":"block";
+				icons_left=config.position=="left"?pos.x+pad+"px;":pos.x+imgW-icons.offsetWidth-pad+"px;";
+				icons_top=pos.y+imgH-icons.offsetHeight+"px;";					
+				icons.style.cssText="left:"+icons_left+"top:"+icons_top+"display:"+dis;
+				
 				for(var len=spots.length,i=0;i<len;i++){               //定位spot
 					var spot=spots[i];
 					var coor=_this.getCoor(spot);
@@ -598,7 +595,7 @@
 
 			},
 			bindEvents :function(){
-				var _this=this,box=_this.boxWrapper,icons=_this.icons,logo=icons.firstChild,img=_this.img,
+				var _this=this,box=_this.boxWrapper,icons=_this.icons,img=_this.img,
 					shareIcon=icons.lastChild.children[1],spotHolder=_this.spotHolder,ad=_this.ad;
 				//box onclick
 				box.onclick=function(e){
@@ -764,7 +761,8 @@
 			   	   h=100,w=300,str='';
 		        if(config.showFootAd&&data.badsSpot.length>0){   
 
-				      var app=data.badsSpot[0],ad=document.createElement('div');
+				      var app=data.badsSpot[0],ad=document.createElement('div'),
+				      	  aw=!!app.adsWidth?app.adsWidth+"px;":"auto;",ah=!!app.adsHeight?app.adsHeight+"px;":"auto;";
 					  /*******change adstype******		  
 					    footAd.adsType=2;
 						footAd.adsPicUrl="http://ads.gumgum.com/com/vibrantmedia/mazda/mazda3.png";
@@ -772,7 +770,7 @@
 					 ***************/	
 					  
 					  ad.className='ad-holder';
-					  str="<div class='ad-cont'><a class='button-close-ad'title='关闭' href='javascript:;'>×</a>";
+					  str='<div class="ad-cont" style="width:'+aw+'height:'+ah+'"><a class="button-close-ad" title="关闭" href="javascript:;">×</a>';
 					
 					  var redUrl=config.redurl+"?tty=0&mid="+(data.imageNumId||0)+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(app.adsType||'')+"&ad="+(app.adsId||'')+"&tg=&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl||''));
 				      if(app.adsType=='3'){							
@@ -832,8 +830,7 @@
 					imgW=img.offsetWidth,imgH=img.offsetHeight;
 				if(ad&&ad.style.display!="block"){
 					show(ad);
-					var adW=parseInt(ev.getStyle(ad.lastChild,"width")),adH=100;
-	
+					var adW=ad.lastChild.offsetWidth,adH=100;
 					ad.style.cssText="display:block;left:"+(pos.x+(imgW-adW)/2)+"px;top:"+(pos.y+imgH-adH)+"px;width:"+adW+"px;height:"+adH+"px";
 					if(!_this.slider){  //如果不存在slider对象则初始化一个
 						_this.adClosed=true;
@@ -860,7 +857,7 @@
 					pos={x:parseInt(tar.style.left),y:parseInt(tar.style.top)},
 					size=25;
 
-				str+="<h2 class='cont-head'><a class='button-close-holder' href='javascript:;' title='关闭'></a></h2>";	
+				str+="<h2 class='cont-head'><a class='button-close-holder' href='javascript:;' title='关闭'>×</a></h2>";	
 				switch(cn){
 					case "instreet-spot-shop":
 					appBox=instreet.shop;
@@ -1048,10 +1045,11 @@
 		window['insjsonp']=function(data){
 			if(data){
 			  var index=data.index,img=imgs[index];
-			  // cache.dataArray[index]=data;
-			  // cache.avaImages.push(img);
 			  img.setAttribute('instreet-data-ready',true);
 			  cache.adsArray[index]=new InstreetAd(data);
+			   if(config.footAuto){
+			   	 cache.adsArray[index].showAd();
+			   }
 			}
 				
 		};

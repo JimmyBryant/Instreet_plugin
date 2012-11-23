@@ -5,6 +5,8 @@
 *1.click.action添加mx参数去掉tag和mid参数
 *2.tracker90.action添加mx参数
 *3.tracker.action添加mx参数去掉tag和mid参数
+*4.push.action增加pu参数
+*5.前端解析新闻数据
 *
 *************************************/
 (function(window,undefined){
@@ -38,7 +40,8 @@
 		var prefix="http://push.instreet.cn/";
 		var config = {
 
-						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet_ifeng.css",
+						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.ifeng.css",
+						// cssurl 	:	"css/instreet.ifeng.css",
 						redurl	:	prefix+"click.action",
 					callbackurl	:	prefix+"push.action",
 						murl	:	prefix+"tracker.action",
@@ -48,19 +51,18 @@
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
-						,
-					 	adsLimit :  null,
-					 	// widgetSid: "36wuVtGXVqclEbzGVGJNcY",
-						widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
-						showAd:true,
-						showFootAd:true,
-						showWeibo:true,
-						showWiki:true,
-						showShareButton:true,
-						showWeather:true,
-						showNews:true,
-						showMeiding  :true,
-					    footAuto:  false
+						// ,
+					 // 	adsLimit :  null,
+						// widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
+						// showAd:true,
+						// showFootAd:true,
+						// showWeibo:true,
+						// showWiki:true,
+						// showShareButton:true,
+						// showWeather:true,
+						// showNews:true,
+						// showMeiding  :true,
+					 //    footAuto:  false
 						
 		};
 
@@ -247,7 +249,8 @@
 			   }
 			},
 			createJsonp  :function(img){
-			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp";
+			   var width=300,height=250,pu=encodeURIComponent(encodeURIComponent(location.href));
+			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pd="+config.widgetSid+"&iu="+iu+"&pu="+pu+"&callback=insjsonp&w="+width+"&h="+height;
 			   ev.importFile('js',url);
 			}
 		
@@ -1055,18 +1058,29 @@
 			},
 			createNews  :function(data,obj){		  
 			   var str="",
-			      //newsUrl="http://push.instreet.cn/baidunews",
-			   	  newsUrl="http://localhost:7456/clivia-branches/baidunews",
-			   	  left=obj.isLeft,
-			   	  liArray=[];
+			      newsUrl="http://push.instreet.cn/baidunews",
+			   	  liArray=[],
+			   	  app=data.newsSpot;
+			   	  
 			   if(config.showNews){
 
-   			   	   var li=document.createElement("li");
-			   	   	   
+   			   	   var li=document.createElement("li"),len=app.length,i=0;	   	   	   
 			   	   li.className="instreet_news";  
 			       str="<a href='javascript:;' class='instreet_tip instreet_news_button'></a><div class='instreet_news_box'>";
-				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关新闻讯息</div>";				
-				   str+='<div class="other_news_box no_border"><iframe frameborder="0" width="300" height="250" marginwidth="0" marginheight="0" src="'+newsUrl+'"></iframe></div></div>';			   
+				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关新闻讯息</div><div class='other_news_box no_border'>";				
+				   if(len<1){
+				      str+='<iframe frameborder="0" width="300" height="250" marginwidth="0" marginheight="0" src="'+newsUrl+'"></iframe>';
+				   }else{
+				   	 str+='<div class="news-box"><h2>热点新闻</h2>';
+				   	 for(;i<len;i++){
+				   	 	var news=app[i],title=news.newsTitle,url=news.newsUrl,date=news.newsDate.split(":"),
+				   	 	    url=config.redurl+"?tty=1&mx=&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=5&at=&ad=&rurl="+encodeURIComponent(encodeURIComponent(url));						  ;
+				   	 	str+='<a href="'+url+'" target="_blank">'+title+'</a><span>'+date[0]+':'+date[1]+'</span>';
+				   	 	if(i==4){break;}
+				   	 }
+				   	 str+='</div>';
+				   }
+				   str+='</div></div>';			   
 			   	   li.innerHTML=str;
 				   liArray.push(li);
 			   }

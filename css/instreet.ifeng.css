@@ -34,7 +34,7 @@
 	display:none
 }
 .instreet_weather_box{
-    height:157px;
+    height:106px;
 }
 #INSTREET_CONTAINER .instreet_other_title{
 	background:url("../images/title_bg.gif") no-repeat scroll 0 0 transparent;
@@ -356,6 +356,39 @@
 #INSTREET_CONTAINER .font_item .time{float:right;padding: 15px 8px 0 0;}
 #INSTREET_CONTAINER .large_font{font-size:25px;font-weight:bold;}
 
+/***************newsbox******************/
+#INSTREET_CONTAINER .news-box{
+	width: 288px;
+	height: 248px;
+	border:1px solid #B1C8D7;
+	padding: 5px;
+	background: #FFF;
+	text-align: left;
+	font: 14px/24px arial,serif,'宋体';
+}
+#INSTREET_CONTAINER .news-box h2{
+    color: #222222;
+    font-size: 18px;
+    margin: 5px 0;
+}
+#INSTREET_CONTAINER .news-box a{
+    color: #2B2B2B;
+    display: block;
+    height: 24px;
+    overflow: hidden;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#INSTREET_CONTAINER .news-box a:hover{
+	color: #BA2636;
+	text-decoration: underline;
+}
+#INSTREET_CONTAINER .news-box span{
+	display: block;
+	color: #888;
+	cursor:default;
+}
 
 
 
