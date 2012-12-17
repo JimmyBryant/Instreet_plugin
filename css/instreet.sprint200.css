@@ -46,7 +46,7 @@
 .in-ad-wrapper{
 	position: absolute;
 	z-index: 2147483640; 
-	/*width: 292px;*/
+	/*width: 242px;*/
 	width: auto;
 	overflow: hidden;
 }
@@ -190,16 +190,16 @@
 	background-color: #000000;
 	text-decoration: none;
 	display: none;
-	width: 250px;
-	height: 250px;
+	width: 200px;
+	height: 200px;
 }
 .in-contents-wrapper .shop .focus{
 	display: block;
 }
 .in-contents-wrapper .shop .pro-box img{
 	display: block;
-	width: 250px;
-	height: 250px;
+	width: 200px;
+	height: 200px;
     transition:all 0.25s ease-in 0.1s;
     -moz-transition:all 0.25s ease-in 0.1s;
 	-webkit-transition:all 0.25s ease-in 0.1s;
@@ -215,8 +215,8 @@
 	position: absolute;
     top: 0;
     left: 0;
-    width:250px;
-    height:250px;
+    width:200px;
+    height:200px;
     overflow: hidden;
     cursor: pointer;
     z-index: 1;
@@ -225,8 +225,8 @@
 .in-contents-wrapper .shop .pro-name{
     display: block;
 	font-size: 20px;
-	height: 25%;
-	padding: 25% 10px 0;
+	height: 30%;
+	padding: 15% 10px 0;
 	overflow: hidden;
 /*	text-overflow: ellipsis;*/
 	white-space: normal;
@@ -271,7 +271,7 @@
 	color: #FFF;
 	height: 50%;
 	width: 0;
-	line-height: 4.8em;
+	line-height: 4.2em;
 	text-align: center;
 	overflow: hidden;
     transition:all 0.35s ease-in;
@@ -282,7 +282,7 @@
 }
 .in-contents-wrapper .shop .pro-box:hover .pro-price{
 	width: 50%;
-	_width:120px;
+	_width:95px;
 }
 .in-contents-wrapper .shop .pro-box:hover .pro-tobuy{
 	width: 50%;
@@ -295,13 +295,13 @@
     box-shadow: 0 1px 0 rgba(0, 0, 0, .3),0 2px 2px -1px rgba(0, 0, 0, .5),0 1px 0 rgba(255, 255, 255, .3) inset;
 	text-shadow: 0 1px 0 rgba(0,0,0,.5);
 	background-color:#C43C35;
-	padding:6px 20px;
+	padding:6px 15px;
 	border: 1px solid #C43C35;
 	border-radius:5px; 
 	color: #FFF;
 	font: bold 12px/1.8 "宋体";
 	font-style: normal;
-    left: 13%;
+    left: 0;
     position: absolute;
     top: 35%;
     width: 52px;
@@ -354,7 +354,7 @@
 	background: url(../images/loading_sprint.gif) no-repeat center center #F1F1F1;
 }
 .in-contents-wrapper li.ad .large-image img{
-	width: 250px;
+	width: 200px;
 }
 .in-contents-wrapper li.ad i.small-info{
 	background: url(../images/small-info.png) no-repeat 13px 0px;
@@ -384,13 +384,14 @@
 *****************************/
 .in-contents-wrapper .weibo .weibo-item{
 	display: none;
-	max-height: 135px;
+	max-height: 180px;
 }
 .in-contents-wrapper .weibo .in-slider-container .focus{
 	display: block;
 }
 .in-contents-wrapper .weibo  .left{
 	float: left;
+	position: relative;
 }
 .in-contents-wrapper .weibo .left a
 {
@@ -403,6 +404,9 @@
 }
 .in-contents-wrapper .weibo .left a:hover{
 	border-color: #555;
+}
+.in-contents-wrapper .weibo .left a img{
+	width: 50px;
 }
 .in-contents-wrapper  .weibo .right{
 	margin-left: 65px;
@@ -470,7 +474,7 @@
 ***********************************/
 .in-contents-wrapper .wiki .wiki-item{
 	display: none;
-	max-height: 135px;
+	max-height: 180px;
 }
 
 .in-contents-wrapper .wiki .in-slider-container .focus{
@@ -478,6 +482,7 @@
 }
 .in-contents-wrapper .wiki .left{
 	float: left;
+	position: relative;
 }
 .in-contents-wrapper .wiki .left .thumb{
 	display: inline-block;
@@ -494,9 +499,12 @@
 .in-contents-wrapper .wiki .left .tagName{
     color: #555555;
     display: block;
+    height: 42px;
+    overflow: hidden;
     padding: 6px 0 0;
-    text-align: center;
+    text-align: left;
     text-decoration: none;
+    width: 60px;
 }
 .in-contents-wrapper .wiki .left .tagName:hover{
 	color: #000;
@@ -591,7 +599,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-   	width: 238px;
     height: 24px;
     text-decoration: none;
 }

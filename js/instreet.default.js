@@ -1,3 +1,9 @@
+/*****************************
+*
+*default.js
+*1.google ad iframe有前端实现
+*
+*****************************/
 (function(window,undefined){
         
 		if (typeof(window.InstreetWidget) != "undefined" || (window.InstreetWidget != null)){
@@ -30,7 +36,7 @@
 						// ,
 						// adsLimit : null,
 						// footAuto : true,
-						// widgetSid: "2uBGRDtPoUnQ6PrBqQVOlG",
+						// widgetSid: "79cjp47BnLo3NdNaLeICIw",
 						// trigger  : "mouse", 
 						// showAd  :   true,
 						// showFootAd: true,
@@ -503,12 +509,11 @@
 			recordImage:function(img){
 	          var iu=encodeURIComponent(encodeURIComponent(img.src)),
 			       pd=config.widgetSid,
-				   pu=encodeURIComponent(encodeURIComponent(location.href)),
 				   t=encodeURIComponent(encodeURIComponent(document.title)),
 				   ul=config.ourl;
 
 			  var time=new Date().getTime();   
-			  ul+="?iu="+iu+"&pd="+pd+"&pu="+pu+"&t="+t+"&time="+time;
+			  ul+="?iu="+iu+"&pd="+pd+"&t="+t+"&time="+time;
 			  ev.importFile('js',ul);
 
 			}
@@ -772,7 +777,7 @@
 					  ad.className='ad-holder';
 					  str='<div class="ad-cont" style="width:'+aw+'height:'+ah+'"><a class="button-close-ad" title="关闭" href="javascript:;">×</a>';
 					
-					  var redUrl=config.redurl+"?tty=0&mid="+(data.imageNumId||0)+"&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(app.adsType||'')+"&ad="+(app.adsId||'')+"&tg=&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl||''));
+					  var redUrl=config.redurl+"?tty=0&mx=&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(app.adsType||'')+"&ad="+(app.adsId||'')+"&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl||''));
 				      if(app.adsType=='3'){							
 						str+='<a href="'+redUrl+'" class="imgbox" target="_blank"><img class="adimg" src="'+app.adsPicUrl+'" alt=""/></a>';
 					  }else if(app.adsType=='8'){
@@ -792,8 +797,7 @@
 						str+="<a href='"+redUrl+"' class='black-bg' target='-blank'><span class='slogan'><p class='light'>"+footAd.adsTitle+"</p><p>更多精彩»</p></span></a>";
 						}
 					  }	else if(!app.adsLinkUrl&&app.description){
-						 var fra=app.description;
-						 str+=fra.slice(0,-2)+'></iframe>';
+						var str='<iframe src="'+app.description+'" scrolling="no" height="'+app.adsHeight+'" width="'+app.adsWidth+'" frameborder="0" border="0" marginwidth="0" marginheight="0"></iframe>';
 					  }
 						  
 
@@ -870,7 +874,7 @@
 					appBox.insId=_this.img.insId;   //标记app属于哪张图片
 				    for(var i=0,len=data.adsSpot.length;i<len;i++){
 					    var app=data.adsSpot[i],						
-						    redUrl=config.redurl+"?tty=0&mid="+app.imageNumId+"&muh="+data.imageUrlHash+"&pd="+app.widgetSid+"&ift=&tg=&at="+app.adsType+"&ad="+app.adsId+"&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl));
+						    redUrl=config.redurl+"?tty=0&mx="+app.metrix+"&muh="+data.imageUrlHash+"&pd="+app.widgetSid+"&ift=&at="+app.adsType+"&ad="+app.adsId+"&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl));
 					    if(app.metrix==metrix){
    							//f=adId?'':'instreet-shop-focus';	
                             // if(adId){
@@ -938,7 +942,7 @@
 		       var _this=this,data=_this.data,img=_this.img,
 				   ul=config.iurl,pd=data.widgetSid,muh=data.imageUrlHash,
 				   iu=encodeURIComponent(encodeURIComponent(img.src));
-				var adsId="",adsType="";
+				var adsId="",adsType="",mx="";
 				if(flag==9&&spot){
 					var metrix=spot.metrix;
 					for(var i=0,len=data.adsSpot.length;i<len;i++){
@@ -946,6 +950,7 @@
 						if(app.metrix==metrix){
 							adsId+=adsId==""?app.adsId:","+app.adsId;
 							adsType+=adsType==""?app.adsType:","+app.adsType;
+							mx=app.metrix;
 						}
 					}
 				}else if(flag==10&&_this.ad){
@@ -954,7 +959,7 @@
 				}
 
 				var time=new Date().getTime();  
-				ul+="?pd="+pd+"&muh="+muh+"&iu="+iu+"&ad="+adsId+"&at="+adsType+"&flag="+flag+"&time="+time;
+				ul+="?pd="+pd+"&muh="+muh+"&mx="+mx+"&iu="+iu+"&ad="+adsId+"&at="+adsType+"&flag="+flag+"&time="+time;
 				ev.importFile('js',ul);
 						   
 		   },
@@ -973,7 +978,8 @@
 					   at='',
 					   tg='',
 					   ift=0,
-					   tty=1;
+					   tty=1,
+					   mx='';
                     var cn=tar.className.replace("-holder","");
 
                     if(cn=="shop"){
@@ -986,15 +992,17 @@
                        	   }
                        }
 					   tty=0;
+					   mx=metrix;
 					}else if(cn=="weibo"){
 					   ift=2;
 					   var metrix=instreet.weibo.metrix;
                        for(var i=0,len=data.weiboSpot.length;i<len;i++){
                        	   var app=data.weiboSpot[i];
-                       	   if(app.metrix==metrix){
-                       	   	 tg=app.title||'';
-                       	   	 break;
-                       	   }
+                       	   mx=metrix;
+                       	   // if(app.metrix==metrix){
+                       	   // 	 tg=app.title||'';
+                       	   // 	 break;
+                       	   // }
                        }
 					   
 					}else if(cn=="wiki"){
@@ -1002,10 +1010,11 @@
 					   var metrix=instreet.wiki.metrix;
                        for(var i=0,len=data.wikiSpot.length;i<len;i++){
                        	   var app=data.wikiSpot[i];
-                       	   if(app.metrix==metrix){
-                       	   	 tg=app.title||'';
-                       	   	 break;
-                       	   }
+                       	   mx=metrix;
+                       	   // if(app.metrix==metrix){
+                       	   // 	 tg=app.title||'';
+                       	   // 	 break;
+                       	   // }
                        }
 					}else if(cn=="ad"){
 					   ad=data.badsSpot[0].adsId;
@@ -1015,7 +1024,7 @@
 						return;
 					}
 					var time=new Date().getTime();  								
-					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&tg="+tg+"&time="+time;				
+					ul+="?iu="+iu+"&pd="+pd+"&muh="+muh+"&ad="+ad+"&mid="+mid+"&at="+at+"&tty="+tty+"&ift="+ift+"&mx="+mx+"&time="+time;				
 					ev.importFile('js',ul);				
 			}
 
@@ -1031,7 +1040,7 @@
 
               var adObj=adsArray[i];
               adObj.locate&&adObj.locate();
-		 
+		 	
 		    }
 		};
 
@@ -1048,7 +1057,9 @@
 			  img.setAttribute('instreet-data-ready',true);
 			  cache.adsArray[index]=new InstreetAd(data);
 			   if(config.footAuto){
-			   	 cache.adsArray[index].showAd();
+			   	 var ad=cache.adsArray[index];
+			   	 ad.showAd();
+			   	 ad.ad&&ad.recordShow(9,null);
 			   }
 			}
 				

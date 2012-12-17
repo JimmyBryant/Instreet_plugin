@@ -1,6 +1,7 @@
 /*********************************************
 *
 *sprint.js
+*1.google ad iframe由前端实现
 *
 **********************************************/
 (function(window,undefined){
@@ -20,11 +21,11 @@
 		   navigator = window.navigator,
 		   location = window.location,
 		   imgs=[],
-           readylist=[],
-		   width=290,
-		   rightPad=28,
+	       readylist=[],
 		   isFirst=true,
-		   wait=false;
+		   sizeList=[250,250,200,200],
+		   cssList=["http://static.instreet.cn/widgets/push/css/instreet.sprint.min.css",
+		   "css/instreet.sprint200.min.css"];
 
 
    		/********************************
@@ -32,30 +33,29 @@
 		*********************************/
 		var prefix="http://push.instreet.cn/";
 		var config = {
-
-						cssurl 	:	"http://static.instreet.cn/widgets/push/css/instreet.sprint.min.css",
-						// cssurl 	:	"css/instreet.sprint.css",
 						redurl	:	prefix+"click.action",
 					callbackurl	:	prefix+"push.action",
 						murl	:	prefix+"tracker.action",
 						iurl    :	prefix+"tracker90.action",
 						ourl	:	prefix+"loadImage.action",
-						surl    :   prefix+"share/weiboshare",						
+						surl    :   prefix+"share/weiboshare",					
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
-						// ,
-						// adsLimit :  5,
+						,
+						adsLimit :  5,
+						widgetSid:"4z9rxazql3QnEikIZVMWf6",
 						// widgetSid:"WkN2vxXpNE7MUOgnYxnAk",
-						// showAd:true,
-						// showFootAd:true,
-						// showWeibo:true,
-						// showWiki:true,
-						// showShareButton:true,
-						// showWeather:true,
-						// showNews:true,
-						// showMeiding  :true,
-						// footAuto:  true						
+						showAd:true,
+						showFootAd:true,
+						showWeibo:true,
+						showWiki:true,
+						showShareButton:true,
+						showWeather:true,
+						showNews:true,
+						showMeiding  :true,
+						footAuto:  true,
+						sizeNum : 1						
 		};
 
 
@@ -160,7 +160,33 @@
 				 }
 				 var head=document.getElementsByTagName('head')[0];
 				 head.appendChild(ele);
-	        }
+	        },
+	       isVisible :function(obj){
+			    if (obj == document) return true;
+
+			    if (!obj) return false;
+			    if (!obj.parentNode) return false;
+			    if (obj.style) {
+			        if (obj.style.display == 'none') return false;
+			        if (obj.style.visibility == 'hidden') return false;
+			    }
+
+			    //Try the computed style in a standard way
+			    if (window.getComputedStyle) {
+			        var style = window.getComputedStyle(obj, "");
+			        if (style.display == 'none') return false;
+			        if (style.visibility == 'hidden') return false;
+			    }
+
+			    //Or get the computed style using IE's silly proprietary way
+			    var style = obj.currentStyle;
+			    if (style) {
+			        if (style['display'] == 'none') return false;
+			        if (style['visibility'] == 'hidden') return false;
+			    }
+
+			    return ev.isVisible(obj.parentNode);
+			}
 		};
         
         var $=function(id){return document.getElementById(id);}
@@ -449,7 +475,7 @@
 	         	 for(var i=0;i<arr.length;i++){
 					arr[i]&&arr[i].detect();
 	         	 }
-             },1000);
+             },500);
     	};
     })();
 
@@ -500,8 +526,12 @@
 			    }
 			},
 			createJsonp  :function(img){
-			   var w=250,h=250,pu=encodeURIComponent(encodeURIComponent(location.href));
-			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pu="+pu+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp"+"&w="+w+"&h="+h;
+			   var w=250,h=250;
+			   if(typeof config.sizeNum=="number"){
+			   	  w=sizeList[config.sizeNum*2];
+			   	  h=sizeList[config.sizeNum*2+1];
+			   }
+			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp"+"&w="+w+"&h="+h;
 			   ev.importFile('js',url);
 			}
 		
@@ -525,7 +555,7 @@
 		var instreet={
 
 			init :function(){
-				var cssurl=config.cssurl;
+				var cssurl=cssList[config.sizeNum];
 				ev.importFile('css',cssurl);
 				instreet.createContainer();
 			},
@@ -581,6 +611,7 @@
 				adWrapper.className="in-ad-wrapper";
 				tabWrapper.className="in-tabs-wrapper";
 				contentWrapper.className="in-contents-wrapper";
+				contentWrapper.style.width="0";
 				//创建文档碎片
 				var tabFrag=document.createDocumentFragment(),
 				contFrag=document.createDocumentFragment();
@@ -640,7 +671,7 @@
 						   oy=Math.round(metrix/3000),					  
 						   x=ox*zoomNum,
 						   y=oy*zoomNum;
-	 					  spot.style.cssText="top:"+(y+pos.y-r)+"px;left:"+(x+pos.x-r)+"px;"
+	 					  spot.style.cssText="top:"+(y+pos.y-r)+"px;left:"+(x+pos.x-r)+"px;display:"+dis;
 
 	                   }
 
@@ -817,17 +848,18 @@
 				this.contents.style.width=0;
 			},
 			showApp: function(tab){   
-				var _this=this,list=_this.tabs.children,type;        
+				var _this=this,list=_this.tabs.children,type,app,width;        
 				if(!tab){
 					tab=list[0];
-				}
+				}				
 				type=tab.lastChild.className;
 				_this.hideApps();
 				tab.className+=" focus";
 				show(ev.$(_this.contents,'li',type));
+				width=(sizeList[config.sizeNum*2]+16)+"px";	
 				if(css.get(_this.contents,'width')==0){
-					animate(_this.contents,{width:'266px'},200,'linear');
-				}
+					animate(_this.contents,{width:width},200,'linear');
+				}							
 			},
 			getSelectedIndex:function(type){
 
@@ -861,7 +893,7 @@
 					window.open('http://t.sohu.com/third/post.jsp?url='+url+'&title='+title+'&content=&pic='+picUrl,'_blank',winStr);
 					break;		
 					case "kaixin-ico"  :	
-					window.open('http://www.kaixin001.com/login/open_login.php?flag=1&url='+url,'_blank',winStr);
+					window.open('http://www.kaixin001.com/login/open_login.php?flag=1&url='+url+'&pic='+picUrl+'&content='+title,'_blank',winStr);
 					break;
 					case "wangyi-ico"  :
 					window.open('http://t.163.com/article/user/checkLogin.do?link='+location.host+'source=&info='+title+url+'&images='+picUrl,'_blank',winStr);		
@@ -876,34 +908,37 @@
 
                 var _this=this,img=_this.img,origin=_this.originInfo,
                 	side=_this.sideWrapper,pos=ev.getXY(img);
-                if(img.src&&img.src!=origin.src){
+
+                if(img.src&&img.src!=origin.src){          //针对幻灯片
                     var parent=side.parentNode||document.body;
                     parent.removeChild(side);
                     cache.onImgLoad(img);
                     origin.src=img.src;
                 }
-                else if(img.clientWidth<=0||img.clientHeight<=0){               		
+                else if(img.clientWidth<=0||img.clientHeight<=0){   //针对原图被删除或者display为none的情况              		
         			var images=document.images;
         			for(var i=images.length;i--;){
         				if(images[i].src==img.src&&images[i].clientWidth>=config.imiw&&images[i].clientHeight>=config.imih){
         					images[i].insId=img.insId;
         					_this.img=images[i];
         					origin.pos=pos;       //修改原来的pos值   
-        					_this.bindImgEvents(_this.img);
-        					// _this.findCover();            
+        					_this.bindImgEvents(_this.img);        
         					break;
         				}
         			}
             		_this.locate();
 
-                }else if(pos.x!==origin.pos.x||pos.y!==origin.pos.y){
+                }else if(pos.x!==origin.pos.x||pos.y!==origin.pos.y){   //针对图片位置发生变化的情况
                 	
                 	    origin.pos=pos;
 						_this.locate();
 
+                }else if(!ev.isVisible(img)&&_this.adWrapper.style.display!="none"){  //图片被隐藏
+                	hide(_this.adWrapper);
+                }else if(ev.isVisible(img)&&_this.adWrapper.style.display=="none"){
+					show(_this.adWrapper);
                 }
                 
-
 			},
 
 		   //鼠标移动到图片的时候发送展现记录
@@ -1033,7 +1068,7 @@
 			   t=encodeURIComponent(encodeURIComponent(document.title)),
 			   ul=config.ourl;
 			var time=new Date().getTime();   
-			  ul+="?iu="+iu+"&pd="+pd+"&pu="+pu+"&t="+t+"&time="+time;
+			  ul+="?iu="+iu+"&pd="+pd+"&t="+t+"&time="+time;
 			  ev.importFile('js',ul);
 		   
 	    };
@@ -1068,7 +1103,7 @@
 					redUrl=config.redurl+"?tty=0&mx="+app.metrix+"&muh="+data.imageUrlHash+"&pd="+app.widgetSid+"&ift=&at="+app.adsType+"&ad="+app.adsId+"&rurl="+encodeURIComponent(encodeURIComponent(app.adsLinkUrl));
 					title=app.adsTitle;
 					price=app.adsDiscount||app.adsPrice;
-					imgUrl=app.adsPicUrl.replace("160x160","250x250");
+					imgUrl=app.adsPicUrl.replace("160x160",sizeList[config.sizeNum*2]+"x"+sizeList[config.sizeNum*2]);
 					str+='<a target="_blank" class="pro-box'+focus+'" href="'+redUrl+'"><img src="'+imgUrl+'"/><span class="pro-info"><span class="pro-name">'+title+'</span><span class="pro-tobuy"><em>进入商店</em></span><span class="pro-price">¥'+price+'</span></span></a>';
 					if(len>1)selectStr+='<a href="javascript:;" class="select-item'+focus+'"></a>';
 				}
@@ -1079,7 +1114,7 @@
 			adApp  :function(obj){
 				if(!config.showFootAd||obj.data.badsSpot.length==0)
 					return;
-				var tab,cont,data,app,redUrl;
+				var tab,cont,data,app,redUrl,w=sizeList[config.sizeNum*2];
 				if(obj.isFirstApp){
 					tab=InstreetAd.createTab('ad','推广','first');
 					obj.isFirstApp=false;
@@ -1099,15 +1134,14 @@
 			  	if(app.adsType==3){      //图片广告			     
 				  str+="<a class='large-image' target='_blank' href='"+redUrl+"'><img src='"+app.adsPicUrl+"' alt=''/></a>";
 			  	}else if(app.adsType==9){              //flash广告
-			  	  str+='<object id="afg-adloader" width="250" height="250"  align="middle" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,0,0" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">';
+			  	  str+='<object id="afg-adloader" width="'+w+'" height="'+w+'"  align="middle" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,0,0" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">';
 				  str+='<param value="always" name="allowScriptAccess"/><param value="'+app.adsPicUrl+'" name="movie"/><param value="high" name="quality"/><param value="opaque" name="wmode"/><param value="high" name="quality"><param value="#F1F1F1" name="bgcolor"/>';
-				  str+='<embed width="250" height="250" align="middle" pluginspage="http://www.adobe.com/go/getflashplayer"  type="application/x-shockwave-flash" allowscriptaccess="always" wmode="opaque"  bgcolor="#F1F1F1" quality="high" src="'+app.adsPicUrl+'"></object>';
+				  str+='<embed width="'+w+'" height="'+w+'" align="middle" pluginspage="http://www.adobe.com/go/getflashplayer"  type="application/x-shockwave-flash" allowscriptaccess="always" wmode="opaque"  bgcolor="#F1F1F1" quality="high" src="'+app.adsPicUrl+'"></object>';
 			  	  str+='<a class="flash-cover" href="'+redUrl+'" target="_blank"></a>';
 			  	}
 			  	else if(!app.adsLinkUrl&&app.description){   //谷歌广告
-				  var frame=app.description;
-				  str+='<i class="small-info"></i>';
-				  str+=frame.slice(0,-2)+'></iframe>';
+				  var frame='<iframe src="'+app.description+'" scrolling="no" height="'+app.adsHeight+'" width="'+app.adsWidth+'" frameborder="0" border="0" marginwidth="0" marginheight="0"></iframe>';
+				  str+='<i class="small-info"></i>'+frame;
 			    }
 	 			str+='</div>';	
 	 			cont.innerHTML=str;
@@ -1181,10 +1215,9 @@
 			newsApp:function(obj){
 				if(!config.showNews)
 					return;
-				var tab,cont,data=obj.data,
-				     newsUrl="http://push.instreet.cn/baidunews?size=250",				     
-				     app=data.newsSpot,i=0,len=app.length
-					;
+				var tab,cont,data=obj.data,w=sizeList[config.sizeNum*2],
+				    newsUrl=prefix+"news?size="+w+"&pd="+data.widgetSid;
+
 				if(obj.isFirstApp){
 					tab=InstreetAd.createTab('news','新闻','first');
 					obj.isFirstApp=false;
@@ -1195,18 +1228,7 @@
    			   	var cont=document.createElement("li");			   	   	   
 		   	    cont.className="news";  
 		        str='<h3 class="title clearfix"><a title="关闭" href="javascript:;" class="in-close">×</a>热点新闻</h3><div class="main-cont">';
-			    if(len<1)
-			    str+='<iframe name="weather_inc" src="'+newsUrl+'" width="250" height="250" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>';
-			    else{
-			    	str+='<div class="news-box">';
-			    	for(;i<len;i++){
-				   	 	var news=app[i],title=news.newsTitle,url=news.newsUrl,date=news.newsDate.split(":"),
-				   	 	    url=config.redurl+"?tty=1&mx=&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=5&at=&ad=&rurl="+encodeURIComponent(encodeURIComponent(url));						  ;
-				   	 	str+='<a href="'+url+'" target="_blank">'+title+'</a><span>'+date[0]+':'+date[1]+'</span>';
-				   	 	if(i==4){break;}
-			    	}
-			    	str+='</div>';
-			    }
+			    str+='<iframe name="weather_inc" src="'+newsUrl+'" width="'+w+'" height="'+w+'" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>';
 			    str+='</div>';
 		   	    cont.innerHTML=str;
 			   
@@ -1216,8 +1238,8 @@
 				if(!config.showWeather)
 					return;
 				var tab,cont,
-					// weatherUrl="http://tianqi.xixik.com/cframe/8";
-					weatherUrl="http://m.weather.com.cn/n/pn10/weather.htm";
+					w=sizeList[config.sizeNum*2],
+					weatherUrl="http://www.thinkpage.cn/weather/weather.aspx?uid=&cid=101010100&l=zh-CHS&p=CMA&a=1&u=C&s=1&m=0&x=1&d=3&fc=&bgc=&bc=&ti=1&in=1&li=2&ct=iframe";
 				if(obj.isFirstApp){
 					tab=InstreetAd.createTab('weather','天气','first');
 					obj.isFirstApp=false;
@@ -1227,7 +1249,7 @@
    			   	var cont=document.createElement("li");			   	   	   
 		   	    cont.className="weather";  
 		        str='<h3 class="title clearfix"><a title="关闭" href="javascript:;" class="in-close">×</a>天气预报</h3><div class="main-cont">';
-			    str+='<iframe name="weather_inc" src="'+weatherUrl+'" width="250" height="80" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" allowtransparency="true" ></iframe>';
+			    str+='<iframe name="weather_inc" src="'+weatherUrl+'" width="'+w+'" height="110" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" allowtransparency="true" ></iframe>';
 			    str+='</div>';
 		   	    cont.innerHTML=str;
 				return {tab:tab,cont:cont};
@@ -1245,7 +1267,7 @@
 				var cont=document.createElement("li");			   	   	   
 		   	    cont.className="share";
 		   	    str='<h3 class="title clearfix"><a title="关闭" href="javascript:;" class="in-close">×</a>图片分享</h3><div class="main-cont">';  
-				str+='<div class="in-share-icons"><a title="新浪微博" class="sina-ico" href="javascript:;"></a><a title="腾讯微博" class="tx-ico" href="javascript:;"></a><a title="QQ空间" class="qzone-ico" href="javascript:;"></a><a title="人人网" class="renren-ico" href="javascript:;"></a><a title="搜狐微博" class="sohu-ico" href="javascript:;"></a><a title="网易微博" class="wangyi-ico" href="javascript:;"></a><a title="豆瓣" class="douban-ico" href="javascript:;"></a>';
+				str+='<div class="in-share-icons"><a title="新浪微博" class="sina-ico" href="javascript:;"></a><a title="腾讯微博" class="tx-ico" href="javascript:;"></a><a title="QQ空间" class="qzone-ico" href="javascript:;"></a><a title="人人网" class="renren-ico" href="javascript:;"></a><a title="搜狐微博" class="sohu-ico" href="javascript:;"></a><a title="网易微博" class="wangyi-ico" href="javascript:;"></a><a title="豆瓣" class="douban-ico" href="javascript:;"></a><a title="开心网" class="kaixin-ico" href="javascript:;"></a>';
 				str+='</div></div>';
 				cont.innerHTML=str;
 				return {tab:tab,cont:cont};
@@ -1287,6 +1309,7 @@
 			 }                  
 		     instreet.init();
 			 cache.initData();
+			 ev.bind(window,'load',function(){InstreetAd.reLocate();}); 
 			 ev.bind(window,'resize',function(){InstreetAd.reLocate();}); 
 			 //定时检测图片是否变化
              TimerTick(cache.adsArray);

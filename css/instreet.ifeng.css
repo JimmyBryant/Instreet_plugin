@@ -299,6 +299,17 @@
 	width: 80px;
 	z-index: 9011;
 }
+.instreet_other_box .other_foot_ad .flash-cover{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	z-index: 2;
+	background: #FFF;
+	opacity: 0;
+	filter:alpha(opacity=0);
+}
 .instreet_other_close{
 	background:#000;
 	opacity:0;
@@ -375,6 +386,7 @@
     color: #2B2B2B;
     display: block;
     height: 24px;
+    width: 288px;
     overflow: hidden;
     text-decoration: none;
     text-overflow: ellipsis;

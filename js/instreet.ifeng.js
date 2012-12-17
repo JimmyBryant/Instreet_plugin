@@ -2,11 +2,7 @@
 *
 *尚街广告插件 @REVISION@
 *    
-*1.click.action添加mx参数去掉tag和mid参数
-*2.tracker90.action添加mx参数
-*3.tracker.action添加mx参数去掉tag和mid参数
-*4.push.action增加pu参数
-*5.前端解析新闻数据
+*1.google ad iframe由前端实现
 *
 *************************************/
 (function(window,undefined){
@@ -53,7 +49,7 @@
 						timer   :   1000
 						// ,
 					 // 	adsLimit :  null,
-						// widgetSid:"77WCO3MnOq5GgvoFH0fbH2",
+						// widgetSid:"4z9rxazql3QnEikIZVMWf6",
 						// showAd:true,
 						// showFootAd:true,
 						// showWeibo:true,
@@ -62,8 +58,7 @@
 						// showWeather:true,
 						// showNews:true,
 						// showMeiding  :true,
-					 //    footAuto:  false
-						
+					 //    footAuto:  false						
 		};
 
         /****************************
@@ -249,8 +244,8 @@
 			   }
 			},
 			createJsonp  :function(img){
-			   var width=300,height=250,pu=encodeURIComponent(encodeURIComponent(location.href));
-			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pd="+config.widgetSid+"&iu="+iu+"&pu="+pu+"&callback=insjsonp&w="+width+"&h="+height;
+			   var width=300,height=250;
+			   var iu=encodeURIComponent(encodeURIComponent(img.src)),url=config.callbackurl+"?index="+img.insId+"&pd="+config.widgetSid+"&iu="+iu+"&callback=insjsonp&w="+width+"&h="+height;
 			   ev.importFile('js',url);
 			}
 		
@@ -849,12 +844,11 @@
 
 	       var iu=encodeURIComponent(encodeURIComponent(img.src)),
 		       pd=config.widgetSid,
-			   pu=encodeURIComponent(encodeURIComponent(location.href)),
 			   t=encodeURIComponent(encodeURIComponent(document.title)),
 			   ul=config.ourl;
 
 			var time=new Date().getTime();   
-			  ul+="?iu="+iu+"&pd="+pd+"&pu="+pu+"&t="+t+"&time="+time;
+			  ul+="?iu="+iu+"&pd="+pd+"&t="+t+"&time="+time;
 			  ev.importFile('js',ul);
 		   
 	    };
@@ -901,19 +895,22 @@
 						return str;		  
 					},
 					createFootAd=function(footData){	                 //创建底部广告节点	
-
-					   var 	str='';
+					   var 	str='',redUrl='';
 					   if(!footData){     
 						  return str;
 					   }else{
 						  str="<div class='other_foot_ad'>";
+						  redUrl=config.redurl+"?tty=0&mx=&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(footData.adsType||'')+"&ad="+(footData.adsId||'')+"&rurl="+encodeURIComponent(encodeURIComponent(footData.adsLinkUrl||''));
 						  if(footData.adsType==3){
-						     var redUrl=config.redurl+"?tty=0&mx=&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=&at="+(footData.adsType||'')+"&ad="+(footData.adsId||'')+"&rurl="+encodeURIComponent(encodeURIComponent(footData.adsLinkUrl));
 							 str+="<a href='"+redUrl+"'><img src='"+footData.adsPicUrl+"' alt=''/></a>";
-						  }else if(!footData.adsLinkUrl&&footData.description){
-							 var fra=footData.description;
-							 str+="<i class='small-info'></i>";
-							 str+=fra.slice(0,-2)+'></iframe>';
+						  }else if(footData.adsType==9){              //flash广告
+						  	  str+='<object id="afg-adloader" width="300" height="250"  align="middle" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,0,0" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">';
+							  str+='<param value="always" name="allowScriptAccess"/><param value="'+footData.adsPicUrl+'" name="movie"/><param value="high" name="quality"/><param value="opaque" name="wmode"/><param value="high" name="quality"><param value="#F1F1F1" name="bgcolor"/>';
+							  str+='<embed width="300" height="250" align="middle" pluginspage="http://www.adobe.com/go/getflashplayer"  type="footDatalication/x-shockwave-flash" allowscriptaccess="always" wmode="opaque"  bgcolor="#F1F1F1" quality="high" src="'+footData.adsPicUrl+'"></object>';
+						  	  str+='<a class="flash-cover" href="'+redUrl+'" target="_blank"></a>';						  
+						  }else if(!footData.adsLinkUrl&&footData.description){						  	
+							 var fra='<iframe src="'+footData.description+'" scrolling="no" height="'+footData.adsHeight+'" width="'+footData.adsWidth+'" frameborder="0" border="0" marginwidth="0" marginheight="0"></iframe>';
+							 str+="<i class='small-info'></i>"+fra;
 						  }
 						  str+="</div>";
 						  return str;
@@ -1058,28 +1055,16 @@
 			},
 			createNews  :function(data,obj){		  
 			   var str="",
-			      newsUrl="http://push.instreet.cn/baidunews",
-			   	  liArray=[],
-			   	  app=data.newsSpot;
+			      newsUrl=prefix+"news?size=300&pd="+data.widgetSid,
+			   	  liArray=[];
 			   	  
 			   if(config.showNews){
 
-   			   	   var li=document.createElement("li"),len=app.length,i=0;	   	   	   
+   			   	   var li=document.createElement("li");	   	   	   
 			   	   li.className="instreet_news";  
 			       str="<a href='javascript:;' class='instreet_tip instreet_news_button'></a><div class='instreet_news_box'>";
-				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关新闻讯息</div><div class='other_news_box no_border'>";				
-				   if(len<1){
-				      str+='<iframe frameborder="0" width="300" height="250" marginwidth="0" marginheight="0" src="'+newsUrl+'"></iframe>';
-				   }else{
-				   	 str+='<div class="news-box"><h2>热点新闻</h2>';
-				   	 for(;i<len;i++){
-				   	 	var news=app[i],title=news.newsTitle,url=news.newsUrl,date=news.newsDate.split(":"),
-				   	 	    url=config.redurl+"?tty=1&mx=&muh="+data.imageUrlHash+"&pd="+data.widgetSid+"&ift=5&at=&ad=&rurl="+encodeURIComponent(encodeURIComponent(url));						  ;
-				   	 	str+='<a href="'+url+'" target="_blank">'+title+'</a><span>'+date[0]+':'+date[1]+'</span>';
-				   	 	if(i==4){break;}
-				   	 }
-				   	 str+='</div>';
-				   }
+				   str+="<div class='instreet_other_title'><a class='instreet_other_close' title='关闭'>x</a>图中相关新闻讯息</div><div class='other_news_box no_border'>";					
+				   str+='<iframe frameborder="0" width="300" height="250" marginwidth="0" marginheight="0" src="'+newsUrl+'"></iframe>';
 				   str+='</div></div>';			   
 			   	   li.innerHTML=str;
 				   liArray.push(li);
