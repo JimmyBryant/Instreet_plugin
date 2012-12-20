@@ -1,7 +1,8 @@
 /*********************************************
 *
 *sprint.js
-*1.google ad iframe由前端实现
+*
+*1.广告位置可选在图片左边或者右边
 *
 **********************************************/
 (function(window,undefined){
@@ -25,7 +26,7 @@
 		   isFirst=true,
 		   sizeList=[250,250,200,200],
 		   cssList=["http://static.instreet.cn/widgets/push/css/instreet.sprint.min.css",
-		   "css/instreet.sprint200.min.css"];
+		   "http://static.instreet.cn/widgets/push/css/instreet.sprint200.min.css"];
 
 
    		/********************************
@@ -42,20 +43,22 @@
 						imih	:	290,
 						imiw	:	290,
 						timer   :   1000
-						,
-						adsLimit :  5,
-						widgetSid:"4z9rxazql3QnEikIZVMWf6",
-						// widgetSid:"WkN2vxXpNE7MUOgnYxnAk",
-						showAd:true,
-						showFootAd:true,
-						showWeibo:true,
-						showWiki:true,
-						showShareButton:true,
-						showWeather:true,
-						showNews:true,
-						showMeiding  :true,
-						footAuto:  true,
-						sizeNum : 1						
+						// ,
+						// adsLimit :  5,
+						// widgetSid:"4z9rxazql3QnEikIZVMWf6",
+						// // widgetSid:"WkN2vxXpNE7MUOgnYxnAk",
+						// showAd:true,
+						// showFootAd:true,
+						// showWeibo:true,
+						// showWiki:true,
+						// showShareButton:true,
+						// showWeather:true,
+						// showNews:true,
+						// showMeiding  :true,
+						// footAuto:  true,
+						// sizeNum : 1	,      //0为250*250 1为200*200
+						// position: 1       //0为right 1为left
+
 		};
 
 
@@ -608,7 +611,12 @@
 				var adWrapper=document.createElement("div"),
 				tabWrapper=document.createElement("ul"),
 				contentWrapper=document.createElement("ul");
-				adWrapper.className="in-ad-wrapper";
+				//根据Position为容器定义不同的class
+				if(config.position==0){
+					adWrapper.className="in-ad-wrapper in-position-right";
+				}else if(config.position==1){
+					adWrapper.className="in-ad-wrapper in-position-left";
+				}
 				tabWrapper.className="in-tabs-wrapper";
 				contentWrapper.className="in-contents-wrapper";
 				contentWrapper.style.width="0";
@@ -653,10 +661,22 @@
 				spotContainer.appendChild(spot);
 			},
 			locate   :function(){                            //定位广告
-				var _this=this,img=_this.img,pos=ev.getXY(img),w=img.offsetWidth,
-				left=pos.x+w+"px",top=pos.y+"px",spotsArray=_this.spotsArray;
+				var _this=this,img=_this.img,pos=ev.getXY(img)
+				,w=img.offsetWidth
+				,left=(pos.x+w)+"px"
+				,right=!!window.ActiveXObject?(document.body.offsetWidth-pos.x)+"px":(document.documentElement.offsetWidth-pos.x)+"px"
+				,top=pos.y+"px",spotsArray=_this.spotsArray;
+
 				var dis=img.clientWidth>=config.imiw&&img.clientHeight>=config.imih?"block":"none";
-				_this.adWrapper.style.cssText="left:"+left+";top:"+top+";display:"+dis;
+				if(config.position==0){
+					_this.adWrapper.style.left=left;
+				}
+			    else if(config.position==1){
+			   	    _this.adWrapper.style.right=right;
+			    }
+				_this.adWrapper.style.top=top;
+				_this.adWrapper.style.display=dis;
+				// _this.adWrapper.style.cssText="left:"+left+";top:"+top+";display:"+dis;
 
                if(spotsArray.length>0){              //如果存在spot，同时也对其重定位
 
@@ -818,21 +838,7 @@
  					_this.timerId=setTimeout(function(){_this.closeApp()},config.timer);
 				});
 			},
-			// findCover:function(){             //查找覆盖在img上的cover
-			// 	var _this=this,img=_this.img,all=document.getElementsByTagName("a"),i=0,
-			// 		len=all.length;
-			// 	for(;i<len;i++){
-			// 		var a=all[i];
-			// 		if(css.get(a,"position")==="absolute"){
-			// 			var pos=ev.getXY(a),imgPos=_this.originInfo.pos;				
-			// 			if(pos.y<=imgPos.y&&(pos.y+a.offsetHeight)>imgPos.y){
-			// 				if(pos.x<=(imgPos.x+img.offsetWidth)&&(pos.x+a.offsetWidth)>imgPos.x){
-			// 					_this.bindImgEvents(a);
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// },
+
 			hideApps:function(){
 				var _this=this,list=_this.tabs.children;
 				//寻找focus tab
@@ -842,6 +848,9 @@
 					}
 				}
 				hide(_this.contents.children);
+				if(_this.adWrapper.style.width!="auto"){	
+					_this.adWrapper.style.width="auto";
+				}	
 			},
 			closeApp:function(){				
 				this.hideApps();
@@ -854,12 +863,16 @@
 				}				
 				type=tab.lastChild.className;
 				_this.hideApps();
+				if(_this.adWrapper.style.width=="auto"){
+					_this.adWrapper.style.width=config.sizeNum==1?"242px":"292px";
+				}
 				tab.className+=" focus";
 				show(ev.$(_this.contents,'li',type));
 				width=(sizeList[config.sizeNum*2]+16)+"px";	
 				if(css.get(_this.contents,'width')==0){
 					animate(_this.contents,{width:width},200,'linear');
-				}							
+				}
+											
 			},
 			getSelectedIndex:function(type){
 

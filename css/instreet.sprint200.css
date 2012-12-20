@@ -59,6 +59,9 @@
 	width: 26px;
 	overflow: hidden;
 }
+.in-position-left .in-tabs-wrapper{
+	float: right;
+}
 .in-tabs-wrapper li.tab{
 	display: block;
 /*	width: 25px;
@@ -143,6 +146,10 @@
 	text-align: left;
 	overflow: hidden;
 }
+.in-position-left .in-contents-wrapper{
+    float: right;
+    margin-right:-1px !important;
+}
 .in-contents-wrapper li{
 	display: none;
 }
@@ -154,6 +161,9 @@
 	/*border-left: 1px solid #BBBBBB;*/
 	color: #555;
 }
+.in-position-left .in-contents-wrapper li .title{
+	border-radius: 5px 0 0;
+} 
 #instreet-plugin-container .title{
 	padding: 2px 5px;
 }
